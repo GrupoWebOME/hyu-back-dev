@@ -9,6 +9,10 @@ const swaggerSpecification = {
       },
       servers: [
         {
+          url: 'https://hyundairetinna.herokuapp.com',
+          description: 'heroku server'
+        },
+        {
           url: 'http://localhost:4000',
           description: 'Local server'
         },
