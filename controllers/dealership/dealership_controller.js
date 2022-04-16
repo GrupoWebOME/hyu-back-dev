@@ -105,10 +105,10 @@ const createDealership = async(request, response) => {
                             })
         }
         
-        if(!address || address.length < 1)
+        if(address || address.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid address',
-                            detail: `address is required`
+                            detail: `invalid address`
                         })
 
         if(autonomous_community && autonomous_community.length < 1)
