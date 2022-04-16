@@ -65,7 +65,7 @@ const getAllDealership= async(request, response) => {
 
 const createDealership = async(request, response) => {
     try{
-        const {name, code, address, location, province, postal_code, phone, email, name_surname_manager, previous_year_sales, referential_sales, 
+        const {name, code, address, location, province, postal_code, autonomous_community, phone, email, name_surname_manager, previous_year_sales, referential_sales, 
             post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, sales_weight_per_installation,post_sale_weight_per_installation, 
             vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income} = request.body
 
@@ -104,11 +104,17 @@ const createDealership = async(request, response) => {
                              detail: `${code} is already in use`
                             })
         }
-
+        
         if(!address || address.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid address',
                             detail: `address is required`
+                        })
+
+        if(autonomous_community && autonomous_community.length < 1)
+            errors.push({code: 400, 
+                            msg: 'invalid autonomous_community',
+                            detail: `invalid autonomous_community`
                         })
 
         if(!location || location.length < 1)
@@ -220,6 +226,7 @@ const createDealership = async(request, response) => {
             postal_code, 
             phone, 
             email, 
+            autonomous_community,
             name_surname_manager, 
             previous_year_sales, 
             referential_sales, 
@@ -248,7 +255,7 @@ const createDealership = async(request, response) => {
 
 const updateDealership = async(request, response) => {
     try{
-        const {name, code, address, location, province, postal_code, phone, email, name_surname_manager, previous_year_sales, referential_sales, 
+        const {name, code, address, autonomous_community, location, province, postal_code, phone, email, name_surname_manager, previous_year_sales, referential_sales, 
             post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, sales_weight_per_installation,post_sale_weight_per_installation, 
             vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income} = request.body
 
@@ -289,43 +296,49 @@ const updateDealership = async(request, response) => {
                             })
         }
 
-        if(address || address.length < 1)
+        if(address && address.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid address',
                             detail: `address is required`
                         })
+        
+        if(autonomous_community && autonomous_community.length < 1)
+            errors.push({code: 400, 
+                            msg: 'invalid autonomous_community',
+                            detail: `invalid autonomous_community`
+                        })
 
-        if(location || location.length < 1)
+        if(location && location.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid location',
                             detail: `location is required`
                         })
                         
-        if(province || province.length < 1)
+        if(province && province.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid province',
                             detail: `province is required`
                         })
                         
-        if(postal_code || postal_code.length < 1)
+        if(postal_code && postal_code.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid postal_code',
                             detail: `postal_code is required`
                         })
 
-        if(phone || phone.length < 1)
+        if(phone && phone.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid phone',
                             detail: `phone is required`
                         })
                         
-        if(email || email.length < 1)
+        if(email && email.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid email',
                             detail: `email is required`
                         })
                         
-        if(name_surname_manager || name_surname_manager.length < 1)
+        if(name_surname_manager && name_surname_manager.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid name_surname_manager',
                             detail: `name_surname_manager is required`
@@ -401,6 +414,8 @@ const updateDealership = async(request, response) => {
             updatedFields['name'] = name
         if(address)
             updatedFields['address'] = address
+        if(autonomous_community)
+            updatedFields['autonomous_community'] = autonomous_community
         if(code)
             updatedFields['code'] = code
         if(location)
