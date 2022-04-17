@@ -90,7 +90,7 @@ const createInstallation = async(request, response) => {
             
         }
 
-        if(!name && name.length < 1)
+        if(!name || name.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid name',
                             detail: `name is required`
@@ -107,13 +107,13 @@ const createInstallation = async(request, response) => {
                             })
         }
 
-        if(!autonomous_community && autonomous_community.length < 1)
+        if(!autonomous_community || autonomous_community.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid autonomous_community',
                             detail: `autonomous_community is required`
                         })
 
-        if(!code && code.length < 1)
+        if(!code || code.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid code',
                             detail: `code is required`
