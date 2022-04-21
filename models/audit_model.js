@@ -11,6 +11,8 @@ const auditSchema = new Schema({
         criterion: {type: Schema.Types.ObjectId, ref: 'Criterion'},
         exceptions: [{type: Schema.Types.ObjectId, ref: 'Installation'}]
     }],
+    isAgency: {type: Boolean,
+               default: false},
     initial_date: {type: Date,
                    default: null },
     end_date: {type: Date,
