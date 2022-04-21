@@ -4,11 +4,9 @@ const uniqueValidator = require('mongoose-unique-validator')
 const roleSchema = new Schema({
         name: {type: String, 
                 unique: true,
-                lowercase: true, 
                 trim: true,
                 required: true},
         requirements: [{type: String, 
-                        lowercase: true, 
                         trim: true,
                         default: null }],
         weight: {type: Number, 
