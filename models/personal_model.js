@@ -3,7 +3,6 @@ const uniqueValidator = require('mongoose-unique-validator')
 
 const personalSchema = new Schema({
     name_and_surname: {type: String, 
-                        lowercase: true, 
                         trim: true,
                         required: true},
     dni: {type: String, 
