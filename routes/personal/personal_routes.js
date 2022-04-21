@@ -30,6 +30,9 @@ const Personal = require('../../controllers/personal/personal_controller')
  *              address:
  *                  type: string
  *                  description: dirección del personal
+ *              email:
+ *                  type: string
+ *                  description: dirección de correo electrónico
  *              role:
  *                  type: array
  *                  items:
@@ -62,6 +65,7 @@ const Personal = require('../../controllers/personal/personal_controller')
  *              address: pellegrini 2020
  *              role: 61799ab01c4a2a001602ab1z
  *              criterions: [61799ab01c4a2a001602ab4e]
+ *              email: email@email.com
  *              createdAt: 2021-10-20
  *              updatedAt: 2021-10-20
  */
@@ -74,6 +78,7 @@ const Personal = require('../../controllers/personal/personal_controller')
   */
 
 api.post('/all', Personal.getAllPersonal)
+
 
 /**
  * @swagger
@@ -103,6 +108,10 @@ api.post('/all', Personal.getAllPersonal)
  *                      type: string
  *                      description: dirección del personal.
  *                      example: pellegrini 2020
+ *                    email:
+ *                      type: string
+ *                      description: dirección de correo electrónico
+ *                      example: email@email.com
  *                    id_secondary:
  *                      type: string
  *                      description: dni del personal.
