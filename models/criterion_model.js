@@ -4,7 +4,6 @@ const uniqueValidator = require('mongoose-unique-validator')
 const criterionSchema = new Schema({  
     description: {type: String,
                   trim: true,
-                  lowercase: true,
                   required: true },
     number: {type: Number,
             required: true},
