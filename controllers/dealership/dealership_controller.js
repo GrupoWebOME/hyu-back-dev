@@ -258,8 +258,29 @@ const updateDealership = async(request, response) => {
         const {name, code, address, autonomous_community, location, province, postal_code, phone, email, name_surname_manager, previous_year_sales, referential_sales, 
             post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, sales_weight_per_installation,post_sale_weight_per_installation, 
             vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income} = request.body
+        const {id} = request.params
 
         let errors = []
+        let dealerById = null
+
+        if(id && ObjectId.isValid(id)){
+            dealerById = await Dealership.findById(id)
+                                          .catch(error => {return response.status(400).json({code: 500, 
+                                                                                            msg: 'error id',
+                                                                                            detail: error.message
+                                                                                            })} )  
+            if(!dealerById)
+                return response.status(400).json({code: 400, 
+                                                  msg: 'invalid id',
+                                                  detail: 'id not found'
+                                                })
+        }
+        else{
+            return response.status(400).json({code: 400, 
+                                              msg: 'invalid id',
+                                              detail: `id not found`
+                                            })   
+        }
 
         if(name){
             if(name.length < 1)
@@ -271,7 +292,7 @@ const updateDealership = async(request, response) => {
                                             .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                             })
-            if(existName)
+            if(existName && dealerById.name !== name)
                 errors.push({code: 400, 
                              msg: 'invalid name',
                              detail: `${name} is already in use`
@@ -289,7 +310,7 @@ const updateDealership = async(request, response) => {
                                             .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                             })
-            if(existCode)
+            if(existCode && dealerById.code !== code)
                 errors.push({code: 400, 
                              msg: 'invalid code',
                              detail: `${code} is already in use`
