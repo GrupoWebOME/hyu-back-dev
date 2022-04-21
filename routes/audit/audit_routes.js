@@ -31,6 +31,9 @@ const Audit = require('../../controllers/audit/audit_controller')
  *                        items:
  *                          type: string
  *                          description: identificador de la instalación
+ *              isAgency:
+ *                  type: boolean
+ *                  description: Especifica si la auditoría afecta a instalaciones o agencias. Si es true, afecta agencias. Si es false, afecta a instalaciones
  *              initial_date:
  *                  type: date
  *                  description: Fecha de inicio.
@@ -49,6 +52,7 @@ const Audit = require('../../controllers/audit/audit_controller')
  *              - criterions
  *              - initial_date
  *              - end_date
+ *              - isAgency
  *              - createdAt
  *              - updatedAt
  *          example:
@@ -57,6 +61,7 @@ const Audit = require('../../controllers/audit/audit_controller')
  *              criterions: [{criterion: 21312rwqewqe984, exceptions: ['23123awea898432423', '3242304823498dea']}]
  *              initial_date: 2022-10-20
  *              end_date: 2022-10-22
+ *              isAgency: false
  *              createdAt: 2021-10-20
  *              updatedAt: 2021-10-20
  */
@@ -100,6 +105,9 @@ api.post('/all', Audit.getAllAudit)
  *                    end_date:
  *                      type: date
  *                      description: 2021-12-20
+ *                    isAgency:
+ *                      type: boolean
+ *                      description: Especifica si la auditoría afecta a instalaciones o agencias. Si es true, afecta agencias. Si es false, afecta a instalaciones
  *                    pageReq:
  *                      type: number
  *                      description: Es el número de página, debe ser mayor a cero
@@ -211,6 +219,10 @@ api.post('/', Audit.createAudit)
  *                         type: date
  *                         description: Fecha de fin.
  *                         example: 2021-12-12
+ *                      isAgency:
+ *                         type: boolean
+ *                         description: Especifica si la auditoría afecta a instalaciones o agencias. Si es true, afecta agencias. Si es false, afecta a instalaciones
+ *                         example: false
  *                      criterions:
  *                        type: array
  *                        items:
