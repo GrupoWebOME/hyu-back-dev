@@ -337,8 +337,29 @@ const updateInstallation = async(request, response) => {
     try{
         const {name, autonomous_community, code, address, dealership, installation_type, population, postal_code, phone, active, province, email,
                latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, contacts } = request.body
+        const {id} = request.params
 
         let errors = []
+        let installation = null
+
+        if(id && ObjectId.isValid(id)){
+            installation = await Installation.findById(id)
+                                          .catch(error => {return response.status(400).json({code: 500, 
+                                                                                            msg: 'error id',
+                                                                                            detail: error.message
+                                                                                            })} )  
+            if(!installation)
+                return response.status(400).json({code: 400, 
+                                                  msg: 'invalid id',
+                                                  detail: 'id not found'
+                                                })
+        }
+        else{
+            return response.status(400).json({code: 400, 
+                                              msg: 'invalid id',
+                                              detail: `id not found`
+                                            })   
+        }
 
         if(contacts && Array.isArray(contacts)){
             for(let i = 0; i<contacts.length; i++){
@@ -363,7 +384,7 @@ const updateInstallation = async(request, response) => {
                                             .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                             })
-            if(existName)
+            if(existName && installation.name !== name)
                 errors.push({code: 400, 
                              msg: 'invalid name',
                              detail: `${name} is already in use`
@@ -386,7 +407,7 @@ const updateInstallation = async(request, response) => {
                                             .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                             })
-            if(existCode)
+            if(existCode && installation.code !== code)
                 errors.push({code: 400, 
                              msg: 'invalid code',
                              detail: `${code} is already in use`
