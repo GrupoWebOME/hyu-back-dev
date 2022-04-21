@@ -71,14 +71,15 @@ const updateRole = async(request, response) => {
         const {name, requirements, weight, total_required} = request.body
 
         let errors = []
+        let roleById = null
 
         if(id && ObjectId.isValid(id)){
-            const existId = await RoleType.findById(id)
+            roleById = await RoleType.findById(id)
                                 .catch(error => {return response.status(400).json({code: 500, 
                                                                                     msg: 'error id',
                                                                                     detail: error.message
                                                                                 })} )  
-            if(!existId)
+            if(!roleById)
                 return response.status(400).json({code: 400, 
                                                   msg: 'invalid id',
                                                   detail: 'id not found'
@@ -98,7 +99,7 @@ const updateRole = async(request, response) => {
                         })
         else if(name){
             const nameExist = await RoleType.exists({name: { $regex : new RegExp(name, "i") }})
-            if(nameExist){
+            if(nameExist && roleById.name !== name){
                 errors.push({code: 400, 
                     msg: 'invalid name',
                     detail: `name already exist`
