@@ -17,7 +17,7 @@ const createPersonal = async(request, response) => {
                          msg: 'invalid email',
                          detail: `${email} is not valid email format. The email field can only contain a valid email`
                         })
-        else{
+        else if(email){
             const personalExist = await Personal.findOne({email: email.toLowerCase()})
             if(personalExist && personalExist._id.toString() !== id)
                 errors.push({code: 400, 
@@ -141,7 +141,8 @@ const createPersonal = async(request, response) => {
             id_secondary, 
             installation, 
             dealership,
-            role
+            role,
+            email
         })
 
         await newPersonal.save()
@@ -324,6 +325,9 @@ const updatePersonal = async(request, response) => {
             updatedFields['dealership'] = dealership
         if(role)
             updatedFields['role'] = role
+        if(email)
+            updatedFields['email'] = email
+
         updatedFields['updatedAt'] = Date.now()
 
         const updatedPersonal = await Personal.findByIdAndUpdate(id, updatedFields, {new: true})
