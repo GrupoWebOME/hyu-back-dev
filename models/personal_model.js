@@ -13,6 +13,10 @@ const personalSchema = new Schema({
             unique: true },
     address: {type: String, 
               default: null},
+    email: {type: String,
+            default: null,
+            lowercase: true    
+    },
     id_secondary: {type: String, 
                    unique: true},
     installation: {type: Schema.Types.ObjectId, 
