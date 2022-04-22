@@ -5,7 +5,7 @@ const ObjectId = require('mongodb').ObjectId
 
 const createAudit = async(request, response) => {
     try{
-        const {name, installation_type, initial_date, end_date, criterions} = request.body
+        const {name, installation_type, initial_date, end_date, criterions, isAgency} = request.body
 
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
@@ -74,6 +74,12 @@ const createAudit = async(request, response) => {
                 })  
         }
 
+        if(isAgency!==null && isAgency!==undefined && typeof isAgency !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid isAgency',
+                        detail: `isAgency should be a boolean type`
+                        }) 
+
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
 
@@ -82,7 +88,8 @@ const createAudit = async(request, response) => {
             installation_type,
             initial_date,
             end_date: end_date? end_date : null,
-            criterions
+            criterions,
+            isAgency: (isAgency && isAgency === true)? true : false,
         })
 
         await newAudit.save()
@@ -101,7 +108,7 @@ const createAudit = async(request, response) => {
 
 const updateAudit = async(request, response) => {
     try{
-        const {name, installation_type, initial_date, end_date, criterions} = request.body
+        const {name, installation_type, initial_date, end_date, criterions, isAgency} = request.body
 
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
@@ -146,6 +153,12 @@ const updateAudit = async(request, response) => {
             })
         }
 
+        if(isAgency!==null && isAgency!==undefined && typeof isAgency !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid isAgency',
+                        detail: `isAgency should be a boolean type`
+                        }) 
+                        
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
 
@@ -161,6 +174,9 @@ const updateAudit = async(request, response) => {
             updatedFields['end_date'] = end_date
         if(criterions)
             updatedFields['criterions'] = criterions
+        if(isAgency !== null && isAgency !== undefined)
+            updatedFields['isAgency'] = isAgency
+            
         updatedFields['updatedAt'] = Date.now()
 
         const updatedAudit = await Audit.findByIdAndUpdate(id, updatedFields, {new: true})
