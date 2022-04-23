@@ -3,7 +3,7 @@ const ObjectId = require('mongodb').ObjectId
 
 const createSizingTable = async(request, response) => {
     try{
-        const {name, columns, rows} = request.body
+        const {name, columns, rows, row} = request.body
 
         let errors = []
 
@@ -52,10 +52,10 @@ const createSizingTable = async(request, response) => {
         else if(rows){
             for(let i = 0; i < rows.length; i++){
 
-                if(!rows[i].hasOwnProperty("name") || !rows[i].hasOwnProperty("initialValue") || !rows[i].hasOwnProperty("endValue") || !rows[i].hasOwnProperty("values") || !rows[i].hasOwnProperty("model") || !rows[i].hasOwnProperty("field"))
+                if(!rows[i].hasOwnProperty("name") || !rows[i].hasOwnProperty("initialValue") || !rows[i].hasOwnProperty("endValue") || !rows[i].hasOwnProperty("values"))
                     errors.push({code: 400, 
                         msg: 'invalid rows',
-                        detail: `name, initialValue, endValue, model, field and values are obligatories fields`
+                        detail: `name, initialValue, endValue and values are obligatories fields`
                         })   
 
                 if(isNaN(rows[i].initialValue) || isNaN(rows[i].endValue))
@@ -85,6 +85,18 @@ const createSizingTable = async(request, response) => {
                 }
             }
         }
+
+        if(!row)
+            errors.push({code: 400, 
+                msg: 'invalid row',
+                detail: `row is required`
+                })   
+
+        else if(!row.hasOwnProperty("model") || !row.hasOwnProperty("field"))
+            errors.push({code: 400, 
+                msg: 'invalid row',
+                detail: `model, field and values are obligatories fields`
+                })   
 
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
@@ -168,10 +180,10 @@ const updateSizingTable = async(request, response) => {
         if(rows){
             for(let i = 0; i < rows.length; i++){
 
-                if(!rows[i].hasOwnProperty("name") || !rows[i].hasOwnProperty("initialValue") || !rows[i].hasOwnProperty("endValue") || !rows[i].hasOwnProperty("values") || !rows[i].hasOwnProperty("model") || !rows[i].hasOwnProperty("field"))
+                if(!rows[i].hasOwnProperty("name") || !rows[i].hasOwnProperty("initialValue") || !rows[i].hasOwnProperty("endValue") || !rows[i].hasOwnProperty("values"))
                     errors.push({code: 400, 
                         msg: 'invalid rows',
-                        detail: `name, initialValue, endValue, model, field and values are obligatories fields`
+                        detail: `name, initialValue, endValue and values are obligatories fields`
                         })   
 
                 if(isNaN(rows[i].initialValue) || isNaN(rows[i].endValue))
@@ -202,6 +214,12 @@ const updateSizingTable = async(request, response) => {
             }
         }
 
+        if(row && (!row.hasOwnProperty("model") || !row.hasOwnProperty("field")))
+            errors.push({code: 400, 
+                msg: 'invalid row',
+                detail: `model, field and values are obligatories fields`
+                })   
+
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
 
@@ -213,6 +231,8 @@ const updateSizingTable = async(request, response) => {
             updatedFields['columns'] = columns
         if(rows)
             updatedFields['rows'] = rows
+        if(row)
+            updatedFields['row'] = row
         updatedFields['updatedAt'] = Date.now()
 
         const updatedSizingTable = await SizingTable.findByIdAndUpdate(id, updatedFields, {new: true})

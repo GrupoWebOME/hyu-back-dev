@@ -50,15 +50,6 @@ const sizingTableSchema = new Schema({
                 }]
         }],
         rows: [{
-                model: {
-                        type: String,
-                        trim: true,
-                },
-
-                field: {
-                        type: String,
-                        trim: true,
-                },
                 name: {
                         type: String,
                         trim: true
