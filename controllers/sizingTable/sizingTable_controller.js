@@ -104,7 +104,8 @@ const createSizingTable = async(request, response) => {
         const newSizingTable = new SizingTable({
             name: name,
             columns: columns,
-            rows: rows
+            rows: rows,
+            row: row
         })
 
         await newSizingTable.save()
