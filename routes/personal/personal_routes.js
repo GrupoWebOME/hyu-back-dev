@@ -79,7 +79,6 @@ const Personal = require('../../controllers/personal/personal_controller')
 
 api.post('/all', Personal.getAllPersonal)
 
-
 /**
  * @swagger
  * /api/personal/all:
