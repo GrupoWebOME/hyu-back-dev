@@ -67,11 +67,20 @@ const createAudit = async(request, response) => {
             })
         }
 
-        if(!criterions){
+        if(!criterions || (criterions && (criterions.length <= 0 || !Array.isArray(criterions)))){
             errors.push({code: 400, 
                          msg: 'invalid criterions',
-                         detail: `criterions is a obligatory field`
+                         detail: `criterions is a obligatory field, and should be an array type`
                 })  
+        }
+        else{
+            for(let i = 0; i < criterions.length; i++){
+                if(!columns[i].hasOwnProperty("criterion"))
+                    errors.push({code: 400, 
+                        msg: 'invalid criterion',
+                        detail: `criterion field in criterions is an obligatory field`
+                    }) 
+            }
         }
 
         if(isAgency!==null && isAgency!==undefined && typeof isAgency !== 'boolean')
@@ -159,6 +168,22 @@ const updateAudit = async(request, response) => {
                         detail: `isAgency should be a boolean type`
                         }) 
                         
+        if(criterions && (criterions && (criterions.length <= 0 || !Array.isArray(criterions)))){
+            errors.push({code: 400, 
+                            msg: 'invalid criterions',
+                            detail: `criterions is a obligatory field, and should be an array type`
+                })  
+        }
+        else if(criterions){
+            for(let i = 0; i < criterions.length; i++){
+                if(!columns[i].hasOwnProperty("criterion"))
+                    errors.push({code: 400, 
+                        msg: 'invalid criterion',
+                        detail: `criterion field in criterions is an obligatory field`
+                    }) 
+            }
+        }
+
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
 
