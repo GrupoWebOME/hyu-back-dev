@@ -66,8 +66,7 @@ const getAllDealership= async(request, response) => {
 const createDealership = async(request, response) => {
     try{
         const {name, code, address, location, province, postal_code, autonomous_community, phone, email, name_surname_manager, previous_year_sales, referential_sales, 
-            post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, sales_weight_per_installation,post_sale_weight_per_installation, 
-            vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income} = request.body
+            post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income} = request.body
 
         let errors = []
 
@@ -176,25 +175,12 @@ const createDealership = async(request, response) => {
                             msg: 'invalid post_sale_referential_spare_parts',
                             detail: `post_sale_referential_spare_parts should be a number value`
                         })   
-                        
-        if(sales_weight_per_installation && typeof sales_weight_per_installation !== 'number')
-            errors.push({code: 400, 
-                            msg: 'invalid sales_weight_per_installation',
-                            detail: `sales_weight_per_installation should be a number value`
-                        })   
-                        
+                                                
         if(post_sale_daily_income && typeof post_sale_daily_income !== 'number')
             errors.push({code: 400, 
                             msg: 'invalid post_sale_daily_income',
                             detail: `post_sale_daily_income should be a number value`
                         })           
-
-        if(post_sale_weight_per_installation && typeof post_sale_weight_per_installation !== 'number')
-            errors.push({code: 400, 
-                            msg: 'invalid post_sale_weight_per_installation',
-                            detail: `post_sale_weight_per_installation should be a number value`
-                        })   
-
                         
         if(vn_quaterly_billing && typeof vn_quaterly_billing !== 'number')
             errors.push({code: 400, 
@@ -232,8 +218,6 @@ const createDealership = async(request, response) => {
             referential_sales, 
             post_sale_spare_parts_previous_year, 
             post_sale_referential_spare_parts, 
-            sales_weight_per_installation,
-            post_sale_weight_per_installation, 
             vn_quaterly_billing, 
             electric_quaterly_billing, 
             ionic5_quaterly_billing, 
@@ -256,8 +240,7 @@ const createDealership = async(request, response) => {
 const updateDealership = async(request, response) => {
     try{
         const {name, code, address, autonomous_community, location, province, postal_code, phone, email, name_surname_manager, previous_year_sales, referential_sales, 
-            post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, sales_weight_per_installation,post_sale_weight_per_installation, 
-            vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income} = request.body
+            post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income} = request.body
         const {id} = request.params
 
         let errors = []
@@ -389,24 +372,11 @@ const updateDealership = async(request, response) => {
                             detail: `post_sale_referential_spare_parts should be a number value`
                         })   
                         
-        if(sales_weight_per_installation && typeof sales_weight_per_installation !== 'number')
-            errors.push({code: 400, 
-                            msg: 'invalid sales_weight_per_installation',
-                            detail: `sales_weight_per_installation should be a number value`
-                        })   
-                        
         if(post_sale_daily_income && typeof post_sale_daily_income !== 'number')
             errors.push({code: 400, 
                             msg: 'invalid post_sale_daily_income',
                             detail: `post_sale_daily_income should be a number value`
-                        })           
-
-        if(post_sale_weight_per_installation && typeof post_sale_weight_per_installation !== 'number')
-            errors.push({code: 400, 
-                            msg: 'invalid post_sale_weight_per_installation',
-                            detail: `post_sale_weight_per_installation should be a number value`
-                        })   
-
+                        })            
                         
         if(vn_quaterly_billing && typeof vn_quaterly_billing !== 'number')
             errors.push({code: 400, 
@@ -459,10 +429,6 @@ const updateDealership = async(request, response) => {
             updatedFields['post_sale_spare_parts_previous_year'] = post_sale_spare_parts_previous_year
         if(post_sale_referential_spare_parts)
             updatedFields['post_sale_referential_spare_parts'] = post_sale_referential_spare_parts
-        if(sales_weight_per_installation)
-            updatedFields['sales_weight_per_installation'] = sales_weight_per_installation
-        if(post_sale_weight_per_installation)
-            updatedFields['post_sale_weight_per_installation'] = post_sale_weight_per_installation
         if(vn_quaterly_billing)
             updatedFields['vn_quaterly_billing'] = vn_quaterly_billing
         if(electric_quaterly_billing)
