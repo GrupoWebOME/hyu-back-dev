@@ -73,7 +73,7 @@ const getAllInstallation = async(request, response) => {
 const createInstallation = async(request, response) => {
     try{
         const {name, autonomous_community, code, address, dealership, installation_type, population, postal_code, phone, active, province, email,
-               latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, contacts } = request.body
+               latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, contacts, sales_weight_per_installation, post_sale_weight_per_installation } = request.body
 
         let errors = []
 
@@ -205,7 +205,19 @@ const createInstallation = async(request, response) => {
                             msg: 'invalid email',
                             detail: `email is required`
                         })
-            
+        
+        if(sales_weight_per_installation && typeof sales_weight_per_installation !== 'number')
+            errors.push({code: 400, 
+                            msg: 'invalid sales_weight_per_installation',
+                            detail: `sales_weight_per_installation should be a number value`
+                        })   
+        
+        if(post_sale_weight_per_installation && typeof post_sale_weight_per_installation !== 'number')
+            errors.push({code: 400, 
+                            msg: 'invalid post_sale_weight_per_installation',
+                            detail: `post_sale_weight_per_installation should be a number value`
+                        })   
+        
         if(latitude && latitude.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid latitude',
@@ -268,6 +280,8 @@ const createInstallation = async(request, response) => {
             postal_code, 
             phone, 
             active, 
+            sales_weight_per_installation,
+            post_sale_weight_per_installation, 
             province, email,
             latitude, 
             length, 
@@ -336,7 +350,7 @@ const getInstallation = async(request, response) => {
 const updateInstallation = async(request, response) => {
     try{
         const {name, autonomous_community, code, address, dealership, installation_type, population, postal_code, phone, active, province, email,
-               latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, contacts } = request.body
+               latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, sales_weight_per_installation, post_sale_weight_per_installation, contacts } = request.body
         const {id} = request.params
 
         let errors = []
@@ -538,6 +552,18 @@ const updateInstallation = async(request, response) => {
                             detail: `invalid format`
                         })     
                         
+        if(sales_weight_per_installation && typeof sales_weight_per_installation !== 'number')
+            errors.push({code: 400, 
+                            msg: 'invalid sales_weight_per_installation',
+                            detail: `sales_weight_per_installation should be a number value`
+                        })   
+        
+        if(post_sale_weight_per_installation && typeof post_sale_weight_per_installation !== 'number')
+            errors.push({code: 400, 
+                            msg: 'invalid post_sale_weight_per_installation',
+                            detail: `post_sale_weight_per_installation should be a number value`
+                        })  
+        
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
 
@@ -571,6 +597,10 @@ const updateInstallation = async(request, response) => {
             updatedFields['latitude'] = latitude
         if(length)
             updatedFields['length'] = length
+        if(sales_weight_per_installation)
+            updatedFields['sales_weight_per_installation'] = sales_weight_per_installation
+        if(post_sale_weight_per_installation)
+            updatedFields['post_sale_weight_per_installation'] = post_sale_weight_per_installation
         if(isSale!==undefined && isSale !== null && (isSale === true || isSale ===false))
             updatedFields['isSale'] = isSale
         if(isPostSale!==undefined && isPostSale !== null && (isPostSale === true || isPostSale ===false))
