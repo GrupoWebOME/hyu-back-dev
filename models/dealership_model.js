@@ -25,6 +25,8 @@ const dealershipSchema = new Schema({
                                required: true},
         phone: {type: String,
                 default: null},
+        cif: {type: String,
+                default: null},
         email: {type: String,
                 default: null},
         previous_year_sales: {type: Number, 
