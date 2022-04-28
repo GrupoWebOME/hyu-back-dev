@@ -50,6 +50,10 @@ const installationSchema = new Schema({
         contacts: [{type: Schema.Types.ObjectId, 
                    ref: 'Personal'
                   }],
+        sales_weight_per_installation: {type: Number, 
+                                        default: 0},
+        post_sale_weight_per_installation: {type: Number, 
+                                            default: 0},
         createdAt: {type: Date,
                 default: Date.now},
         updatedAt: {type: Date,
