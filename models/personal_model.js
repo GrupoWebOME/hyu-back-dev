@@ -16,6 +16,8 @@ const personalSchema = new Schema({
             default: null,
             lowercase: true    
     },
+    phone: {type: String,
+            default: null},
     id_secondary: {type: String, 
                    unique: true},
     installation: {type: Schema.Types.ObjectId, 
