@@ -31,7 +31,7 @@ const getAllInstallation = async(request, response) => {
         if(dealership)
             filter['dealership'] = dealership
         if(page === 0){
-            const installations = await Installation.find(filter).populate({path: 'dealership installation_type'})
+            const installations = await Installation.find(filter).populate({path: 'dealership installation_type contacts'})
                                              .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                              })
@@ -53,7 +53,7 @@ const getAllInstallation = async(request, response) => {
         if((countPage < page) && page !==1)
             return response.status(400).json({code: 400, msg: 'invalid page', detail: `totalPages: ${countPage}`})
 
-        const installations = await Installation.find(filter).skip(skip).limit(10).populate({path: 'dealership installation_type'})
+        const installations = await Installation.find(filter).skip(skip).limit(10).populate({path: 'dealership installation_type contacts'})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
@@ -326,7 +326,7 @@ const getInstallation = async(request, response) => {
                                               msg: 'invalid id',
                                               detail: 'id should be an objectId'})
     
-        const instType = await Installation.findById(id).populate({path: 'dealership installation_type'})
+        const instType = await Installation.findById(id).populate({path: 'dealership installation_type contacts'})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
