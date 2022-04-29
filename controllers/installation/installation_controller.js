@@ -604,7 +604,7 @@ const updateInstallation = async(request, response) => {
         if(isSale!==undefined && isSale !== null && (isSale === true || isSale ===false))
             updatedFields['isSale'] = isSale
         if(isPostSale!==undefined && isPostSale !== null && (isPostSale === true || isPostSale ===false))
-            updatedFields['isSale'] = isSale
+            updatedFields['isPostSale'] = isPostSale
         if(isHP!==undefined && isHP !== null && (isHP === true || isHP ===false))
             updatedFields['isHP'] = isHP
         if(m2Exp)
