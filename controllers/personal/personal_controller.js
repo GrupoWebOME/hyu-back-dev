@@ -6,7 +6,7 @@ const ObjectId = require('mongodb').ObjectId
 
 const createPersonal = async(request, response) => {
     try{
-        const {name_and_surname, dni, address, id_secondary, installation, dealership, role, email} = request.body
+        const {name_and_surname, dni, address, id_secondary, installation, dealership, role, email, phone} = request.body
 
         let errors = []
 
@@ -104,7 +104,13 @@ const createPersonal = async(request, response) => {
                         msg: 'invalid name_and_surname',
                         detail: `name_and_surname is required`
                         })  
-
+        
+        if(phone && phone.length < 1)
+            errors.push({code: 400, 
+                        msg: 'invalid phone',
+                        detail: `phone is required`
+                        }) 
+        
         if(!dni)
             errors.push({code: 400, 
                         msg: 'invalid dni',
@@ -162,7 +168,7 @@ const createPersonal = async(request, response) => {
 const updatePersonal = async(request, response) => {
     try{
         const {id} = request.params
-        const {name_and_surname, dni, address, id_secondary, installation, dealership, role, email} = request.body
+        const {name_and_surname, dni, address, id_secondary, installation, dealership, role, email, phone} = request.body
 
         let errors = []
 
@@ -242,6 +248,12 @@ const updatePersonal = async(request, response) => {
                                             })   
         }
 
+        if(phone && phone.length < 1)
+            errors.push({code: 400, 
+                        msg: 'invalid phone',
+                        detail: `phone is required`
+                        }) 
+        
         if(role){
             if(!Array.isArray(role) || role.length === 0){
                 return response.status(400).json({code: 400, 
@@ -315,6 +327,8 @@ const updatePersonal = async(request, response) => {
             updatedFields['name_and_surname'] = name_and_surname
         if(dni)
             updatedFields['dni'] = dni
+        if(phone)
+            updatedFields['phone'] = phone
         if(address)
             updatedFields['address'] = address
         if(id_secondary)
