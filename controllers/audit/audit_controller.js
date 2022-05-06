@@ -6,7 +6,7 @@ const ObjectId = require('mongodb').ObjectId
 const createAudit = async(request, response) => {
     try{
         const {name, installation_type, initial_date, end_date, criterions, isAgency} = request.body
-
+console.log("entra")
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
 
@@ -75,7 +75,7 @@ const createAudit = async(request, response) => {
         }
         else{
             for(let i = 0; i < criterions.length; i++){
-                if(!columns[i].hasOwnProperty("criterion"))
+                if(!criterions[i].hasOwnProperty("criterion"))
                     errors.push({code: 400, 
                         msg: 'invalid criterion',
                         detail: `criterion field in criterions is an obligatory field`
@@ -176,7 +176,7 @@ const updateAudit = async(request, response) => {
         }
         else if(criterions){
             for(let i = 0; i < criterions.length; i++){
-                if(!columns[i].hasOwnProperty("criterion"))
+                if(!criterions[i].hasOwnProperty("criterion"))
                     errors.push({code: 400, 
                         msg: 'invalid criterion',
                         detail: `criterion field in criterions is an obligatory field`
