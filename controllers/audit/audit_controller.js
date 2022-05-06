@@ -6,7 +6,7 @@ const ObjectId = require('mongodb').ObjectId
 const createAudit = async(request, response) => {
     try{
         const {name, installation_type, initial_date, end_date, criterions, isAgency} = request.body
-console.log("entra")
+
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
 
