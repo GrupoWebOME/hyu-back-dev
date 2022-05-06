@@ -280,7 +280,7 @@ const getAllAudit= async(request, response) => {
         }
 
         if(page === 0){
-            const audits = await Audit.find(filter).populate("installation_type")
+            const audits = await Audit.find(filter).populate("installation_type criterions.criterion")
                                              .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                              })
@@ -304,7 +304,7 @@ const getAllAudit= async(request, response) => {
                                               msg: 'invalid page', 
                                               detail: `totalPages: ${countPage}`})
 
-        const audits = await Audit.find(filter).skip(skip).limit(10).populate("installation_type")
+        const audits = await Audit.find(filter).skip(skip).limit(10).populate("installation_type criterions.criterion")
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
