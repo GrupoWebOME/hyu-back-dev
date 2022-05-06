@@ -24,12 +24,6 @@ const createAudit = async(request, response) => {
                             })
         }
 
-        if(!installation_type)
-            errors.push({code: 400, 
-                        msg: 'invalid installation_type',
-                        detail: `installation_type is required`
-                        })      
-
         if(installation_type){
             if(!ObjectId.isValid(installation_type)){
                 errors.push({code: 400, 
