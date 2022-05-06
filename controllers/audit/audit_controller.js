@@ -280,7 +280,7 @@ const getAllAudit= async(request, response) => {
         }
 
         if(page === 0){
-            const audits = await Audit.find(filter).populate({path: 'block category standards'})
+            const audits = await Audit.find(filter).populate("installation_type")
                                              .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                              })
@@ -304,7 +304,7 @@ const getAllAudit= async(request, response) => {
                                               msg: 'invalid page', 
                                               detail: `totalPages: ${countPage}`})
 
-        const audits = await Audit.find(filter).skip(skip).limit(10).populate({path: 'block category standards'})
+        const audits = await Audit.find(filter).skip(skip).limit(10).populate("installation_type")
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
@@ -312,7 +312,7 @@ const getAllAudit= async(request, response) => {
         const data = {audits: audits, 
                       totalPages: countPage}
 
-        response.status(200).json({code: 200,
+        return response.status(200).json({code: 200,
                                    msg: 'success',
                                    data: data })
     }
@@ -336,7 +336,7 @@ const getAudit = async(request, response) => {
                                               msg: 'invalid id',
                                               detail: 'id should be an objectId'})
     
-        const audit = await Audit.findById(id).populate({path: 'block category standards'})
+        const audit = await Audit.findById(id).populate("installation_type")
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
