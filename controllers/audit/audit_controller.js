@@ -217,7 +217,7 @@ const deleteAudit = async(request, response) => {
         const {id} = request.params
 
         if(id && ObjectId.isValid(id)){
-            const existId = await Area.exists({_id: id})
+            const existId = await Audit.exists({_id: id})
                                           .catch(error => {return response.status(400).json({code: 500, 
                                                                                             msg: 'error id',
                                                                                             detail: error.message
