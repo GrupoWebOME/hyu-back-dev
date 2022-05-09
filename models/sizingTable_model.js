@@ -10,41 +10,48 @@ const sizingTableSchema = new Schema({
         columns: [{
                 name: {
                         type: String,   
-                        trim: true
+                        trim: true,
+                        default: null
                 },
                 comment: {
                         type: String,   
-                        trim: true                                
+                        trim: true,
+                        default: null
                 },
                 level2: [{
                         name: {
                                 type: String,   
-                                trim: true
+                                trim: true,
+                                default: null
                         },
                         comment: {
                                 type: String,   
-                                trim: true                                
+                                trim: true,
+                                default: null
                         },
                         level3: [{
 
                                 model: {
                                         type: String,
                                         trim: true,
+                                        default: null
                                 },
 
                                 field: {
                                         type: String,
                                         trim: true,
+                                        default: null
                                 },
 
                                 name: {
                                         type: String,   
-                                        trim: true
+                                        trim: true,
                                 },
 
                                 comment: {
                                         type: String,   
-                                        trim: true                                
+                                        trim: true,
+                                        default: null
                                 },
                         }]
                 }]
@@ -68,10 +75,12 @@ const sizingTableSchema = new Schema({
                 model: {
                         type: String,
                         trim: true,
+                        default: null
                 },
                 field: {
                         type: String,
                         trim: true,
+                        default: null
                 }
         },
         createdAt: {

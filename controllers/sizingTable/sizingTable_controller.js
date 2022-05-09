@@ -33,7 +33,7 @@ const createSizingTable = async(request, response) => {
                             detail: `name and level3 are obligatories fields, level3 should be in array format`
                             })
                     for(let z = 0; z < columns[i].level2[j].level3.length; z++){            
-                        if(!columns[i].level2[j].level3[z].hasOwnProperty("name") || !columns[i].level2[j].level3[z].hasOwnProperty("model") || !columns[i].level2[j].level3[z].hasOwnProperty("field"))
+                        if(!columns[i].level2[j].level3[z].hasOwnProperty("name"))
                             errors.push({code: 400, 
                                 msg: 'invalid level3',
                                 detail: `name, model and field are obligatory fields`
@@ -168,7 +168,7 @@ const updateSizingTable = async(request, response) => {
                             detail: `name and level3 are obligatories fields, level3 should be in array format`
                             })
                     for(let z = 0; z < columns[i].level2[j].level3.length; z++){            
-                        if(!columns[i].level2[j].level3[z].hasOwnProperty("name") || !columns[i].level2[j].level3[z].hasOwnProperty("model") || !columns[i].level2[j].level3[z].hasOwnProperty("field"))
+                        if(!columns[i].level2[j].level3[z].hasOwnProperty("name"))
                             errors.push({code: 400, 
                                 msg: 'invalid level3',
                                 detail: `name, model and field are obligatory fields`
