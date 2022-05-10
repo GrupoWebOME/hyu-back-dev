@@ -273,7 +273,7 @@ const deleteSizingTable = async(request, response) => {
                                             })   
         }
 
-        const deleteSizingTable = await RoleType.findByIdAndDelete(id)
+        const deleteSizingTable = await SizingTable.findByIdAndDelete(id)
                                                 .catch(error => {        
                                                     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                                 })
@@ -333,7 +333,7 @@ const getAllSizingTable = async(request, response) => {
         let skip = (page - 1) * 10
 
         if(page === 0){
-            const sizingTables = await RoleType.find()
+            const sizingTables = await SizingTable.find()
                                              .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                              })
@@ -345,7 +345,7 @@ const getAllSizingTable = async(request, response) => {
                                               data: data })
         }
             
-        let countDocs = await RoleType.countDocuments()
+        let countDocs = await SizingTable.countDocuments()
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
@@ -355,7 +355,7 @@ const getAllSizingTable = async(request, response) => {
         if(countPage < page)
             return response.status(400).json({code: 400, msg: 'invalid page', detail: `totalPages: ${countPage}`})
 
-        const sizingTable = await RoleType.find().skip(skip).limit(10)
+        const sizingTable = await SizingTable.find().skip(skip).limit(10)
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
