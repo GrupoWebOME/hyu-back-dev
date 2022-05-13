@@ -155,7 +155,7 @@ const updateAudit = async(request, response) => {
                     })  
             }
             else{                
-                const existInstallationType = await Audit.exists({_id: installation_type})
+                const existInstallationType = await InstallationType.exists({_id: installation_type})
                 if(!existInstallationType)
                     errors.push({code: 400, 
                                 msg: 'invalid installation_type',
