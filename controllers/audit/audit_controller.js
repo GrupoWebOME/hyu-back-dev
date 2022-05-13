@@ -112,13 +112,35 @@ const createAudit = async(request, response) => {
 const updateAudit = async(request, response) => {
     try{
         const {name, installation_type, initial_date, end_date, criterions, isAgency} = request.body
+        const {id} = request.params
 
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
 
+        let auditById = null
+
+        if(id && ObjectId.isValid(id)){
+            auditById = await Audit.findById(id)
+                                       .catch(error => {return response.status(400).json({code: 500, 
+                                                                                          msg: 'error id',
+                                                                                          detail: error.message
+                                                                                        })} )  
+            if(!auditById)
+                return response.status(400).json({code: 400, 
+                                                  msg: 'invalid id',
+                                                  detail: 'id not found'
+                                                })
+        }
+        else{
+            return response.status(400).json({code: 400, 
+                                              msg: 'invalid id',
+                                              detail: `id not found`
+                                            })   
+        }
+
         if(name){
             const audit = await Audit.exists({name: { $regex : new RegExp(name, "i") } })
-            if(audit)
+            if(audit && name !== auditById.name)
                 errors.push({code: 400, 
                              msg: 'invalid name',
                              detail: `${name} is in use`
