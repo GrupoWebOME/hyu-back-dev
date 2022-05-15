@@ -8,7 +8,6 @@ const installationSchema = new Schema({
         autonomous_community: {type: String, 
                                default: null},
         code: {type: String,
-                unique: true,
                 required: true },
         address: {type: String,
                         required: true},
