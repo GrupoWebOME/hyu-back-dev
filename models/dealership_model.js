@@ -10,7 +10,6 @@ const dealershipSchema = new Schema({
                         trim: true},
         code: {type: String,
                 trim: true,
-                unique: true,
                 required: true },
         installations: [{type: Schema.Types.ObjectId}],
         location: {type: String, 
