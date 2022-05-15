@@ -92,17 +92,6 @@ const createDealership = async(request, response) => {
                             msg: 'invalid code',
                             detail: `code is required`
                         })
-        else if(code){
-            const existCode = await Dealership.exists({code: { $regex : new RegExp(code, "i") }})
-                                            .catch(error => {        
-                                                return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-                                            })
-            if(existCode)
-                errors.push({code: 400, 
-                             msg: 'invalid code',
-                             detail: `${code} is already in use`
-                            })
-        }
         
         if(address && address.length < 1)
             errors.push({code: 400, 
@@ -295,16 +284,6 @@ const updateDealership = async(request, response) => {
                     msg: 'invalid code',
                     detail: `code is empty`
                 })
-
-            const existCode = await Dealership.exists({code: { $regex : new RegExp(code, "i") }})
-                                            .catch(error => {        
-                                                return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-                                            })
-            if(existCode && dealerById.code !== code)
-                errors.push({code: 400, 
-                             msg: 'invalid code',
-                             detail: `${code} is already in use`
-                            })
         }
 
         if(address && address.length < 1)
