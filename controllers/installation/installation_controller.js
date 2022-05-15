@@ -118,17 +118,6 @@ const createInstallation = async(request, response) => {
                             msg: 'invalid code',
                             detail: `code is required`
                         })
-        else if(code){
-            const existCode = await Installation.exists({code: { $regex : new RegExp(code, "i") }})
-                                            .catch(error => {        
-                                                return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-                                            })
-            if(existCode)
-                errors.push({code: 400, 
-                             msg: 'invalid code',
-                             detail: `${code} is already in use`
-                            })
-        }
 
         if(!installation_type || (installation_type.length < 1 || (installation_type && !ObjectId.isValid(installation_type))))
             errors.push({code: 400, 
@@ -416,17 +405,6 @@ const updateInstallation = async(request, response) => {
                             msg: 'invalid code',
                             detail: `code is required`
                         })
-        else if(code){
-            const existCode = await Installation.exists({code: { $regex : new RegExp(code, "i") }})
-                                            .catch(error => {        
-                                                return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-                                            })
-            if(existCode && installation.code !== code)
-                errors.push({code: 400, 
-                             msg: 'invalid code',
-                             detail: `${code} is already in use`
-                            })
-        }
 
         if(installation_type && (installation_type.length < 1 || (installation_type && !ObjectId.isValid(installation_type))))
             errors.push({code: 400, 
