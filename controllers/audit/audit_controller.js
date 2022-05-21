@@ -17,7 +17,8 @@ const createAudit = async(request, response) => {
                         })
         else{
             const audit = await Audit.exists({name: { $regex : new RegExp(name, "i") } })
-            if(audit)
+            const audit2 = await Audit.exists({name: name })
+            if(audit || audit2)
                 errors.push({code: 400, 
                              msg: 'invalid name',
                              detail: `${name} is in use`
@@ -140,7 +141,8 @@ const updateAudit = async(request, response) => {
 
         if(name){
             const audit = await Audit.exists({name: { $regex : new RegExp(name, "i") } })
-            if(audit && name !== auditById.name)
+            const audit2 = await Audit.exists({name: name })
+            if((audit || audit2) && name !== auditById.name)
                 errors.push({code: 400, 
                              msg: 'invalid name',
                              detail: `${name} is in use`
