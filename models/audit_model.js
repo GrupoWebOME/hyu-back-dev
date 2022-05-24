@@ -6,7 +6,7 @@ const auditSchema = new Schema({
            required: true,
            unique: true,
            trim: true},
-    installation_type: {type: Schema.Types.ObjectId, ref: 'InstallationType', default: null},
+    installation_type: [{type: Schema.Types.ObjectId, ref: 'InstallationType', default: null}],
     criterions: [{
         criterion: {type: Schema.Types.ObjectId, ref: 'Criterion'},
         exceptions: [{type: Schema.Types.ObjectId, ref: 'Installation'}]
