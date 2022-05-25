@@ -17,9 +17,9 @@ const createPersonal = async(request, response) => {
                          msg: 'invalid email',
                          detail: `${email} is not valid email format. The email field can only contain a valid email`
                         })
-        else if(email){
+         else if(email){
             const personalExist = await Personal.findOne({email: email.toLowerCase()})
-            if(personalExist && personalExist._id.toString() !== id)
+            if(personalExist)
                 errors.push({code: 400, 
                              msg: 'invalid email',
                              detail: `${email} is in use`
