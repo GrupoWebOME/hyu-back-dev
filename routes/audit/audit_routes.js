@@ -16,8 +16,10 @@ const Audit = require('../../controllers/audit/audit_controller')
  *                  type: string
  *                  description: nombre de la auditoría
  *              installation_type:
- *                  type: string
- *                  description: identificador del tipo de instalación 
+ *                  type: array
+ *                  items:
+ *                    type: string
+ *                    description: identificador del tipo de instalación 
  *              criterions:
  *                  type: array
  *                  items:
@@ -57,7 +59,7 @@ const Audit = require('../../controllers/audit/audit_controller')
  *              - updatedAt
  *          example:
  *              name: Audit 1
- *              installation_type: u32423423rewr2331
+ *              installation_type: ['u32423423rewr2331']
  *              criterions: [{criterion: 21312rwqewqe984, exceptions: ['23123awea898432423', '3242304823498dea']}]
  *              initial_date: 2022-10-20
  *              end_date: 2022-10-22
@@ -208,9 +210,11 @@ api.post('/', Audit.createAudit)
  *                        description: Nombre de la auditoría.
  *                        example: Auditoría 1
  *                      installation_type:
- *                        type: string
- *                        description: identificador del tipo de instalación
- *                        example: 625494cf52b66d16944982a9   
+ *                        type: array
+ *                        items:
+ *                          type: string
+ *                          description: identificador del tipo de instalación
+ *                          example: 625494cf52b66d16944982a9   
  *                      initial_date:
  *                         type: date
  *                         description: Fecha de inicio.
@@ -421,9 +425,11 @@ api.put('/:id', Audit.updateAudit)
  *                        description: Nombre de la auditoría.
  *                        example: Auditoría 1
  *                      installation_type:
- *                        type: string
- *                        description: identificador del tipo de instalación
- *                        example: 625494cf52b66d16944982a9   
+ *                        type: array
+ *                        items:
+ *                          type: string
+ *                          description: identificador del tipo de instalación
+ *                          example: 625494cf52b66d16944982a9   
  *                      initial_date:
  *                         type: date
  *                         description: Fecha de inicio.

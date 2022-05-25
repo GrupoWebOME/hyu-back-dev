@@ -1,4 +1,3 @@
-const Area = require('../../models/area_model')
 const Audit = require('../../models/audit_model')
 const InstallationType = require('../../models/installationType_model')
 const ObjectId = require('mongodb').ObjectId
@@ -25,21 +24,29 @@ const createAudit = async(request, response) => {
                             })
         }
 
-        if(installation_type){
-            if(!ObjectId.isValid(installation_type)){
-                errors.push({code: 400, 
-                    msg: 'invalid block',
-                    detail: `format should be a ObjectId`
-                    })  
-            }
-            else{                
-                const existInstallationType = await InstallationType.exists({_id: installation_type})
-                if(!existInstallationType)
+        if(installation_type && !Array.isArray(installation_type)){
+            errors.push({code: 400, 
+                msg: 'invalid installation_type',
+                detail: `installation_type should be an array type`
+            })
+        }
+        else if(installation_type){
+            installation_type.forEach(async(element) => {
+                if(!ObjectId.isValid(element)){
                     errors.push({code: 400, 
-                                msg: 'invalid installation_type',
-                                detail: `installation_type not found`
-                                })        
-            }
+                        msg: 'invalid installation_type',
+                        detail: `${element} is not an ObjectId`
+                    })  
+                }
+                else{                
+                    const existInstallationType = await InstallationType.exists({_id: element})
+                    if(!existInstallationType)
+                        errors.push({code: 400, 
+                                    msg: 'invalid installation_type',
+                                    detail: `${element} not found`
+                                    })        
+                }
+            })
         }
 
         if(!initial_date){
@@ -74,7 +81,7 @@ const createAudit = async(request, response) => {
                     errors.push({code: 400, 
                         msg: 'invalid criterion',
                         detail: `criterion field in criterions is an obligatory field`
-                    }) 
+                }) 
             }
         }
 
@@ -149,21 +156,29 @@ const updateAudit = async(request, response) => {
                             })
         }
 
-        if(installation_type){
-            if(!ObjectId.isValid(installation_type)){
-                errors.push({code: 400, 
-                    msg: 'invalid block',
-                    detail: `format should be a ObjectId`
-                    })  
-            }
-            else{                
-                const existInstallationType = await InstallationType.exists({_id: installation_type})
-                if(!existInstallationType)
+        if(installation_type && !Array.isArray(installation_type)){
+            errors.push({code: 400, 
+                msg: 'invalid installation_type',
+                detail: `installation_type should be an array type`
+            })
+        }
+        else if(installation_type){
+            installation_type.forEach(async(element) => {
+                if(!ObjectId.isValid(element)){
                     errors.push({code: 400, 
-                                msg: 'invalid installation_type',
-                                detail: `installation_type not found`
-                                })        
-            }
+                        msg: 'invalid installation_type',
+                        detail: `${element} is not an ObjectId`
+                    })  
+                }
+                else{                
+                    const existInstallationType = await InstallationType.exists({_id: element})
+                    if(!existInstallationType)
+                        errors.push({code: 400, 
+                                    msg: 'invalid installation_type',
+                                    detail: `${element} not found`
+                                    })        
+                }
+            })
         }
 
         if(initial_date && (!initial_date.match(regexDate) || initial_date > end_date)){
@@ -287,7 +302,6 @@ const getAllAudit= async(request, response) => {
                                               detail: `format should be a ObjectId`
                                             })  
         }
-
         if(name)
             filter['name'] = { $regex : new RegExp(name, "i") } 
         if(installation_type)
