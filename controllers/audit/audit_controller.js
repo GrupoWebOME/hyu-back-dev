@@ -1,10 +1,11 @@
 const Audit = require('../../models/audit_model')
 const InstallationType = require('../../models/installationType_model')
+const Installation = require('../../models/installation_schema')
 const ObjectId = require('mongodb').ObjectId
 
 const createAudit = async(request, response) => {
     try{
-        const {name, installation_type, initial_date, end_date, criterions, isAgency} = request.body
+        const {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions} = request.body
 
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
@@ -85,6 +86,31 @@ const createAudit = async(request, response) => {
             }
         }
 
+        if(installation_exceptions && (installation_exceptions.length <= 0 || !Array.isArray(installation_exceptions))){
+            errors.push({code: 400, 
+                         msg: 'invalid criterions',
+                         detail: `installation_exceptions should be an array type`
+                })  
+        }
+        else if(installation_exceptions){
+            installation_exceptions.forEach(async(element) => {
+                if(!ObjectId.isValid(element)){
+                    errors.push({code: 400, 
+                        msg: 'invalid installation_exceptions',
+                        detail: `${element} is not an ObjectId`
+                    })  
+                }
+                else{                
+                    const existInstallation = await Installation.exists({_id: element})
+                    if(!existInstallation)
+                        errors.push({code: 400, 
+                                    msg: 'invalid installation_exceptions',
+                                    detail: `${element} not found`
+                                    })        
+                }
+            })
+        }
+
         if(isAgency!==null && isAgency!==undefined && typeof isAgency !== 'boolean')
             errors.push({code: 400, 
                         msg: 'invalid isAgency',
@@ -119,7 +145,7 @@ const createAudit = async(request, response) => {
 
 const updateAudit = async(request, response) => {
     try{
-        const {name, installation_type, initial_date, end_date, criterions, isAgency} = request.body
+        const {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions} = request.body
         const {id} = request.params
 
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
@@ -215,6 +241,31 @@ const updateAudit = async(request, response) => {
                         detail: `criterion field in criterions is an obligatory field`
                     }) 
             }
+        }
+
+        if(installation_exceptions && (installation_exceptions.length <= 0 || !Array.isArray(installation_exceptions))){
+            errors.push({code: 400, 
+                         msg: 'invalid criterions',
+                         detail: `installation_exceptions should be an array type`
+                })  
+        }
+        else if(installation_exceptions){
+            installation_exceptions.forEach(async(element) => {
+                if(!ObjectId.isValid(element)){
+                    errors.push({code: 400, 
+                        msg: 'invalid installation_exceptions',
+                        detail: `${element} is not an ObjectId`
+                    })  
+                }
+                else{                
+                    const existInstallation = await Installation.exists({_id: element})
+                    if(!existInstallation)
+                        errors.push({code: 400, 
+                                    msg: 'invalid installation_exceptions',
+                                    detail: `${element} not found`
+                                    })        
+                }
+            })
         }
 
         if(errors.length > 0)

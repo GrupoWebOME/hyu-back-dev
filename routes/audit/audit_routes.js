@@ -33,6 +33,11 @@ const Audit = require('../../controllers/audit/audit_controller')
  *                        items:
  *                          type: string
  *                          description: identificador de la instalación
+ *              installation_exceptions:
+ *                  type: array
+ *                  items:
+ *                      type: string
+ *                      description: identificador de la/s instalación/es exceptuadas para la auditoria completa
  *              isAgency:
  *                  type: boolean
  *                  description: Especifica si la auditoría afecta a instalaciones o agencias. Si es true, afecta agencias. Si es false, afecta a instalaciones
@@ -64,6 +69,7 @@ const Audit = require('../../controllers/audit/audit_controller')
  *              initial_date: 2022-10-20
  *              end_date: 2022-10-22
  *              isAgency: false
+ *              installation_exceptions: ['a324982389239wqdas898999']
  *              createdAt: 2021-10-20
  *              updatedAt: 2021-10-20
  */
@@ -219,6 +225,12 @@ api.post('/', Audit.createAudit)
  *                         type: date
  *                         description: Fecha de inicio.
  *                         example: 2021-12-12
+ *                      installation_exceptions:
+ *                        type: array
+ *                        items:
+ *                             type: string
+ *                             description: identificador de la/s instalación/es exceptuadas para la auditoria completa
+ *                             example: 625494cf52b66d16944982a9
  *                      end_date:
  *                         type: date
  *                         description: Fecha de fin.
@@ -438,6 +450,12 @@ api.put('/:id', Audit.updateAudit)
  *                         type: date
  *                         description: Fecha de fin.
  *                         example: 12-12-2021
+ *                      installation_exceptions:
+ *                        type: array
+ *                        items:
+ *                             type: string
+ *                             description: identificador de la/s instalación/es exceptuadas para la auditoria completa
+ *                             example: 625494cf52b66d16944982a9
  *                      criterions:
  *                        type: array
  *                        items:
