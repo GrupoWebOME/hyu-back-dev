@@ -24,7 +24,7 @@ const createAuditResults = async(request, response) => {
                 })  
             }
             else{
-                const existAudit = await Audit.exists({_id: element})
+                const existAudit = await Audit.exists({_id: audit_id})
                 if(!existAudit)
                     errors.push({code: 400, 
                                 msg: 'invalid audit_id',
@@ -47,7 +47,7 @@ const createAuditResults = async(request, response) => {
                 })  
             }
             else{
-                const existInstallation = await Installation.exists({_id: element})
+                const existInstallation = await Installation.exists({_id: installation_id})
                 if(!existInstallation)
                     errors.push({code: 400, 
                                 msg: 'invalid installation_id',
@@ -142,7 +142,7 @@ const updateAuditResults = async(request, response) => {
                 })  
             }
             else{
-                const existAudit = await Audit.exists({_id: element})
+                const existAudit = await Audit.exists({_id: audit_id})
                 if(!existAudit)
                     errors.push({code: 400, 
                                 msg: 'invalid audit_id',
@@ -159,7 +159,7 @@ const updateAuditResults = async(request, response) => {
                 })  
             }
             else{
-                const existInstallation = await Installation.exists({_id: element})
+                const existInstallation = await Installation.exists({_id: installation_id})
                 if(!existInstallation)
                     errors.push({code: 400, 
                                 msg: 'invalid installation_id',
@@ -228,7 +228,7 @@ const deleteAuditResults = async(request, response) => {
         const {id} = request.params
 
         if(id && ObjectId.isValid(id)){
-            const existId = await AuditResults.exists({_id: id})
+            const existId = await Audit.exists({_id: id})
                                           .catch(error => {return response.status(400).json({code: 500, 
                                                                                             msg: 'error id',
                                                                                             detail: error.message
