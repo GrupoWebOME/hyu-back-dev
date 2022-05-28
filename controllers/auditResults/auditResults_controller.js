@@ -63,6 +63,7 @@ const createAuditResults = async(request, response) => {
             })
         }
         else if(criterions){
+
             criterions.forEach(async(element) => {
                 if(!element.hasOwnProperty("criterion_id") || !element.hasOwnProperty("pass")){
                     errors.push({code: 400, 
@@ -86,6 +87,9 @@ const createAuditResults = async(request, response) => {
                 }
             })
         }
+
+        if(errors.length > 0)
+            return response.status(400).json({errors: errors})
 
         const newAuditResults = new AuditResults({
             audit_id,
@@ -198,6 +202,9 @@ const updateAuditResults = async(request, response) => {
                 }
             })
         }
+        
+        if(errors.length > 0)
+            return response.status(400).json({errors: errors})
 
         const updatedFields = {}
 
