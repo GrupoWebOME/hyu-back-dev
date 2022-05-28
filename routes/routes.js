@@ -16,6 +16,7 @@ const apiPersonal = require('./personal/personal_routes')
 const apiAudit = require('./audit/audit_routes')
 const apiCloudinary = require('./cloudinary/cloudinary_routes')
 const apiSizingTable = require('./sizingTable/sizingtable_routes')
+const apiAuditResults = require('./auditResults/auditResults_routes')
 const apiSwagger = require('./doc/doc_routes')
 
 api.get('/', (request, response) => {
@@ -38,6 +39,7 @@ api.use('/personal', apiPersonal)
 api.use('/audit', apiAudit)
 api.use('/cloudinary', apiCloudinary)
 api.use('/sizingTable', apiSizingTable)
+api.use('/auditResults', apiAuditResults)
 api.use('/doc', apiSwagger)
 
 module.exports = api

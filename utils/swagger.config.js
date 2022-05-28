@@ -47,6 +47,7 @@ const swaggerSpecification = {
       `${path.join(__dirname, "../routes/installation/installation_routes.js")}`,
       `${path.join(__dirname, "../routes/cloudinary/cloudinary_routes.js")}`,
       `${path.join(__dirname, "../routes/audit/audit_routes.js")}`,
+      `${path.join(__dirname, "../routes/auditResults/auditResults_routes.js")}`,
     ],
   }
 

@@ -78,7 +78,7 @@ const Audit = require('../../controllers/audit/audit_controller')
   * @swagger
   * tags:
   *   name: Audit
-  *   description: Rutas de Categorías
+  *   description: Rutas de Auditorías
   */
 
 api.post('/all', Audit.getAllAudit)
@@ -355,7 +355,7 @@ api.get('/:id', Audit.getAudit)
  *                                  type: string
  *                                  example: success
  *                              data:
- *                                  $ref: '#/components/schemas/Block'
+ *                                  $ref: '#/components/schemas/Audit'
  *          400: 
  *              description: invalid id 
  *              content: 
