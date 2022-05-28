@@ -2,11 +2,12 @@ const Audit = require('../../models/audit_model')
 const AuditResults = require('../../models/audit_results_model')
 const Criterion = require('../../models/criterion_model')
 const Installation = require('../../models/installation_schema')
+const Dealership = require('../../models/dealership_model')
 const ObjectId = require('mongodb').ObjectId
 
 const createAuditResults = async(request, response) => {
     try{
-        const {audit_id, installation_id, criterions} = request.body
+        const {audit_id, installation_id, criterions, dealership_id} = request.body
 
         let errors = []
 
@@ -52,6 +53,29 @@ const createAuditResults = async(request, response) => {
                     errors.push({code: 400, 
                                 msg: 'invalid installation_id',
                                 detail: `${installation_id} not found`
+                                })   
+            }
+        }
+
+        if(!dealership_id){
+            errors.push({code: 400, 
+                         msg: 'invalid dealership_id',
+                         detail: 'dealership_id is an obligatory field'
+                        })
+        }
+        else{
+            if(!ObjectId.isValid(dealership_id)){
+                errors.push({code: 400, 
+                    msg: 'invalid dealership_id',
+                    detail: `${dealership_id} is not an ObjectId`
+                })  
+            }
+            else{
+                const existInstallation = await Dealership.exists({_id: dealership_id})
+                if(!existInstallation)
+                    errors.push({code: 400, 
+                                msg: 'invalid dealership_id',
+                                detail: `${dealership_id} not found`
                                 })   
             }
         }
@@ -113,7 +137,7 @@ const createAuditResults = async(request, response) => {
 
 const updateAuditResults = async(request, response) => {
     try{
-        const {audit_id, installation_id, criterions} = request.body
+        const {audit_id, installation_id, dealership_id, criterions} = request.body
         const {id} = request.params
 
         let errors = []
@@ -172,6 +196,23 @@ const updateAuditResults = async(request, response) => {
             }
         }
 
+        if(dealership_id){
+            if(!ObjectId.isValid(dealership_id)){
+                errors.push({code: 400, 
+                    msg: 'invalid dealership_id',
+                    detail: `${dealership_id} is not an ObjectId`
+                })  
+            }
+            else{
+                const existInstallation = await Dealership.exists({_id: dealership_id})
+                if(!existInstallation)
+                    errors.push({code: 400, 
+                                msg: 'invalid dealership_id',
+                                detail: `${dealership_id} not found`
+                                })   
+            }
+        }
+
         if(!criterions || !Array.isArray(criterions)){
             errors.push({code: 400, 
                 msg: 'invalid criterions',
@@ -212,6 +253,8 @@ const updateAuditResults = async(request, response) => {
             updatedFields['audit_id'] = audit_id
         if(installation_id)
             updatedFields['installation_id'] = installation_id
+        if(dealership_id)
+            updatedFields['dealership_id'] = dealership_id
         if(criterions)
             updatedFields['criterions'] = criterions
         updatedFields['updatedAt'] = Date.now()
@@ -264,5 +307,7 @@ const deleteAuditResults = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
     }
 }
+
+
 
 module.exports = {createAuditResults, updateAuditResults, deleteAuditResults}

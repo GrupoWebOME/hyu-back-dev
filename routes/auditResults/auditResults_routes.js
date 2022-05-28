@@ -18,6 +18,9 @@ const AuditResults = require('../../controllers/auditResults/auditResults_contro
  *              installation_id:
  *                  type: string
  *                  description: Identificador de la instalación
+ *              dealership_id:
+ *                  type: string
+ *                  description: identificador de la Agencia
  *              criterions:
  *                  type: array
  *                  items:
@@ -86,6 +89,10 @@ api.post('/', AuditResults.createAuditResults)
  *                      type: string
  *                      description: identificador de la instalación
  *                      example: 625494cf52b66d1694498211
+ *                    dealership_id:
+ *                      type: string
+ *                      description: identificador de la Agencia
+ *                      example: 625494cf52b66d1694498216
  *                    criterions:
  *                      type: array
  *                      items:
@@ -201,6 +208,10 @@ api.put('/:id', AuditResults.updateAuditResults)
  *                      type: string
  *                      description: identificador de la auditoria
  *                      example: 625494cf52b66d16944982a9
+ *                    dealership_id:
+ *                      type: string
+ *                      description: identificador de la Agencia
+ *                      example: 625494cf52b66d1694498216
  *                    installation_id:
  *                      type: string
  *                      description: identificador de la instalación
