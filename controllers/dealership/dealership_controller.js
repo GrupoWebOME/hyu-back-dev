@@ -528,13 +528,17 @@ const getDealership = async(request, response) => {
 }
 
 const getAllDealershipByAuditID = async(request, response) => {
-
     const {audit_id} = request.body
+
+    if(audit_id && !ObjectId.isValid(audit_id))
+        return response.status(400).json({code: 400,
+                                        msg: 'invalid id',
+                                        detail: 'audit_id should be an objectId'})
     const auditByID = await Audit.findById(audit_id)
     const installations = await Installation.find({$and:[{installation_type: {$in: auditByID.installation_type}},{_id: {$nin: auditByID.installation_exceptions}}]}).populate("dealership")
     let auxAudID = {}
     let arrayAgencies = []
-    installations.forEach((element) => {
+    installations && installations.forEach((element) => {
         if(!auxAudID[element.dealership._id]){
             arrayAgencies = [...arrayAgencies, element.dealership]
             auxAudID[element.dealership._id] = element.dealership
