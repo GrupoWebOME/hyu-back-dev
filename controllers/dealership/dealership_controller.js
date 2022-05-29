@@ -1,5 +1,6 @@
 const Dealership = require('../../models/dealership_model')
 const Installation = require('../../models/installation_schema')
+const Audit = require('../../models/audit_model')
 const ObjectId = require('mongodb').ObjectId
 
 const getAllDealership= async(request, response) => {
@@ -526,4 +527,20 @@ const getDealership = async(request, response) => {
     
 }
 
-module.exports = {getAllDealership, createDealership, updateDealership, deleteDealership, getDealership}
+const getAllDealershipByAuditID = async(request, response) => {
+
+    const {audit_id} = request.body
+    const auditByID = await Audit.findById(audit_id)
+    const installations = await Installation.find({$and:[{installation_type: {$in: auditByID.installation_type}},{_id: {$nin: auditByID.installation_exceptions}}]}).populate("dealership")
+    let auxAudID = {}
+    let arrayAgencies = []
+    installations.forEach((element) => {
+        if(!auxAudID[element.dealership._id]){
+            arrayAgencies = [...arrayAgencies, element.dealership]
+            auxAudID[element.dealership._id] = element.dealership
+        }
+    })
+    return response.status(200).json({data: arrayAgencies})
+}
+
+module.exports = {getAllDealership, createDealership, updateDealership, deleteDealership, getDealership, getAllDealershipByAuditID}

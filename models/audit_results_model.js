@@ -4,7 +4,6 @@ const uniqueValidator = require('mongoose-unique-validator')
 const auditResultsSchema = new Schema({
     audit_id: {type: Schema.Types.ObjectId, ref: 'Audit'},
     installation_id: {type: Schema.Types.ObjectId, ref: 'Installation', default: null},
-    dealership_id: {type: Schema.Types.ObjectId, ref: 'Dealership', default: null},
     criterions: [{
         criterion_id: {type: Schema.Types.ObjectId, ref: 'Criterion'},
         pass: {type: Boolean, default: true}

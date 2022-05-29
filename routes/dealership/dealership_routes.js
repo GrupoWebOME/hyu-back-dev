@@ -736,4 +736,6 @@ api.delete('/:id', Dealership.deleteDealership)
  *                                  example: something went wrong on the server
  */
 
+ api.post('/byaudit', Dealership.getAllDealershipByAuditID)
+
 module.exports = api
