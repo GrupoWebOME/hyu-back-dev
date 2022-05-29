@@ -2,7 +2,6 @@ const Audit = require('../../models/audit_model')
 const AuditResults = require('../../models/audit_results_model')
 const Criterion = require('../../models/criterion_model')
 const Installation = require('../../models/installation_schema')
-const Dealership = require('../../models/dealership_model')
 const ObjectId = require('mongodb').ObjectId
 
 const createAuditResults = async(request, response) => {
