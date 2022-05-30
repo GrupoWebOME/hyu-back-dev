@@ -380,4 +380,6 @@ api.delete('/:id', AuditResults.deleteAuditResults)
  *                                  example: something went wrong on the server
  */
 
+ api.post('/tables', AuditResults.getDataForTables)
+
 module.exports = api

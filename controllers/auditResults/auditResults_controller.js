@@ -1,4 +1,5 @@
 const Audit = require('../../models/audit_model')
+const Dealership = require('../../models/dealership_model')
 const AuditResults = require('../../models/audit_results_model')
 const Criterion = require('../../models/criterion_model')
 const Installation = require('../../models/installation_schema')
@@ -265,4 +266,30 @@ const deleteAuditResults = async(request, response) => {
     }
 }
 
-module.exports = {createAuditResults, updateAuditResults, deleteAuditResults}
+const getDataForTables = async(request, response) => {
+    const {dealership_id, audit_id} = request.body
+    try{
+        const dealershipByID = await Dealership.findById(dealership_id)
+        if(!dealershipByID)
+            return response.status(400).json({code: 404, 
+                                              msg: 'invalid dealership_id',
+                                              detail: 'dealership_id not found'
+                                            })
+        const auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
+                                                .populate({path: 'installation_id', select: '_id name code installation_type', 
+                                                           populate: {path: 'installation_type', select: '_id code'}})
+                                                .populate({ path: 'criterions.criterion_id', 
+                                                            populate: {
+                                                                path: 'standard block area category auditResponsable criterionType installationType',
+                                                                select: 'name code description isCore number abbreviation'
+                                                            },
+                                                        })
+        return response.status(200).json({data: auditsResults})
+    }
+    catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
+    }
+}
+
+
+module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables}
