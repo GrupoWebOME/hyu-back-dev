@@ -621,4 +621,80 @@ api.delete('/:id', Audit.deleteAudit)
  *                                  example: something went wrong on the server
  */
 
+ api.get('/byupdate/:totalResults', Audit.getAllUpdateAudit)
+
+ /**
+  * @swagger
+  * /api/audit/byupdate/{totalResults}:
+  *  get:
+  *      summary: Devuelve la cantidad especificada de auditorías ordenadas por última fecha de modificación.
+  *      description: >
+  *        <b>Permissions</b> <br>
+  *        - Requiere permisos de admin
+  *      tags: [Audit]
+  *      parameters:
+  *          - in: path
+  *            name: totalResults
+  *            schema:
+  *              type: string
+  *              nullable: false
+  *            required: true
+  *            description: cantidad de resultados deseados
+  *      responses:
+  *          200: 
+  *              description: Devuelve todos las auditorías por paginación, y el total de páginas
+  *              content: 
+  *                  application/json:
+  *                      schema: 
+  *                          type: object
+  *                          properties:
+  *                              code: 
+  *                                  type: number
+  *                                  example: 200
+  *                              msg:
+  *                                  type: string
+  *                                  example: success
+  *                              data:
+  *                                  type: array
+  *                                  items:
+  *                                       properties:
+  *                                           audits:
+  *                                               $ref: '#/components/schemas/Audit'
+  *                                           totalPages: 
+  *                                               type: integer
+  *                                               example: 2
+  *          401: 
+  *              description: invalid token
+  *              content: 
+  *                  application/json:
+  *                      schema: 
+  *                          type: object
+  *                          properties:
+  *                              code: 
+  *                                  type: number
+  *                                  example: 401
+  *                              msg:
+  *                                  type: string
+  *                                  example: invalid token
+  *                              detail: 
+  *                                  type: string
+  *                                  example: you don't have permission
+  *          500:
+  *              description: server error
+  *              content: 
+  *                  application/json:
+  *                      schema: 
+  *                          type: object
+  *                          properties:
+  *                              code: 
+  *                                  type: number
+  *                                  example: 500
+  *                              msg:
+  *                                  type: string
+  *                                  example: server error
+  *                              detail: 
+  *                                  type: string
+  *                                  example: something went wrong on the server
+  */
+ 
 module.exports = api

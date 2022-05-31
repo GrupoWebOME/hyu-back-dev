@@ -439,4 +439,21 @@ const getAudit = async(request, response) => {
     }  
 }
 
-module.exports = {createAudit, updateAudit, deleteAudit, getAllAudit, getAudit}
+const getAllUpdateAudit= async(request, response) => {
+    const {totalResults} = request.params
+    try{
+        const audits = await Audit.find().limit(parseInt(totalResults)).sort({updatedAt: -1}).populate("installation_type criterions.criterion")
+                                        .catch(error => {        
+                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                                        })
+        const data = {audits: audits}
+        return response.status(200).json({code: 200,
+                                   msg: 'success',
+                                   data: data })
+    }
+   catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+    }  
+}
+
+module.exports = {createAudit, updateAudit, deleteAudit, getAllAudit, getAudit, getAllUpdateAudit}
