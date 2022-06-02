@@ -456,4 +456,5 @@ const getAllUpdateAudit= async(request, response) => {
     }  
 }
 
+
 module.exports = {createAudit, updateAudit, deleteAudit, getAllAudit, getAudit, getAllUpdateAudit}

@@ -291,5 +291,47 @@ const getDataForTables = async(request, response) => {
     }
 }
 
+const getAuditResByAuditIDAndInstallationID = async(request, response) => {
+    try{
+        const {auditid, installationid} = request.params
 
-module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables}
+        //Validations
+        if(!auditid)
+            return response.status(400).json({code: 400,
+                                                msg: 'invalid auditid',
+                                                detail: 'id is a obligatory field'})
+        if(auditid && !ObjectId.isValid(auditid))
+            return response.status(400).json({code: 400,
+                                              msg: 'invalid auditid',
+                                              detail: 'auditid should be an objectId'})
+
+        if(!installationid)
+            return response.status(400).json({code: 400,
+                                                msg: 'invalid installationid',
+                                                detail: 'id is a obligatory field'})
+        if(installationid && !ObjectId.isValid(installationid))
+            return response.status(400).json({code: 400,
+                                            msg: 'invalid installationid',
+                                            detail: 'installationid should be an objectId'})
+    
+        const auditRes = await AuditResults.findOne({audit_id: auditid, installation_id: {$in: [installationid]}})
+                                        .catch(error => {        
+                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                                        })
+    
+        if(auditRes){
+            response.status(200).json({code: 200,
+                                       msg: 'success',
+                                       data: auditRes})
+        }
+        else{
+            response.status(200).json({code: 204,
+                                        msg: 'not found',
+                                        data: null})}
+    }
+    catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+    }  
+}
+
+module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables, getAuditResByAuditIDAndInstallationID}

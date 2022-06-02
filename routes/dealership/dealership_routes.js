@@ -736,6 +736,6 @@ api.delete('/:id', Dealership.deleteDealership)
  *                                  example: something went wrong on the server
  */
 
-api.get('/audit/:id', Dealership.getAllDealershipByAuditID)
+api.get('/:id', Dealership.getAllDealershipByAuditID)
 
 module.exports = api
