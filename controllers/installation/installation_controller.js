@@ -72,7 +72,7 @@ const getAllInstallation = async(request, response) => {
 
 const createInstallation = async(request, response) => {
     try{
-        const {name, autonomous_community, code, address, dealership, installation_type, population, postal_code, phone, active, province, email,
+        const {name, autonomous_community, code, address, dealership, installation_type, population, postal_code, phone, active, province, email, refer_value,
                latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, contacts, sales_weight_per_installation, post_sale_weight_per_installation } = request.body
 
         let errors = []
@@ -254,6 +254,23 @@ const createInstallation = async(request, response) => {
                             msg: 'invalid m2Rec',
                             detail: `invalid format`
                         })     
+
+        if(refer_value){
+            if(!Array.isArray(refer_value))
+                errors.push({code: 400, 
+                    msg: 'invalid m2Rec',
+                    detail: `invalid format, refer_value should be an array type`
+                })    
+            else{
+                refer_value.array.forEach(element => {
+                    if(!element.hasOwnProperty("criterion") || !element.hasOwnProperty("value"))
+                        errors.push({code: 400, 
+                            msg: 'invalid refer_value',
+                            detail: `invalid format, refer_value elements should be contain a criterion and value keys`
+                        }) 
+                })
+            }
+        }
                         
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
@@ -280,7 +297,8 @@ const createInstallation = async(request, response) => {
             m2Exp, 
             m2PostSale, 
             m2Rec,
-            contacts
+            contacts,
+            refer_value
         })
 
         await newInstallation.save()
@@ -338,7 +356,7 @@ const getInstallation = async(request, response) => {
 
 const updateInstallation = async(request, response) => {
     try{
-        const {name, autonomous_community, code, address, dealership, installation_type, population, postal_code, phone, active, province, email,
+        const {name, autonomous_community, code, address, dealership, installation_type, population, postal_code, phone, active, province, email, refer_value,
                latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, sales_weight_per_installation, post_sale_weight_per_installation, contacts } = request.body
         const {id} = request.params
 
@@ -541,6 +559,23 @@ const updateInstallation = async(request, response) => {
                             msg: 'invalid post_sale_weight_per_installation',
                             detail: `post_sale_weight_per_installation should be a number value`
                         })  
+
+        if(refer_value){
+            if(!Array.isArray(refer_value))
+                errors.push({code: 400, 
+                    msg: 'invalid m2Rec',
+                    detail: `invalid format, refer_value should be an array type`
+                })    
+            else{
+                refer_value.array.forEach(element => {
+                    if(!element.hasOwnProperty("criterion") || !element.hasOwnProperty("value"))
+                        errors.push({code: 400, 
+                            msg: 'invalid refer_value',
+                            detail: `invalid format, refer_value elements should be contain a criterion and value keys`
+                        }) 
+                })
+            }
+        }
         
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
@@ -593,6 +628,8 @@ const updateInstallation = async(request, response) => {
             updatedFields['m2Rec'] = m2Rec
         if(contacts)
             updatedFields['contacts'] = contacts
+        if(refer_value)
+            updatedFields['refer_value'] = refer_value
         updatedFields['updatedAt'] = Date.now()
 
         const updatedInstallation = await Installation.findByIdAndUpdate(id, updatedFields, {new: true})

@@ -1,3 +1,4 @@
+const { stringifyStyle } = require('@vue/shared')
 const {Schema, model} = require('mongoose')
 const uniqueValidator = require('mongoose-unique-validator')
 
@@ -53,6 +54,12 @@ const installationSchema = new Schema({
                                         default: 0},
         post_sale_weight_per_installation: {type: Number, 
                                             default: 0},
+        refer_value: [
+                {
+                        criterion: {type: Schema.Types.ObjectId, ref: 'Criterion'},
+                        value: {type: Number, default: null}
+                }
+        ],
         createdAt: {type: Date,
                 default: Date.now},
         updatedAt: {type: Date,
