@@ -283,8 +283,107 @@ const getDataForTables = async(request, response) => {
                                                                 path: 'standard block area category auditResponsable criterionType installationType',
                                                                 select: 'name code description isCore number abbreviation'
                                                             },
-                                                        })
-        return response.status(200).json({data: auditsResults})
+                                                        }) 
+                                                
+        auditsResults.forEach((element) => {
+            const orderedCriterionsArray = element.criterions.sort(function (a, b) {
+                if (a.criterion_id.standard._id.toString() > b.criterion_id.standard._id.toString()) {
+                  return 1;
+                }
+                if (a.criterion_id.standard._id.toString() < b.criterion_id.standard._id.toString()) {
+                  return -1;
+                }
+                return 0;
+            })
+            orderedCriterionsArray.forEach((criterion) => {
+                if(criterion.criterion_id.standard.isCore && !criterion.pass){
+                    orderedCriterionsArray.filter((el, index) => {
+                       if(criterion.criterion_id.standard._id.toString() === el.criterion_id.standard._id.toString()){
+                            orderedCriterionsArray[index].pass = false
+                       }
+                    })
+                }
+            })
+        })
+
+        instalations_audit_details = []
+
+        auditsResults.forEach((element) => {
+
+            let installationAuditData = {}
+            installationAuditData['installation'] =  element.installation_id
+            let actualCategoryID = ''
+            let actualCategoryName = ''
+            let accum = 0
+            let totalAccum = 0
+            let categories = []
+
+            element.criterions.forEach((criterion, index) => {
+
+                if((criterion.criterion_id.category._id.toString() !== actualCategoryID) && index !== 0){
+                    categories = [...categories, {
+                        id: actualCategoryID,
+                        name: actualCategoryName,
+                        pass: accum,
+                        total: totalAccum,
+                        percentage: (accum * 100)/totalAccum
+                    }]
+                    actualCategoryID = criterion.criterion_id.category._id.toString()
+                    actualCategoryName = criterion.criterion_id.category.name
+                    if(criterion.pass){
+                        accum = criterion.criterion_id.value
+                    }
+                    else{
+                        accum = 0
+                    }
+                    accum = criterion.criterion_id.value
+                    totalAccum = criterion.criterion_id.value
+                }
+                else{
+                    if(criterion.pass)
+                        accum += criterion.criterion_id.value
+                    if(index === 0){
+                        actualCategoryName = criterion.criterion_id.category.name
+                        actualCategoryID = criterion.criterion_id.category._id.toString()
+                    }
+                    totalAccum += criterion.criterion_id.value
+                    if(index === (element.criterions.length - 1)){
+                        categories = [...categories, {
+                            id: criterion.criterion_id.category._id.toString(),
+                            name: criterion.criterion_id.category.name,
+                            pass: accum,
+                            total: totalAccum,
+                            percentage: (accum * 100)/totalAccum
+                        }]
+                        let totalResult = 0
+                        categories.forEach((category) => {
+                            totalResult += category.percentage
+                        })
+                        auditTotalResult = totalResult / categories.length
+                        categories = [...categories, {auditTotalResult: auditTotalResult}]
+                        installationAuditData['categories'] =  categories
+                    }
+                }
+            })
+
+            instalations_audit_details = [...instalations_audit_details, installationAuditData]
+        })
+
+        let accumAgency = 0
+        instalations_audit_details.forEach((installation) => {
+            accumAgency += installation.categories[installation.categories.length - 1].auditTotalResult
+        })
+
+        agency_audit_details = accumAgency / instalations_audit_details.length
+
+        let data = {
+            dealership_details: dealershipByID,
+            audit_criterions_details: auditsResults,
+            instalations_audit_details: instalations_audit_details,
+            agency_audit_details: agency_audit_details
+        }
+
+        return response.status(200).json({data: data})
     }
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
