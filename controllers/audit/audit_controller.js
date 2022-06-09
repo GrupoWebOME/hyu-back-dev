@@ -188,6 +188,24 @@ const updateAudit = async(request, response) => {
                                               detail: `id not found`
                                             })   
         }
+        
+        if(end_date && end_date.match(regexDate)){
+            const arrayDate = end_date.split('-')
+            if(arrayDate[1].length<2)
+                arrayDate[1] = '0'+arrayDate[1]
+            if(arrayDate[2].length<2)
+                arrayDate[2] = '0'+arrayDate[2]
+            end_date = `${arrayDate[0]}-${arrayDate[1]}-${arrayDate[2]}`
+        }
+
+        if(initial_date && initial_date.match(regexDate)){
+            const arrayDate = initial_date.split('-')
+            if(arrayDate[1].length<2)
+                arrayDate[1] = '0'+arrayDate[1]
+            if(arrayDate[2].length<2)
+                arrayDate[2] = '0'+arrayDate[2]
+            initial_date = `${arrayDate[0]}-${arrayDate[1]}-${arrayDate[2]}`
+        }
 
         if(name){
             const audit = await Audit.exists({name: { $regex : new RegExp(name, "i") } })
