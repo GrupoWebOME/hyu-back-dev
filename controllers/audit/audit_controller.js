@@ -5,7 +5,7 @@ const ObjectId = require('mongodb').ObjectId
 
 const createAudit = async(request, response) => {
     try{
-        const {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions} = request.body
+        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions} = request.body
 
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
@@ -162,7 +162,7 @@ const createAudit = async(request, response) => {
 
 const updateAudit = async(request, response) => {
     try{
-        const {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions} = request.body
+        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions} = request.body
         const {id} = request.params
 
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
