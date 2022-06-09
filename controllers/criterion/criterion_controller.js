@@ -668,7 +668,7 @@ const getAllCriterion = async(request, response) => {
             filter['saleCriterion'] = saleCriterion
 
         if(page === 0){
-            const criterions = await Criterion.find(filter).populate({path: 'installationType standard block area auditResponsable criterionType'})
+            const criterions = await Criterion.find(filter).populate({path: 'installationType standard block area auditResponsable criterionType category'})
                                              .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                              })
@@ -692,7 +692,7 @@ const getAllCriterion = async(request, response) => {
                                               msg: 'invalid page', 
                                               detail: `totalPages: ${countPage}`})
 
-        const criterions = await Criterion.find(filter).skip(skip).limit(10).populate({path: 'installationType standard block area auditResponsable criterionType'})
+        const criterions = await Criterion.find(filter).skip(skip).limit(10).populate({path: 'installationType standard block area auditResponsable criterionType category'})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
