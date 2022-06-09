@@ -62,6 +62,23 @@ const createAudit = async(request, response) => {
                 detail: `initial_date should be yyyy-mm-dd format`
             })
         }
+        else{
+            const arrayDate = initial_date.split('-')
+            if(arrayDate[1].length<2)
+                arrayDate[1] = '0'+arrayDate[1]
+            if(arrayDate[2].length<2)
+                arrayDate[2] = '0'+arrayDate[2]
+            initial_date = `${arrayDate[0]}-${arrayDate[1]}-${arrayDate[2]}`
+        }
+
+        if(end_date && end_date.match(regexDate)){
+            const arrayDate = end_date.split('-')
+            if(arrayDate[1].length<2)
+                arrayDate[1] = '0'+arrayDate[1]
+            if(arrayDate[2].length<2)
+                arrayDate[2] = '0'+arrayDate[2]
+            end_date = `${arrayDate[0]}-${arrayDate[1]}-${arrayDate[2]}`
+        }
 
         if(end_date && !end_date.match(regexDate) || initial_date > end_date){
             errors.push({code: 400, 
