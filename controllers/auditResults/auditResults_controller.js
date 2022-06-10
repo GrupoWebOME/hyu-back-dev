@@ -378,7 +378,7 @@ const getDataForTables = async(request, response) => {
                         }]
                         let totalResult = 0
                         categories.forEach((category) => {
-                            totalResult += (category.pass * 100)/totalAccum
+                            totalResult += (category.pass * 100)/category.total
                         })
                         auditTotalResult = totalResult / categories.length
                         categories = [...categories, {auditTotalResult: auditTotalResult}]
