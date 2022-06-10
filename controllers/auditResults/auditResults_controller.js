@@ -276,7 +276,7 @@ const getDataForTables = async(request, response) => {
                                               detail: 'dealership_id not found'
                                             })
         const auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
-                                                .populate({path: 'installation_id', select: '_id name code installation_type', 
+                                                .populate({path: 'installation_id', select: '_id name code installation_type sales_weight_per_installation post_sale_weight_per_installation', 
                                                            populate: {path: 'installation_type', select: '_id code'}})
                                                 .populate({ path: 'criterions.criterion_id', 
                                                             populate: {
@@ -284,7 +284,7 @@ const getDataForTables = async(request, response) => {
                                                                 select: 'name code description isCore number abbreviation'
                                                             },
                                                         }) 
-                                                
+                                            
         auditsResults.forEach((element) => {
             const orderedCriterionsArray = element.criterions.sort(function (a, b) {
                 if (a.criterion_id.standard._id.toString() > b.criterion_id.standard._id.toString()) {
@@ -319,14 +319,34 @@ const getDataForTables = async(request, response) => {
             let categories = []
 
             element.criterions.forEach((criterion, index) => {
-
+                let multiplicator = 1
+                if(actualCategoryID === "6233b3ace74b428c2dcf3068"){
+                    if(element.installation_id.sales_weight_per_installation !== null){
+                        multiplicator = element.installation_id.sales_weight_per_installation/100
+                    }
+                    else{
+                        multiplicator = 1
+                    }
+                }
+                else if(actualCategoryID === "6233b450e74b428c2dcf3091"){
+                    if(element.installation_id.post_sale_weight_per_installation !== null){
+                        multiplicator = element.installation_id.post_sale_weight_per_installation/100
+                    }
+                    else{
+                        multiplicator = 1
+                    }
+                }
+                else{
+                    multiplicator = 1
+                }
                 if((criterion.criterion_id.category._id.toString() !== actualCategoryID) && index !== 0){
+                    const perc = ((accum * 100)/totalAccum) * multiplicator
                     categories = [...categories, {
                         id: actualCategoryID,
                         name: actualCategoryName,
                         pass: accum,
                         total: totalAccum,
-                        percentage: (accum * 100)/totalAccum
+                        percentage: perc,
                     }]
                     actualCategoryID = criterion.criterion_id.category._id.toString()
                     actualCategoryName = criterion.criterion_id.category.name
@@ -348,12 +368,13 @@ const getDataForTables = async(request, response) => {
                     }
                     totalAccum += criterion.criterion_id.value
                     if(index === (element.criterions.length - 1)){
+                        const perc = ((accum * 100)/totalAccum) * multiplicator
                         categories = [...categories, {
                             id: criterion.criterion_id.category._id.toString(),
                             name: criterion.criterion_id.category.name,
                             pass: accum,
                             total: totalAccum,
-                            percentage: (accum * 100)/totalAccum
+                            percentage: ((accum * 100)/totalAccum) * multiplicator,
                         }]
                         let totalResult = 0
                         categories.forEach((category) => {
