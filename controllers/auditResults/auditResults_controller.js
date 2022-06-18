@@ -309,6 +309,9 @@ const getDataForTables = async(request, response) => {
 
         instalations_audit_details = []
 
+        const VENTA = "6233b3ace74b428c2dcf3068"
+        const POSVENTA = "6233b450e74b428c2dcf3091"
+
         auditsResults.forEach((element) => {
 
             let installationAuditData = {}
@@ -317,11 +320,11 @@ const getDataForTables = async(request, response) => {
             let actualCategoryName = ''
             let accum = 0
             let totalAccum = 0
+            let totalCriterionsByCat = 0
             let categories = []
-
             element.criterions.forEach((criterion, index) => {
                 let multiplicator = 1
-                if(actualCategoryID === "6233b3ace74b428c2dcf3068"){
+                if(actualCategoryID === VENTA){
                     if(element.installation_id.sales_weight_per_installation !== null){
                         multiplicator = element.installation_id.sales_weight_per_installation/100
                     }
@@ -329,7 +332,7 @@ const getDataForTables = async(request, response) => {
                         multiplicator = 1
                     }
                 }
-                else if(actualCategoryID === "6233b450e74b428c2dcf3091"){
+                else if(actualCategoryID === POSVENTA){
                     if(element.installation_id.post_sale_weight_per_installation !== null){
                         multiplicator = element.installation_id.post_sale_weight_per_installation/100
                     }
@@ -342,13 +345,16 @@ const getDataForTables = async(request, response) => {
                 }
                 if((criterion.criterion_id.category._id.toString() !== actualCategoryID) && index !== 0){
                     const perc = ((accum * 100)/totalAccum) * multiplicator
+                    const percByCrit = totalCriterionsByCat * 100 / element.criterions.length
                     categories = [...categories, {
                         id: actualCategoryID,
                         name: actualCategoryName,
                         pass: accum,
                         total: totalAccum,
+                        totalCriterionsPercByCat: percByCrit * perc / 100,
                         percentage: perc,
                     }]
+                    totalCriterionsByCat = 0
                     actualCategoryID = criterion.criterion_id.category._id.toString()
                     actualCategoryName = criterion.criterion_id.category.name
                     if(criterion.pass){
@@ -359,6 +365,7 @@ const getDataForTables = async(request, response) => {
                     }
                     accum = criterion.criterion_id.value
                     totalAccum = criterion.criterion_id.value
+                    totalCriterionsByCat += 1
                 }
                 else{
                     if(criterion.pass)
@@ -368,14 +375,17 @@ const getDataForTables = async(request, response) => {
                         actualCategoryID = criterion.criterion_id.category._id.toString()
                     }
                     totalAccum += criterion.criterion_id.value
+                    totalCriterionsByCat += 1
                     if(index === (element.criterions.length - 1)){
                         const perc = ((accum * 100)/totalAccum) * multiplicator
+                        const percByCrit = totalCriterionsByCat * 100 / element.criterions.length
                         categories = [...categories, {
                             id: criterion.criterion_id.category._id.toString(),
                             name: criterion.criterion_id.category.name,
                             pass: accum,
                             total: totalAccum,
-                            percentage: ((accum * 100)/totalAccum) * multiplicator,
+                            totalCriterionsPercByCat: percByCrit * perc / 100,
+                            percentage: perc,
                         }]
                         let totalResult = 0
                         categories.forEach((category) => {
@@ -387,7 +397,6 @@ const getDataForTables = async(request, response) => {
                     }
                 }
             })
-
             instalations_audit_details = [...instalations_audit_details, installationAuditData]
         })
 
