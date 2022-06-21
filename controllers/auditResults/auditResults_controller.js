@@ -277,7 +277,7 @@ const getDataForTables = async(request, response) => {
                                               detail: 'dealership_id not found'
                                             })
         const auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
-                                                .populate({path: 'installation_id', select: '_id name code installation_type sales_weight_per_installation post_sale_weight_per_installation', 
+                                                .populate({path: 'installation_id', select: '_id name code installation_type sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
                                                            populate: {path: 'installation_type', select: '_id code'}})
                                                 .populate({ path: 'criterions.criterion_id', 
                                                             populate: {
@@ -311,6 +311,7 @@ const getDataForTables = async(request, response) => {
 
         const VENTA = "6233b3ace74b428c2dcf3068"
         const POSVENTA = "6233b450e74b428c2dcf3091"
+        const HYUNDAI_PROMISE = "6233b445e74b428c2dcf3088"
 
         auditsResults.forEach((element) => {
 
@@ -322,6 +323,7 @@ const getDataForTables = async(request, response) => {
             let totalAccum = 0
             let totalCriterionsByCat = 0
             let categories = []
+
             element.criterions.forEach((criterion, index) => {
                 let multiplicator = 1
                 if(actualCategoryID === VENTA){
@@ -343,57 +345,63 @@ const getDataForTables = async(request, response) => {
                 else{
                     multiplicator = 1
                 }
-                if((criterion.criterion_id.category._id.toString() !== actualCategoryID) && index !== 0){
-                    const perc = ((accum * 100)/totalAccum) * multiplicator
-                    const percByCrit = totalCriterionsByCat * 100 / element.criterions.length
-                    categories = [...categories, {
-                        id: actualCategoryID,
-                        name: actualCategoryName,
-                        pass: accum,
-                        total: totalAccum,
-                        totalCriterionsPercByCat: percByCrit * perc / 100,
-                        percentage: perc,
-                    }]
-                    totalCriterionsByCat = 0
-                    actualCategoryID = criterion.criterion_id.category._id.toString()
-                    actualCategoryName = criterion.criterion_id.category.name
-                    if(criterion.pass){
-                        accum = criterion.criterion_id.value
-                    }
-                    else{
-                        accum = 0
-                    }
-                    accum = criterion.criterion_id.value
-                    totalAccum = criterion.criterion_id.value
-                    totalCriterionsByCat += 1
+                if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
+                   criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
+                   criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP){
                 }
                 else{
-                    if(criterion.pass)
-                        accum += criterion.criterion_id.value
-                    if(index === 0){
-                        actualCategoryName = criterion.criterion_id.category.name
-                        actualCategoryID = criterion.criterion_id.category._id.toString()
-                    }
-                    totalAccum += criterion.criterion_id.value
-                    totalCriterionsByCat += 1
-                    if(index === (element.criterions.length - 1)){
+                    if((criterion.criterion_id.category._id.toString() !== actualCategoryID) && index !== 0){
                         const perc = ((accum * 100)/totalAccum) * multiplicator
                         const percByCrit = totalCriterionsByCat * 100 / element.criterions.length
                         categories = [...categories, {
-                            id: criterion.criterion_id.category._id.toString(),
-                            name: criterion.criterion_id.category.name,
+                            id: actualCategoryID,
+                            name: actualCategoryName,
                             pass: accum,
                             total: totalAccum,
                             totalCriterionsPercByCat: percByCrit * perc / 100,
                             percentage: perc,
                         }]
-                        let totalResult = 0
-                        categories.forEach((category) => {
-                            totalResult += (category.pass * 100)/category.total
-                        })
-                        auditTotalResult = totalResult / categories.length
-                        categories = [...categories, {auditTotalResult: auditTotalResult}]
-                        installationAuditData['categories'] =  categories
+                        totalCriterionsByCat = 0
+                        actualCategoryID = criterion.criterion_id.category._id.toString()
+                        actualCategoryName = criterion.criterion_id.category.name
+                        if(criterion.pass){
+                            accum = criterion.criterion_id.value
+                        }
+                        else{
+                            accum = 0
+                        }
+                        accum = criterion.criterion_id.value
+                        totalAccum = criterion.criterion_id.value
+                        totalCriterionsByCat += 1
+                    }
+                    else{
+                        if(criterion.pass)
+                            accum += criterion.criterion_id.value
+                        if(index === 0){
+                            actualCategoryName = criterion.criterion_id.category.name
+                            actualCategoryID = criterion.criterion_id.category._id.toString()
+                        }
+                        totalAccum += criterion.criterion_id.value
+                        totalCriterionsByCat += 1
+                        if(index === (element.criterions.length - 1)){
+                            const perc = ((accum * 100)/totalAccum) * multiplicator
+                            const percByCrit = totalCriterionsByCat * 100 / element.criterions.length
+                            categories = [...categories, {
+                                id: criterion.criterion_id.category._id.toString(),
+                                name: criterion.criterion_id.category.name,
+                                pass: accum,
+                                total: totalAccum,
+                                totalCriterionsPercByCat: percByCrit * perc / 100,
+                                percentage: perc,
+                            }]
+                            let totalResult = 0
+                            categories.forEach((category) => {
+                                totalResult += (category.pass * 100)/category.total
+                            })
+                            auditTotalResult = totalResult / categories.length
+                            categories = [...categories, {auditTotalResult: auditTotalResult}]
+                            installationAuditData['categories'] =  categories
+                        }
                     }
                 }
             })
