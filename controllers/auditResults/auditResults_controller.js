@@ -5,7 +5,6 @@ const Criterion = require('../../models/criterion_model')
 const Installation = require('../../models/installation_schema')
 const ObjectId = require('mongodb').ObjectId
 
-
 const createAuditResults = async(request, response) => {
     try{
         const {audit_id, installation_id, criterions} = request.body
@@ -34,6 +33,13 @@ const createAuditResults = async(request, response) => {
                                 })   
             }
         }
+
+        const auditResultsFind = await AuditResults.findOne({audit_id: audit_id, installation_id: installation_id})
+        if(auditResultsFind)
+            errors.push({code: 400, 
+                msg: 'invalid installation_id',
+                detail: 'installation_id has already been audited'
+            })
 
         if(!installation_id){
             errors.push({code: 400, 
@@ -93,7 +99,7 @@ const createAuditResults = async(request, response) => {
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
 
-        const newAuditResults = new AuditResults({
+            const newAuditResults = new AuditResults({
             audit_id,
             installation_id,
             criterions
@@ -106,7 +112,7 @@ const createAuditResults = async(request, response) => {
 
         response.status(201).json({code: 201,
                                     msg: 'the auditResults has been created successfully',
-                                    data: newAuditResults })
+                                    data: 'newAuditResults' })
     }
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
