@@ -276,12 +276,33 @@ const deleteAuditResults = async(request, response) => {
 const getDataForTables = async(request, response) => {
     const {dealership_id, audit_id} = request.body
     try{
+        if(!ObjectId.isValid(dealership_id)){
+            return response.status(400).json(
+                {errors: [{code: 400, 
+                           msg: 'invalid dealership_id', 
+                           detail: `${dealership_id} is not an ObjectId`}]})
+        }
         const dealershipByID = await Dealership.findById(dealership_id)
         if(!dealershipByID)
             return response.status(400).json({code: 404, 
                                               msg: 'invalid dealership_id',
                                               detail: 'dealership_id not found'
                                             })
+        let existAudit = null
+        if(!ObjectId.isValid(audit_id)){
+            return response.status(400).json(
+                {errors: [{code: 400, 
+                           msg: 'invalid audit_id', 
+                           detail: `${audit_id} is not an ObjectId`}]})
+        }
+        else{
+            existAudit = await Audit.findById(audit_id)
+            if(!existAudit)
+                return response.status(400).json(
+                    {errors: [{code: 400, 
+                            msg: 'invalid audit_id', 
+                            detail: `${dealership_id} not found`}]}) 
+        }
         const auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
                                                 .populate({path: 'installation_id', select: '_id name code installation_type sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
                                                            populate: {path: 'installation_type', select: '_id code'}})
@@ -445,6 +466,7 @@ const getDataForTables = async(request, response) => {
         agency_audit_details = accumAgency / instalations_audit_details.length
 
         let data = {
+            audit_name: existAudit.name,
             dealership_details: dealershipByID,
             audit_criterions_details: auditsResults,
             instalations_audit_details: instalations_audit_details,
