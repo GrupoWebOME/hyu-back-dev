@@ -329,6 +329,8 @@ const getDataForTables = async(request, response) => {
             let totalAccum = 0
             let totalCriterionsByCat = 0
             let categories = []
+            let totalCriterionsForInst = 0
+            let categoriesAux = null
 
             element.criterions.forEach((criterion, index) => {
                 let multiplicator = 1
@@ -351,20 +353,26 @@ const getDataForTables = async(request, response) => {
                 else{
                     multiplicator = 1
                 }
+                let isValidType = false
+                criterion.criterion_id.installationType.forEach((type) => {
+                    if(type._id.toString() === element.installation_id.installation_type._id.toString())
+                        isValidType = true
+                })
                 if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
                    criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
-                   criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP){
+                   criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP || 
+                   !isValidType){
                 }
                 else{
-                    if((criterion.criterion_id.category._id.toString() !== actualCategoryID) && index !== 0){
+                   totalCriterionsForInst += 1
+                    if((criterion.criterion_id.category._id.toString() !== actualCategoryID) && index !== 0 && totalCriterionsForInst>1){
                         const perc = ((accum * 100)/totalAccum) * multiplicator
-                        const percByCrit = totalCriterionsByCat * 100 / element.criterions.length
                         categories = [...categories, {
                             id: actualCategoryID,
                             name: actualCategoryName,
                             pass: accum,
                             total: totalAccum,
-                            totalCriterionsPercByCat: percByCrit * perc / 100,
+                            totalCriterionsByCat: totalCriterionsByCat,
                             percentage: perc,
                         }]
                         totalCriterionsByCat = 0
@@ -379,6 +387,7 @@ const getDataForTables = async(request, response) => {
                         accum = criterion.criterion_id.value
                         totalAccum = criterion.criterion_id.value
                         totalCriterionsByCat += 1
+        
                     }
                     else{
                         if(criterion.pass)
@@ -389,34 +398,48 @@ const getDataForTables = async(request, response) => {
                         }
                         totalAccum += criterion.criterion_id.value
                         totalCriterionsByCat += 1
+                        const perc = ((accum * 100)/totalAccum) * multiplicator
+                        const category = {
+                            id: criterion.criterion_id.category._id.toString(),
+                            name: criterion.criterion_id.category.name,
+                            pass: accum,
+                            total: totalAccum,
+                            totalCriterionsByCat: totalCriterionsByCat,
+                            percentage: perc,
+                        }
+                        categoriesAux = category
                         if(index === (element.criterions.length - 1)){
-                            const perc = ((accum * 100)/totalAccum) * multiplicator
-                            const percByCrit = totalCriterionsByCat * 100 / element.criterions.length
-                            categories = [...categories, {
-                                id: criterion.criterion_id.category._id.toString(),
-                                name: criterion.criterion_id.category.name,
-                                pass: accum,
-                                total: totalAccum,
-                                totalCriterionsPercByCat: percByCrit * perc / 100,
-                                percentage: perc,
-                            }]
-                            let totalResult = 0
-                            categories.forEach((category) => {
-                                totalResult += (category.pass * 100)/category.total
-                            })
-                            auditTotalResult = totalResult / categories.length
-                            categories = [...categories, {auditTotalResult: auditTotalResult}]
-                            installationAuditData['categories'] =  categories
+                            categories = [...categories, category]
                         }
                     }
                 }
             })
+
+            let totalResult = 0
+            if(categories.length>0){
+                categories.forEach((category) => {
+                    totalResult += (category.pass * 100)/category.total
+                    const percByCrit = category.totalCriterionsByCat * 100 / totalCriterionsForInst
+                    category["totalCriterionsPercByCat"] = percByCrit * category.percentage / 100
+                })
+            }
+            else if(totalCriterionsForInst>0){
+                totalResult = 1
+                const percByCrit = categoriesAux.totalCriterionsByCat * 100 / totalCriterionsForInst
+                categoriesAux["totalCriterionsPercByCat"] = percByCrit * categoriesAux.percentage / 100
+                categories = [...categories, categoriesAux]
+            }
+            
+            auditTotalResult = totalResult / categories.length
+            categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
+            installationAuditData['categories'] =  categories
             instalations_audit_details = [...instalations_audit_details, installationAuditData]
         })
 
         let accumAgency = 0
         instalations_audit_details.forEach((installation) => {
-            accumAgency += installation.categories[installation.categories.length - 1].auditTotalResult
+            if(installation && installation.categories)
+                accumAgency += installation.categories[installation.categories.length - 1].auditTotalResult
         })
 
         agency_audit_details = accumAgency / instalations_audit_details.length
