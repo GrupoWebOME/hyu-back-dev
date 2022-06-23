@@ -382,6 +382,8 @@ api.delete('/:id', AuditResults.deleteAuditResults)
 
  api.post('/tables', AuditResults.getDataForTables)
 
+ api.get('/tables/audit/:audit_id', AuditResults.getDataForAudit)
+
  api.get('/audit/:auditid/installation/:installationid', AuditResults.getAuditResByAuditIDAndInstallationID)
 
 module.exports = api
