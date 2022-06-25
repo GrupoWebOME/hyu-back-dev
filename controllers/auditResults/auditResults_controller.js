@@ -341,7 +341,6 @@ const getDataForTables = async(request, response) => {
         const HYUNDAI_PROMISE = "6233b445e74b428c2dcf3088"
 
         auditsResults.forEach((element) => {
-
             let installationAuditData = {}
             installationAuditData['installation'] =  element.installation_id
             let actualCategoryID = ''
@@ -374,6 +373,7 @@ const getDataForTables = async(request, response) => {
                 else{
                     multiplicator = 1
                 }
+
                 let isValidType = false
                 criterion.criterion_id.installationType.forEach((type) => {
                     if(type._id.toString() === element.installation_id.installation_type._id.toString())
@@ -388,14 +388,16 @@ const getDataForTables = async(request, response) => {
                    totalCriterionsForInst += 1
                     if((criterion.criterion_id.category._id.toString() !== actualCategoryID) && index !== 0 && totalCriterionsForInst>1){
                         const perc = ((accum * 100)/totalAccum) * multiplicator
-                        categories = [...categories, {
-                            id: actualCategoryID,
-                            name: actualCategoryName,
-                            pass: accum,
-                            total: totalAccum,
-                            totalCriterionsByCat: totalCriterionsByCat,
-                            percentage: perc,
-                        }]
+                        if(actualCategoryID.length>0){
+                            categories = [...categories, {
+                                id: actualCategoryID,
+                                name: actualCategoryName,
+                                pass: accum,
+                                total: totalAccum,
+                                totalCriterionsByCat: totalCriterionsByCat,
+                                percentage: perc,
+                            }]
+                        }
                         totalCriterionsByCat = 0
                         actualCategoryID = criterion.criterion_id.category._id.toString()
                         actualCategoryName = criterion.criterion_id.category.name
@@ -408,7 +410,6 @@ const getDataForTables = async(request, response) => {
                         accum = criterion.criterion_id.value
                         totalAccum = criterion.criterion_id.value
                         totalCriterionsByCat += 1
-        
                     }
                     else{
                         if(criterion.pass)
