@@ -481,49 +481,45 @@ const getDataForTables = async(request, response) => {
 }
 
 const getDataForAudit = async(request, response) => {
-    const {audit_id} = request.params
+    let {audit_id} = request.params
     let auditsResults = null
 
     try{
         let existAudit = null
 
-        if(audit_id !== "last"){
-            if(!ObjectId.isValid(audit_id)){
+        if(audit_id === "last"){
+            const audit = await Audit.findOne().sort({$natural:-1}).limit(1)
+            if(audit){
+                audit_id = audit._id
+            }
+            else{
+                return response.status(404).json({errors: [{code: 404, msg: 'not found', detail: "No audits in ddbb"}]})
+            }
+        }
+        if(!ObjectId.isValid(audit_id)){
+            return response.status(400).json(
+                {errors: [{code: 400, 
+                        msg: 'invalid audit_id', 
+                        detail: `${audit_id} is not an ObjectId`}]})
+        }
+        else{
+            existAudit = await Audit.findById(audit_id)
+            if(!existAudit)
                 return response.status(400).json(
                     {errors: [{code: 400, 
                             msg: 'invalid audit_id', 
-                            detail: `${audit_id} is not an ObjectId`}]})
-            }
-            else{
-                existAudit = await Audit.findById(audit_id)
-                if(!existAudit)
-                    return response.status(400).json(
-                        {errors: [{code: 400, 
-                                msg: 'invalid audit_id', 
-                                detail: `${audit_id} not found`}]}) 
-            }
+                            detail: `${audit_id} not found`}]}) 
+        }
 
-            auditsResults = await AuditResults.find({audit_id: audit_id})
-                                                    .populate({path: 'installation_id', select: '_id name installation_type', 
-                                                                                                    populate: {path: 'installation_type', select: '_id code'}})
-                                                    .populate({ path: 'criterions.criterion_id', 
-                                                        populate: {
-                                                            path: 'standard category criterionType installationType',
-                                                            select: 'name code description isCore'
-                                                        },
-                                                    }) 
-        }
-        else{
-            auditsResults = await AuditResults.find().sort({$natural:-1})
-                                                    .populate({path: 'installation_id', select: '_id name installation_type', 
-                                                                populate: {path: 'installation_type', select: '_id code'}})
-                                                    .populate({ path: 'criterions.criterion_id', 
-                                                        populate: {
-                                                            path: 'standard category criterionType installationType',
-                                                            select: 'name code description isCore'
-                                                        },
-                                                    }) 
-        }
+        auditsResults = await AuditResults.find({audit_id: audit_id})
+                                                .populate({path: 'installation_id', select: '_id name installation_type', 
+                                                                                                populate: {path: 'installation_type', select: '_id code'}})
+                                                .populate({ path: 'criterions.criterion_id', 
+                                                    populate: {
+                                                        path: 'standard category criterionType installationType',
+                                                        select: 'name code description isCore'
+                                                    },
+                                                }) 
 
         const AOH = "6226310514861f56d3c64266"
 
