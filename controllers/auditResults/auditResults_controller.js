@@ -482,34 +482,49 @@ const getDataForTables = async(request, response) => {
 
 const getDataForAudit = async(request, response) => {
     const {audit_id} = request.params
+    let auditsResults = null
 
     try{
         let existAudit = null
 
-        if(!ObjectId.isValid(audit_id)){
-            return response.status(400).json(
-                {errors: [{code: 400, 
-                           msg: 'invalid audit_id', 
-                           detail: `${audit_id} is not an ObjectId`}]})
-        }
-        else{
-            existAudit = await Audit.findById(audit_id)
-            if(!existAudit)
+        if(audit_id !== "last"){
+            if(!ObjectId.isValid(audit_id)){
                 return response.status(400).json(
                     {errors: [{code: 400, 
                             msg: 'invalid audit_id', 
-                            detail: `${audit_id} not found`}]}) 
+                            detail: `${audit_id} is not an ObjectId`}]})
+            }
+            else{
+                existAudit = await Audit.findById(audit_id)
+                if(!existAudit)
+                    return response.status(400).json(
+                        {errors: [{code: 400, 
+                                msg: 'invalid audit_id', 
+                                detail: `${audit_id} not found`}]}) 
+            }
+
+            auditsResults = await AuditResults.find({audit_id: audit_id})
+                                                    .populate({path: 'installation_id', select: '_id name installation_type', 
+                                                                                                    populate: {path: 'installation_type', select: '_id code'}})
+                                                    .populate({ path: 'criterions.criterion_id', 
+                                                        populate: {
+                                                            path: 'standard category criterionType installationType',
+                                                            select: 'name code description isCore'
+                                                        },
+                                                    }) 
+        }
+        else{
+            auditsResults = await AuditResults.find().sort({$natural:-1})
+                                                    .populate({path: 'installation_id', select: '_id name installation_type', 
+                                                                populate: {path: 'installation_type', select: '_id code'}})
+                                                    .populate({ path: 'criterions.criterion_id', 
+                                                        populate: {
+                                                            path: 'standard category criterionType installationType',
+                                                            select: 'name code description isCore'
+                                                        },
+                                                    }) 
         }
 
-        const auditsResults = await AuditResults.find({audit_id: audit_id})
-                                                .populate({path: 'installation_id', select: '_id name installation_type', 
-                                                                                                populate: {path: 'installation_type', select: '_id code'}})
-                                                .populate({ path: 'criterions.criterion_id', 
-                                                    populate: {
-                                                        path: 'standard category criterionType installationType',
-                                                        select: 'name code description isCore'
-                                                    },
-                                                }) 
         const AOH = "6226310514861f56d3c64266"
 
         auditsResults.forEach((element) => {
@@ -599,12 +614,12 @@ const getDataForAudit = async(request, response) => {
             })
         })
 
-        const hmes_dealership = (hmesValuesPassDeal * 100)/hmesTotalValueDeal 
-        const img_dealership = (imgValuesPassDeal * 100)/imgTotalValueDeal 
-        const electric_dealership = (electricValuesPassDeal * 100)/electricTotalValueDeal 
-        const hmes_inst = (hmesValuesPass * 100)/hmesTotalValue 
-        const img_inst = (imgValuesPass * 100)/imgTotalValue 
-        const electric_inst = (electricValuesPass * 100)/electricTotalValue 
+        const hmes_dealership = hmesTotalValueDeal!==0? (hmesValuesPassDeal * 100)/hmesTotalValueDeal : null
+        const img_dealership = imgTotalValueDeal!==0? (imgValuesPassDeal * 100)/imgTotalValueDeal : null
+        const electric_dealership = electricTotalValueDeal!==0? (electricValuesPassDeal * 100)/electricTotalValueDeal : null
+        const hmes_inst = hmesTotalValue!==0? (hmesValuesPass * 100)/hmesTotalValue : null
+        const img_inst = imgTotalValue!==0? (imgValuesPass * 100)/imgTotalValue : null
+        const electric_inst = electricTotalValue!==0? (electricValuesPass * 100)/electricTotalValue : null
 
         const data = {
             hmes_dealership: hmes_dealership,
