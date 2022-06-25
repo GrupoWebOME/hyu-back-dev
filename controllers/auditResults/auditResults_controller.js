@@ -559,6 +559,10 @@ const getDataForAudit = async(request, response) => {
         let electricValuesPassDeal = 0
         let electricTotalValueDeal = 0
 
+        let instalations_detail = []
+        let totalValueDeal_for_installation = 0
+        let totalValuesPassDeal_for_installation = 0
+
         auditsResults.forEach((element) => {
             let isValidType = false
             element.criterions.forEach((criterion, index) => {
@@ -570,45 +574,64 @@ const getDataForAudit = async(request, response) => {
                     if(element.installation_id.installation_type._id.toString() === AOH){
                         if(criterion.criterion_id.isHmeAudit){
                             hmesTotalValueDeal+= criterion.criterion_id.value
+                            totalValueDeal_for_installation+= criterion.criterion_id.value
                             if(criterion.pass){
                                 hmesValuesPassDeal+= criterion.criterion_id.value
+                                totalValuesPassDeal_for_installation+= criterion.criterion_id.value
                             }
                         }
                         if(criterion.criterion_id.isImgAudit){
                             imgTotalValueDeal+= criterion.criterion_id.value
+                            totalValueDeal_for_installation+= criterion.criterion_id.value
                             if(criterion.pass){
                                 imgValuesPassDeal+= criterion.criterion_id.value
+                                totalValuesPassDeal_for_installation+= criterion.criterion_id.value
                             }
                         }
                         if(criterion.criterion_id.isElectricAudit){
                             electricTotalValueDeal+= criterion.criterion_id.value
+                            totalValueDeal_for_installation+= criterion.criterion_id.value
                             if(criterion.pass){
                                 electricValuesPassDeal+= criterion.criterion_id.value
+                                totalValuesPassDeal_for_installation+= criterion.criterion_id.value
                             }
                         }
                     }
                     else{
                         if(criterion.criterion_id.isHmeAudit){
                             hmesTotalValue+= criterion.criterion_id.value
+                            totalValueDeal_for_installation+= criterion.criterion_id.value
                             if(criterion.pass){
                                 hmesValuesPass+= criterion.criterion_id.value
+                                totalValuesPassDeal_for_installation+= criterion.criterion_id.value
                             }
                         }
                         if(criterion.criterion_id.isImgAudit){
                             imgTotalValue+= criterion.criterion_id.value
+                            totalValueDeal_for_installation+= criterion.criterion_id.value
                             if(criterion.pass){
                                 imgValuesPass+= criterion.criterion_id.value
+                                totalValuesPassDeal_for_installation+= criterion.criterion_id.value
                             }
                         }
                         if(criterion.criterion_id.isElectricAudit){
                             electricTotalValue+= criterion.criterion_id.value
+                            totalValueDeal_for_installation+= criterion.criterion_id.value
                             if(criterion.pass){
                                 electricValuesPass+= criterion.criterion_id.value
+                                totalValuesPassDeal_for_installation+= criterion.criterion_id.value
                             }
                         }
                     }
                 }
             })
+            instalations_detail = [...instalations_detail, 
+                                    {installation_name: element.installation_id.name, 
+                                     installation_id: element.installation_id._id,
+                                     perc: (totalValuesPassDeal_for_installation * 100) / totalValueDeal_for_installation
+                                    }]
+            totalValueDeal_for_installation = 0
+            totalValuesPassDeal_for_installation = 0
         })
 
         const hmes_dealership = hmesTotalValueDeal!==0? (hmesValuesPassDeal * 100)/hmesTotalValueDeal : null
@@ -617,7 +640,6 @@ const getDataForAudit = async(request, response) => {
         const hmes_inst = hmesTotalValue!==0? (hmesValuesPass * 100)/hmesTotalValue : null
         const img_inst = imgTotalValue!==0? (imgValuesPass * 100)/imgTotalValue : null
         const electric_inst = electricTotalValue!==0? (electricValuesPass * 100)/electricTotalValue : null
-
         const data = {
             hmes_dealership: hmes_dealership,
             img_dealership: img_dealership,
@@ -627,7 +649,8 @@ const getDataForAudit = async(request, response) => {
             electric_inst: electric_inst,
             total_dealership: (hmes_dealership + img_dealership + electric_dealership)/3,
             total_inst: (hmes_inst + img_inst + electric_inst)/3,
-            total: (((hmes_dealership + img_dealership + electric_dealership)/3) + ( (hmes_inst + img_inst + electric_inst)/3))/2
+            total: (((hmes_dealership + img_dealership + electric_dealership)/3) + ( (hmes_inst + img_inst + electric_inst)/3))/2,
+            instalations_detail: instalations_detail
         }
 
         return response.status(200).json({data: data})
