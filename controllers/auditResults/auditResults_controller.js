@@ -640,6 +640,23 @@ const getDataForAudit = async(request, response) => {
         const hmes_inst = hmesTotalValue!==0? (hmesValuesPass * 100)/hmesTotalValue : null
         const img_inst = imgTotalValue!==0? (imgValuesPass * 100)/imgTotalValue : null
         const electric_inst = electricTotalValue!==0? (electricValuesPass * 100)/electricTotalValue : null
+
+        let dealerTotal = 0
+        let instTotal = 0
+        
+        if(hmes_dealership!==null)
+            dealerTotal+= 1
+        if(img_dealership!==null)
+            dealerTotal+= 1
+        if(electric_dealership!==null)
+            dealerTotal+= 1
+        if(hmes_inst!==null)
+            instTotal+= 1
+        if(img_inst!==null)
+            instTotal+= 1
+        if(electric_inst!==null)
+            instTotal+= 1
+
         const data = {
             hmes_dealership: hmes_dealership,
             img_dealership: img_dealership,
@@ -647,9 +664,9 @@ const getDataForAudit = async(request, response) => {
             hmes_inst: hmes_inst,
             img_inst: img_inst,
             electric_inst: electric_inst,
-            total_dealership: (hmes_dealership + img_dealership + electric_dealership)/3,
-            total_inst: (hmes_inst + img_inst + electric_inst)/3,
-            total: (((hmes_dealership + img_dealership + electric_dealership)/3) + ( (hmes_inst + img_inst + electric_inst)/3))/2,
+            total_dealership: (hmes_dealership + img_dealership + electric_dealership)/dealerTotal,
+            total_inst: (hmes_inst + img_inst + electric_inst)/instTotal,
+            total: (((hmes_dealership + img_dealership + electric_dealership)/dealerTotal) + ( (hmes_inst + img_inst + electric_inst)/instTotal))/2,
             instalations_detail: instalations_detail
         }
 
