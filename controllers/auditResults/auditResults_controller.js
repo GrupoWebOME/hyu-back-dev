@@ -335,12 +335,14 @@ const getDataForTables = async(request, response) => {
         })
 
         instalations_audit_details = []
+        instalation_audit_types = null
 
         const VENTA = "6233b3ace74b428c2dcf3068"
         const POSVENTA = "6233b450e74b428c2dcf3091"
         const HYUNDAI_PROMISE = "6233b445e74b428c2dcf3088"
 
         auditsResults.forEach((element) => {
+
             let installationAuditData = {}
             installationAuditData['installation'] =  element.installation_id
             let actualCategoryID = ''
@@ -351,6 +353,13 @@ const getDataForTables = async(request, response) => {
             let categories = []
             let totalCriterionsForInst = 0
             let categoriesAux = null
+
+            let totalImgAudit = 0
+            let totalPassImgAudit = 0
+            let totalHmeAudit = 0
+            let totalPassHmeAudit = 0
+            let totalElectricAudit = 0
+            let totalPassElectricAudit = 0
 
             element.criterions.forEach((criterion, index) => {
                 let multiplicator = 1
@@ -385,7 +394,7 @@ const getDataForTables = async(request, response) => {
                    !isValidType){
                 }
                 else{
-                   totalCriterionsForInst += 1
+                    totalCriterionsForInst += 1
                     if((criterion.criterion_id.category._id.toString() !== actualCategoryID) && index !== 0 && totalCriterionsForInst>1){
                         const perc = ((accum * 100)/totalAccum) * multiplicator
                         if(actualCategoryID.length>0){
@@ -394,7 +403,7 @@ const getDataForTables = async(request, response) => {
                                 name: actualCategoryName,
                                 pass: accum,
                                 total: totalAccum,
-                                percentageByInstallation: totalAccum/accum * 100,
+                                percentageByInstallation: (totalAccum * 100)/accum,
                                 totalCriterionsByCat: totalCriterionsByCat,
                                 percentage: perc,
                             }]
@@ -427,7 +436,7 @@ const getDataForTables = async(request, response) => {
                             name: criterion.criterion_id.category.name,
                             pass: accum,
                             total: totalAccum,
-                            percentageByInstallation: totalAccum/accum * 100,
+                            percentageByInstallation: (totalAccum * 100)/accum,
                             totalCriterionsByCat: totalCriterionsByCat,
                             percentage: perc,
                         }
@@ -435,6 +444,21 @@ const getDataForTables = async(request, response) => {
                         if(index === (element.criterions.length - 1)){
                             categories = [...categories, category]
                         }
+                    }
+                    if(criterion.criterion_id.isImgAudit){
+                        totalImgAudit+= criterion.criterion_id.value
+                        if(criterion.pass)
+                            totalPassImgAudit+= criterion.criterion_id.value
+                    }
+                    else if(criterion.criterion_id.isHmeAudit){
+                        totalHmeAudit+= criterion.criterion_id.value
+                        if(criterion.pass)
+                            totalPassHmeAudit+= criterion.criterion_id.value
+                    }
+                    else if(criterion.criterion_id.isElectricAudit){
+                        totalElectricAudit+= criterion.criterion_id.value
+                        if(criterion.pass)
+                            totalPassElectricAudit+= criterion.criterion_id.value
                     }
                 }
             })
@@ -458,6 +482,11 @@ const getDataForTables = async(request, response) => {
             categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
             installationAuditData['categories'] =  categories
             instalations_audit_details = [...instalations_audit_details, installationAuditData]
+            instalation_audit_types = {
+                percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
+                percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
+                percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
+            }
         })
 
         let accumAgency = 0
@@ -473,7 +502,8 @@ const getDataForTables = async(request, response) => {
             dealership_details: dealershipByID,
             audit_criterions_details: auditsResults,
             instalations_audit_details: instalations_audit_details,
-            agency_audit_details: agency_audit_details
+            agency_audit_details: agency_audit_details,
+            instalation_audit_types: instalation_audit_types
         }
 
         return response.status(200).json({data: data})
