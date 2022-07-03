@@ -394,6 +394,7 @@ const getDataForTables = async(request, response) => {
                                 name: actualCategoryName,
                                 pass: accum,
                                 total: totalAccum,
+                                percentageByInstallation: totalAccum/accum * 100,
                                 totalCriterionsByCat: totalCriterionsByCat,
                                 percentage: perc,
                             }]
@@ -426,6 +427,7 @@ const getDataForTables = async(request, response) => {
                             name: criterion.criterion_id.category.name,
                             pass: accum,
                             total: totalAccum,
+                            percentageByInstallation: totalAccum/accum * 100,
                             totalCriterionsByCat: totalCriterionsByCat,
                             percentage: perc,
                         }
