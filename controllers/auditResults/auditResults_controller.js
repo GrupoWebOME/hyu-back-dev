@@ -572,9 +572,9 @@ const getDataForTables = async(request, response) => {
             total_cat+= 1
             total_agency+= agency_by_types.pv_perc
         }
-        if(agency_by_types.hme_perc !== null){
+        if(agency_by_types.hp_perc !== null){
             total_cat+= 1
-            total_agency+= agency_by_types.hme_perc
+            total_agency+= agency_by_types.hp_perc
         }
 
         agency_by_types['total_agency'] = total_agency/total_cat
