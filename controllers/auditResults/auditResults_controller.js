@@ -598,12 +598,12 @@ const getDataForTables = async(request, response) => {
         })
 
         let agency_by_types = {
-            electric_perc: electric_perc / electric_total,
-            img_perc: img_perc / img_total,
-            hme_perc: hme_perc / hme_total,
-            hp_perc: hp_perc / hp_total,
+            electric_perc: (electric_total === 0)? null: electric_perc / electric_total,
+            img_perc: (img_total === 0)? null: img_perc / img_total,
+            hme_perc: (hme_total === 0)? null: hme_perc / hme_total,
+            hp_perc: (hp_total === 0)? null: hp_perc / hp_total,
             v_perc: v_perc,
-            general_perc: general_perc / general_total,
+            general_perc: (general_total === 0)? null: general_perc / general_total,
             pv_perc: pv_perc
         }
 
@@ -843,6 +843,407 @@ const getDataForAudit = async(request, response) => {
     }
 }
 
+const getDataForFullAudit = async(request, response) => {
+    const {audit_id} = request.params
+    let auditsResults = null
+    let arrayDealershipsAudit = []
+    try{
+        let existAudit = null
+
+        if(!ObjectId.isValid(audit_id)){
+            return response.status(400).json(
+                {errors: [{code: 400, 
+                        msg: 'invalid audit_id', 
+                        detail: `${audit_id} is not an ObjectId`}]})
+        }
+        else{
+            existAudit = await Audit.findById(audit_id)
+            if(!existAudit)
+                return response.status(400).json(
+                    {errors: [{code: 400, 
+                            msg: 'invalid audit_id', 
+                            detail: `${audit_id} not found`}]}) 
+        }
+
+        auditsResults = await AuditResults.find({audit_id: audit_id})
+                                                .populate({path: 'installation_id', select: 'dealership'})
+
+        let arrayOfDealerships = []
+
+        auditsResults.forEach((element) => {
+            if(!arrayOfDealerships.includes(element.installation_id.dealership.toString())){
+                arrayOfDealerships = [...arrayOfDealerships, element.installation_id.dealership.toString()]
+            }
+        })
+
+        let compliance_audit = 0
+
+        for(let i = 0; i < arrayOfDealerships.length; i++){
+            const dealership = arrayOfDealerships[i]
+
+            const dealershipByID = await Dealership.findById(dealership)
+            const auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
+                                                    .populate({path: 'installation_id', select: '_id name code installation_type sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
+                                                                populate: {path: 'installation_type', select: '_id code'}})
+                                                    .populate({ path: 'criterions.criterion_id', 
+                                                                populate: {
+                                                                    path: 'standard block area category auditResponsable criterionType installationType',
+                                                                    select: 'name code description isCore number abbreviation'
+                                                                },
+                                                            }) 
+                                                
+            auditsResults.forEach((element) => {
+                const orderedCriterionsArray = element.criterions.sort(function (a, b) {
+                    if (a.criterion_id.standard._id.toString() > b.criterion_id.standard._id.toString()) {
+                        return 1;
+                    }
+                    if (a.criterion_id.standard._id.toString() < b.criterion_id.standard._id.toString()) {
+                        return -1;
+                    }
+                    return 0;
+                })
+                orderedCriterionsArray.forEach((criterion) => {
+                    if(criterion.criterion_id.standard.isCore && !criterion.pass){
+                        orderedCriterionsArray.filter((el, index) => {
+                            if(criterion.criterion_id.standard._id.toString() === el.criterion_id.standard._id.toString()){
+                                orderedCriterionsArray[index].pass = false
+                            }
+                        })
+                    }
+                })
+            })
+    
+            let instalations_audit_details = []
+            let instalation_audit_types = null
+    
+            const VENTA = "6233b3ace74b428c2dcf3068"
+            const POSVENTA = "6233b450e74b428c2dcf3091"
+            const HYUNDAI_PROMISE = "6233b445e74b428c2dcf3088"
+            const GENERAL = "6233b39fe74b428c2dcf305f"
+    
+            auditsResults.forEach((element) => {
+                let installationAuditData = {}
+                installationAuditData['installation'] =  element.installation_id
+                let actualCategoryID = ''
+                let actualCategoryName = ''
+                let accum = 0
+                let totalAccum = 0
+                let totalCriterionsByCat = 0
+                let categories = []
+                let totalCriterionsForInst = 0
+                let categoriesAux = null
+    
+                let totalImgAudit = 0
+                let totalPassImgAudit = 0
+                let totalHmeAudit = 0
+                let totalPassHmeAudit = 0
+                let totalElectricAudit = 0
+                let totalPassElectricAudit = 0
+                
+                let totalCritValid = 0
+    
+                element.criterions.forEach((criterion, index) => {                
+                    let isValidType = false
+                    criterion.criterion_id.installationType.forEach((type) => {
+                        if(type._id.toString() === element.installation_id.installation_type._id.toString()){
+                            isValidType = true
+                        }
+                    })
+                    if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
+                        criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
+                        criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP || 
+                        !isValidType){
+                    }
+                    else{
+                        totalCriterionsForInst += 1
+                        if(criterion.criterion_id.isImgAudit){
+                            totalImgAudit+= criterion.criterion_id.value
+                            if(criterion.pass)
+                                totalPassImgAudit+= criterion.criterion_id.value
+                        }
+                        else if(criterion.criterion_id.isHmeAudit){
+                            totalHmeAudit+= criterion.criterion_id.value
+                            if(criterion.pass)
+                                totalPassHmeAudit+= criterion.criterion_id.value
+                        }
+                        else if(criterion.criterion_id.isElectricAudit){
+                            totalElectricAudit+= criterion.criterion_id.value
+                            if(criterion.pass)
+                                totalPassElectricAudit+= criterion.criterion_id.value
+                        }
+                    }
+                })
+    
+                element.criterions.forEach((criterion, index) => {
+                    let isValidType = false
+                    criterion.criterion_id.installationType.forEach((type) => {
+                        if(type._id.toString() === element.installation_id.installation_type._id.toString()){
+                            isValidType = true
+                        }
+                    })
+                    if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
+                        criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
+                        criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP || 
+                        !isValidType){
+                    }
+                    else{
+                        let multiplicator = 1
+    
+                        if(actualCategoryID === VENTA){
+                            if(element.installation_id.sales_weight_per_installation !== null){
+                                multiplicator = element.installation_id.sales_weight_per_installation/100
+                            }
+                            else{
+                                multiplicator = 1
+                            }
+                        }
+                        else if(actualCategoryID === POSVENTA){
+                            if(element.installation_id.post_sale_weight_per_installation !== null){
+                                multiplicator = element.installation_id.post_sale_weight_per_installation/100
+                            }
+                            else{
+                                multiplicator = 1
+                            }
+                        }
+                        else{
+                            multiplicator = 1
+                        }
+    
+                        totalCritValid += 1
+    
+                        if((criterion.criterion_id.category._id.toString() === actualCategoryID)){
+                            totalCriterionsByCat += 1
+                            if(criterion.pass){
+                                accum += criterion.criterion_id.value
+                            }
+                            totalAccum += criterion.criterion_id.value
+                            if(totalCritValid === totalCriterionsForInst){
+                                const perc = ((accum * 100)/totalAccum) * multiplicator
+                                const category = {
+                                    id: actualCategoryID.toString(),
+                                    name: actualCategoryName,
+                                    pass: accum,
+                                    total: totalAccum,
+                                    percentageByInstallation: (accum * 100)/totalAccum,
+                                    totalCriterionsByCat: totalCriterionsByCat,
+                                    percentage: perc,
+                                }
+                                categories = [...categories, category]
+    
+                                let totalResult = 0
+                                if(categories.length>0){
+                                    categories.forEach((category) => {
+                                        totalResult += (category.pass * 100)/category.total
+                                        const percByCrit = category.totalCriterionsByCat * 100 / totalCriterionsForInst
+                                        category["totalCriterionsPercByCat"] = percByCrit * category.percentage / 100
+                                    })
+                                }
+                                else if(totalCriterionsForInst>0){
+                                    totalResult = 1
+                                    const percByCrit = categoriesAux.totalCriterionsByCat * 100 / totalCriterionsForInst
+                                    categoriesAux["totalCriterionsPercByCat"] = percByCrit * categoriesAux.percentage / 100
+                                    categories = [...categories, categoriesAux]
+                                }
+                                
+                                auditTotalResult = totalResult / categories.length
+                                categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
+    
+                                installationAuditData['categories'] = categories
+    
+                                instalation_audit_types = {
+                                    percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
+                                    percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
+                                    percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
+                                }
+    
+                                installationAuditData['instalation_audit_types'] =  instalation_audit_types
+    
+                                instalations_audit_details = [...instalations_audit_details, installationAuditData]
+                            }
+                        }
+                        else{
+                            if(totalCritValid !== 1 || totalCriterionsForInst === 1){
+                                const perc = ((accum * 100)/totalAccum) * multiplicator
+                                const category = {
+                                    id: actualCategoryID.length>0? actualCategoryID: criterion.criterion_id.category._id.toString(),
+                                    name: actualCategoryName.length>0? actualCategoryName: criterion.criterion_id.category.name,
+                                    pass: accum,
+                                    total: totalAccum,
+                                    percentageByInstallation: (accum * 100)/totalAccum,
+                                    totalCriterionsByCat: totalCriterionsByCat,
+                                    percentage: perc,
+                                }
+                                categories = [...categories, category]
+                            }
+                            totalCriterionsByCat = 1
+                            totalAccum = criterion.criterion_id.value
+                            if(criterion.pass){
+                                accum = criterion.criterion_id.value
+                            }
+                            else{
+                                accum = 0
+                            }
+                            actualCategoryID = criterion.criterion_id.category._id.toString()
+                            actualCategoryName = criterion.criterion_id.category.name
+                            if(totalCritValid === totalCriterionsForInst){
+    
+                                let totalResult = 0
+                                if(categories.length>0){
+                                    categories.forEach((category) => {
+                                        totalResult += (category.pass * 100)/category.total
+                                        const percByCrit = category.totalCriterionsByCat * 100 / totalCriterionsForInst
+                                        category["totalCriterionsPercByCat"] = percByCrit * category.percentage / 100
+                                    })
+                                }
+                                else if(totalCriterionsForInst>0){
+                                    totalResult = 1
+                                    const percByCrit = categoriesAux.totalCriterionsByCat * 100 / totalCriterionsForInst
+                                    categoriesAux["totalCriterionsPercByCat"] = percByCrit * categoriesAux.percentage / 100
+                                    categories = [...categories, categoriesAux]
+                                }
+    
+                                auditTotalResult = totalResult / categories.length
+                                categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
+    
+                                installationAuditData['categories'] = categories
+    
+                                instalation_audit_types = {
+                                    percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
+                                    percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
+                                    percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
+                                }
+    
+                                installationAuditData['instalation_audit_types'] =  instalation_audit_types
+    
+                                instalations_audit_details = [...instalations_audit_details, installationAuditData]
+                            }
+                        }
+                    }      
+                })
+            })
+    
+            let accumAgency = 0
+    
+            let hp_total = 0
+            let hp_perc = 0
+            let general_total = 0
+            let general_perc = 0
+            let v_perc = 0
+            let pv_perc = 0
+            
+            let electric_total = 0
+            let electric_perc = 0
+            let img_total = 0
+            let img_perc = 0
+            let hme_total = 0
+            let hme_perc = 0
+    
+            instalations_audit_details.forEach((installation) => {
+                if(installation && installation.categories){
+                    accumAgency += installation.categories[installation.categories.length - 1].auditTotalResult
+                    installation.categories.forEach((category) => {
+                        if(category.id === HYUNDAI_PROMISE){
+                            hp_perc += category.percentageByInstallation
+                            hp_total += 1
+                        }
+                        else if(category.id === GENERAL){
+                            general_perc += category.percentageByInstallation
+                            general_total += 1
+                        }
+                        else if(category.id === VENTA){
+                            v_perc += category.percentage
+                        }
+                        else if(category.id === POSVENTA){
+                            pv_perc += category.percentage
+                        }
+                    })
+                }
+                if(installation && installation.instalation_audit_types){
+                    if(installation.instalation_audit_types.percImgAudit !== null){
+                        img_perc+= installation.instalation_audit_types.percImgAudit
+                        img_total+= 1
+                    }
+                    if(installation.instalation_audit_types.percElectricAudit !== null){
+                        electric_perc+= installation.instalation_audit_types.percElectricAudit
+                        electric_total+= 1
+                    }
+                    if(installation.instalation_audit_types.percHmeAudit !== null){
+                        hme_perc+= installation.instalation_audit_types.percHmeAudit
+                        hme_total+= 1
+                    }
+                }
+            })
+    
+            let agency_by_types = {
+                electric_perc: (electric_total === 0)? null: electric_perc / electric_total,
+                img_perc: (img_total === 0)? null: img_perc / img_total,
+                hme_perc: (hme_total === 0)? null: hme_perc / hme_total,
+                hp_perc: (hp_total === 0)? null: hp_perc / hp_total,
+                v_perc: v_perc,
+                general_perc: (general_total === 0)? null: general_perc / general_total,
+                pv_perc: pv_perc
+            }
+    
+            let total_cat = 0
+            let total_agency = 0
+    
+            if(agency_by_types.general_perc !== null){
+                total_cat+= 1
+                total_agency+= agency_by_types.general_perc
+            }
+            if(agency_by_types.v_perc !== null){
+                total_cat+= 1
+                total_agency+= agency_by_types.v_perc
+            }
+            if(agency_by_types.pv_perc !== null){
+                total_cat+= 1
+                total_agency+= agency_by_types.pv_perc
+            }
+            if(agency_by_types.hp_perc !== null){
+                total_cat+= 1
+                total_agency+= agency_by_types.hp_perc
+            }
+    
+            agency_by_types['total_agency'] = (total_cat !== 0) ? total_agency/total_cat: null
+    
+            agency_audit_details = accumAgency / instalations_audit_details.length
+    
+            let data = {
+                code: dealershipByID.code,
+                name: dealershipByID.name,
+                ionic5_quaterly_billing: dealershipByID.ionic5_quaterly_billing,
+                vn_quaterly_billing: dealershipByID.vn_quaterly_billing,
+                electric_quaterly_billing: dealershipByID.electric_quaterly_billing,
+                percentage_total: agency_by_types.total_agency,
+                percentage_general: agency_by_types.general_perc,
+                percentage_venta: agency_by_types.v_perc,
+                percentage_postventa: agency_by_types.pv_perc,
+                percentage_HP: agency_by_types.hp_perc,
+                percentage_audit_electric: agency_by_types.electric_perc,
+                percentage_audit_img: agency_by_types.img_perc,
+                percentage_audit_hme: agency_by_types.hme_perc,
+            }
+
+            compliance_audit += agency_by_types.total_agency !== null? agency_by_types.total_agency : 0
+
+            arrayDealershipsAudit = [...arrayDealershipsAudit, data]
+        }
+
+        const audit_data = {
+            name: existAudit.name,
+            initial_date: existAudit.initial_date,
+            end_date: existAudit.end_date,
+            compliance_audit: compliance_audit/arrayOfDealerships.length,
+            dealership_details: arrayDealershipsAudit
+        }
+
+        return response.status(200).json({data: audit_data})
+    }
+    catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
+    }
+}
+
 const getAuditResByAuditIDAndInstallationID = async(request, response) => {
     try{
         const {auditid, installationid} = request.params
@@ -886,4 +1287,4 @@ const getAuditResByAuditIDAndInstallationID = async(request, response) => {
     }  
 }
 
-module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables, getAuditResByAuditIDAndInstallationID, getDataForAudit}
+module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables, getAuditResByAuditIDAndInstallationID, getDataForAudit, getDataForFullAudit}
