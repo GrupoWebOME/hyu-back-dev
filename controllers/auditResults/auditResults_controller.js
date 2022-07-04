@@ -340,6 +340,7 @@ const getDataForTables = async(request, response) => {
         const VENTA = "6233b3ace74b428c2dcf3068"
         const POSVENTA = "6233b450e74b428c2dcf3091"
         const HYUNDAI_PROMISE = "6233b445e74b428c2dcf3088"
+        const GENERAL = "6233b39fe74b428c2dcf305f"
 
         auditsResults.forEach((element) => {
 
@@ -481,18 +482,55 @@ const getDataForTables = async(request, response) => {
             auditTotalResult = totalResult / categories.length
             categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
             installationAuditData['categories'] =  categories
-            instalations_audit_details = [...instalations_audit_details, installationAuditData]
             instalation_audit_types = {
                 percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
                 percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
                 percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
             }
+            installationAuditData['instalation_audit_types'] =  instalation_audit_types
+            instalations_audit_details = [...instalations_audit_details, installationAuditData]
         })
 
         let accumAgency = 0
+
+        let hp_total = 0
+        let hp_perc = 0
+        let general_total = 0
+        let general_perc = 0
+        let v_total = 0
+        let v_perc = 0
+        let pv_total = 0
+        let pv_perc = 0
+        
+        let electric_total = 0
+        let electric_perc = 0
+        let img_total = 0
+        let img_perc = 0
+        let hme_total = 0
+        let hme_perc = 0
+
         instalations_audit_details.forEach((installation) => {
-            if(installation && installation.categories)
+            if(installation && installation.categories){
                 accumAgency += installation.categories[installation.categories.length - 1].auditTotalResult
+                installation.categories.forEach((category) => {
+                    if(category.id === HYUNDAI_PROMISE){
+                        hp_perc += category.percentageByInstallation
+                        hp_total += 1
+                    }
+                    else if(category.id === GENERAL){
+                        general_perc += category.percentageByInstallation
+                        general_total += 1
+                    }
+                    else if(category.id === VENTA){
+                        v_perc += category.totalCriterionsPercByCat
+                        v_total += 1
+                    }
+                    else if(category.id === POSVENTA){
+                        pv_perc += category.totalCriterionsPercByCat
+                        pv_total += 1
+                    }
+                })
+            }
         })
 
         agency_audit_details = accumAgency / instalations_audit_details.length
@@ -502,8 +540,7 @@ const getDataForTables = async(request, response) => {
             dealership_details: dealershipByID,
             audit_criterions_details: auditsResults,
             instalations_audit_details: instalations_audit_details,
-            agency_audit_details: agency_audit_details,
-            instalation_audit_types: instalation_audit_types
+            agency_audit_details: agency_audit_details
         }
 
         return response.status(200).json({data: data})
