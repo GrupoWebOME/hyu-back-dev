@@ -531,7 +531,31 @@ const getDataForTables = async(request, response) => {
                     }
                 })
             }
+            if(installation && installation.instalation_audit_types){
+                if(installation.instalation_audit_types.percImgAudit !== null){
+                    img_perc+= installation.instalation_audit_types.percImgAudit
+                    img_total+= 1
+                }
+                if(installation.instalation_audit_types.percElectricAudit !== null){
+                    electric_perc+= installation.instalation_audit_types.percElectricAudit
+                    electric_total+= 1
+                }
+                if(installation.instalation_audit_types.percHmeAudit !== null){
+                    hme_perc+= installation.instalation_audit_types.percHmeAudit
+                    hme_total+= 1
+                }
+            }
         })
+
+        const agency_by_types = {
+            electric_perc: electric_perc / electric_total,
+            img_perc: img_perc / img_total,
+            hme_perc: hme_perc / hme_total,
+            hp_perc: hp_perc / hp_total,
+            v_perc: v_perc,
+            general_perc: general_perc / general_total,
+            pv_perc: pv_perc
+        }
 
         agency_audit_details = accumAgency / instalations_audit_details.length
 
@@ -540,7 +564,8 @@ const getDataForTables = async(request, response) => {
             dealership_details: dealershipByID,
             audit_criterions_details: auditsResults,
             instalations_audit_details: instalations_audit_details,
-            agency_audit_details: agency_audit_details
+            agency_audit_details: agency_audit_details,
+            agency_by_types: agency_by_types
         }
 
         return response.status(200).json({data: data})
