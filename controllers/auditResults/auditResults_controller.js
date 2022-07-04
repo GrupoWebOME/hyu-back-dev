@@ -334,8 +334,8 @@ const getDataForTables = async(request, response) => {
             })
         })
 
-        instalations_audit_details = []
-        instalation_audit_types = null
+        let instalations_audit_details = []
+        let instalation_audit_types = null
 
         const VENTA = "6233b3ace74b428c2dcf3068"
         const POSVENTA = "6233b450e74b428c2dcf3091"
@@ -343,7 +343,6 @@ const getDataForTables = async(request, response) => {
         const GENERAL = "6233b39fe74b428c2dcf305f"
 
         auditsResults.forEach((element) => {
-
             let installationAuditData = {}
             installationAuditData['installation'] =  element.installation_id
             let actualCategoryID = ''
@@ -361,33 +360,15 @@ const getDataForTables = async(request, response) => {
             let totalPassHmeAudit = 0
             let totalElectricAudit = 0
             let totalPassElectricAudit = 0
+            
+            let totalCritValid = 0
 
-            element.criterions.forEach((criterion, index) => {
-                let multiplicator = 1
-                if(actualCategoryID === VENTA){
-                    if(element.installation_id.sales_weight_per_installation !== null){
-                        multiplicator = element.installation_id.sales_weight_per_installation/100
-                    }
-                    else{
-                        multiplicator = 1
-                    }
-                }
-                else if(actualCategoryID === POSVENTA){
-                    if(element.installation_id.post_sale_weight_per_installation !== null){
-                        multiplicator = element.installation_id.post_sale_weight_per_installation/100
-                    }
-                    else{
-                        multiplicator = 1
-                    }
-                }
-                else{
-                    multiplicator = 1
-                }
-
+            element.criterions.forEach((criterion, index) => {                
                 let isValidType = false
                 criterion.criterion_id.installationType.forEach((type) => {
-                    if(type._id.toString() === element.installation_id.installation_type._id.toString())
+                    if(type._id.toString() === element.installation_id.installation_type._id.toString()){
                         isValidType = true
+                    }
                 })
                 if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
                    criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
@@ -396,56 +377,6 @@ const getDataForTables = async(request, response) => {
                 }
                 else{
                     totalCriterionsForInst += 1
-                    if((criterion.criterion_id.category._id.toString() !== actualCategoryID) && index !== 0 && totalCriterionsForInst>1){
-                        const perc = ((accum * 100)/totalAccum) * multiplicator
-                        if(actualCategoryID.length>0){
-                            categories = [...categories, {
-                                id: actualCategoryID,
-                                name: actualCategoryName,
-                                pass: accum,
-                                total: totalAccum,
-                                percentageByInstallation: (accum * 100)/totalAccum,
-                                totalCriterionsByCat: totalCriterionsByCat,
-                                percentage: perc,
-                            }]
-                        }
-                        totalCriterionsByCat = 0
-                        actualCategoryID = criterion.criterion_id.category._id.toString()
-                        actualCategoryName = criterion.criterion_id.category.name
-                        if(criterion.pass){
-                            accum = criterion.criterion_id.value
-                        }
-                        else{
-                            accum = 0
-                        }
-                        accum = criterion.criterion_id.value
-                        totalAccum = criterion.criterion_id.value
-                        totalCriterionsByCat += 1
-                    }
-                    else{
-                        if(criterion.pass)
-                            accum += criterion.criterion_id.value
-                        if(index === 0){
-                            actualCategoryName = criterion.criterion_id.category.name
-                            actualCategoryID = criterion.criterion_id.category._id.toString()
-                        }
-                        totalAccum += criterion.criterion_id.value
-                        totalCriterionsByCat += 1
-                        const perc = ((accum * 100)/totalAccum) * multiplicator
-                        const category = {
-                            id: criterion.criterion_id.category._id.toString(),
-                            name: criterion.criterion_id.category.name,
-                            pass: accum,
-                            total: totalAccum,
-                            percentageByInstallation: (accum * 100)/totalAccum,
-                            totalCriterionsByCat: totalCriterionsByCat,
-                            percentage: perc,
-                        }
-                        categoriesAux = category
-                        if(index === (element.criterions.length - 1)){
-                            categories = [...categories, category]
-                        }
-                    }
                     if(criterion.criterion_id.isImgAudit){
                         totalImgAudit+= criterion.criterion_id.value
                         if(criterion.pass)
@@ -464,31 +395,154 @@ const getDataForTables = async(request, response) => {
                 }
             })
 
-            let totalResult = 0
-            if(categories.length>0){
-                categories.forEach((category) => {
-                    totalResult += (category.pass * 100)/category.total
-                    const percByCrit = category.totalCriterionsByCat * 100 / totalCriterionsForInst
-                    category["totalCriterionsPercByCat"] = percByCrit * category.percentage / 100
+            element.criterions.forEach((criterion, index) => {
+                let isValidType = false
+                criterion.criterion_id.installationType.forEach((type) => {
+                    if(type._id.toString() === element.installation_id.installation_type._id.toString()){
+                        isValidType = true
+                    }
                 })
-            }
-            else if(totalCriterionsForInst>0){
-                totalResult = 1
-                const percByCrit = categoriesAux.totalCriterionsByCat * 100 / totalCriterionsForInst
-                categoriesAux["totalCriterionsPercByCat"] = percByCrit * categoriesAux.percentage / 100
-                categories = [...categories, categoriesAux]
-            }
-            
-            auditTotalResult = totalResult / categories.length
-            categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
-            installationAuditData['categories'] =  categories
-            instalation_audit_types = {
-                percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
-                percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
-                percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
-            }
-            installationAuditData['instalation_audit_types'] =  instalation_audit_types
-            instalations_audit_details = [...instalations_audit_details, installationAuditData]
+                if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
+                   criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
+                   criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP || 
+                   !isValidType){
+                }
+                else{
+                    let multiplicator = 1
+
+                    if(actualCategoryID === VENTA){
+                        if(element.installation_id.sales_weight_per_installation !== null){
+                            multiplicator = element.installation_id.sales_weight_per_installation/100
+                        }
+                        else{
+                            multiplicator = 1
+                        }
+                    }
+                    else if(actualCategoryID === POSVENTA){
+                        if(element.installation_id.post_sale_weight_per_installation !== null){
+                            multiplicator = element.installation_id.post_sale_weight_per_installation/100
+                        }
+                        else{
+                            multiplicator = 1
+                        }
+                    }
+                    else{
+                        multiplicator = 1
+                    }
+
+                    totalCritValid += 1
+
+                    if((criterion.criterion_id.category._id.toString() === actualCategoryID)){
+                        totalCriterionsByCat += 1
+                        if(criterion.pass){
+                            accum += criterion.criterion_id.value
+                        }
+                        totalAccum += criterion.criterion_id.value
+                        if(totalCritValid === totalCriterionsForInst){
+                            const perc = ((accum * 100)/totalAccum) * multiplicator
+                            const category = {
+                                id: actualCategoryID.toString(),
+                                name: actualCategoryName,
+                                pass: accum,
+                                total: totalAccum,
+                                percentageByInstallation: (accum * 100)/totalAccum,
+                                totalCriterionsByCat: totalCriterionsByCat,
+                                percentage: perc,
+                            }
+                            categories = [...categories, category]
+
+                            let totalResult = 0
+                            if(categories.length>0){
+                                categories.forEach((category) => {
+                                    totalResult += (category.pass * 100)/category.total
+                                    const percByCrit = category.totalCriterionsByCat * 100 / totalCriterionsForInst
+                                    category["totalCriterionsPercByCat"] = percByCrit * category.percentage / 100
+                                })
+                            }
+                            else if(totalCriterionsForInst>0){
+                                totalResult = 1
+                                const percByCrit = categoriesAux.totalCriterionsByCat * 100 / totalCriterionsForInst
+                                categoriesAux["totalCriterionsPercByCat"] = percByCrit * categoriesAux.percentage / 100
+                                categories = [...categories, categoriesAux]
+                            }
+                            
+                            auditTotalResult = totalResult / categories.length
+                            categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
+
+                            installationAuditData['categories'] = categories
+
+                            instalation_audit_types = {
+                                percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
+                                percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
+                                percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
+                            }
+
+                            installationAuditData['instalation_audit_types'] =  instalation_audit_types
+
+                            instalations_audit_details = [...instalations_audit_details, installationAuditData]
+                        }
+                    }
+                    else{
+                        if(totalCritValid !== 1 || totalCriterionsForInst === 1){
+                            const perc = ((accum * 100)/totalAccum) * multiplicator
+                            const category = {
+                                id: actualCategoryID.length>0? actualCategoryID: criterion.criterion_id.category._id.toString(),
+                                name: actualCategoryName.length>0? actualCategoryName: criterion.criterion_id.category.name,
+                                pass: accum,
+                                total: totalAccum,
+                                percentageByInstallation: (accum * 100)/totalAccum,
+                                totalCriterionsByCat: totalCriterionsByCat,
+                                percentage: perc,
+                            }
+                            categories = [...categories, category]
+                        }
+                        totalCriterionsByCat = 1
+                        totalAccum = criterion.criterion_id.value
+                        if(criterion.pass){
+                            accum = criterion.criterion_id.value
+                        }
+                        else{
+                            accum = 0
+                        }
+                        actualCategoryID = criterion.criterion_id.category._id.toString()
+                        actualCategoryName = criterion.criterion_id.category.name
+                        if(totalCritValid === totalCriterionsForInst){
+
+                            let totalResult = 0
+                            if(categories.length>0){
+                                categories.forEach((category) => {
+                                    totalResult += (category.pass * 100)/category.total
+                                    const percByCrit = category.totalCriterionsByCat * 100 / totalCriterionsForInst
+                                    category["totalCriterionsPercByCat"] = percByCrit * category.percentage / 100
+                                })
+                            }
+                            else if(totalCriterionsForInst>0){
+                                totalResult = 1
+                                const percByCrit = categoriesAux.totalCriterionsByCat * 100 / totalCriterionsForInst
+                                categoriesAux["totalCriterionsPercByCat"] = percByCrit * categoriesAux.percentage / 100
+                                categories = [...categories, categoriesAux]
+                            }
+
+                            auditTotalResult = totalResult / categories.length
+                            categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
+
+                            installationAuditData['categories'] = categories
+
+                            instalation_audit_types = {
+                                percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
+                                percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
+                                percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
+                            }
+
+                            installationAuditData['instalation_audit_types'] =  instalation_audit_types
+
+                            instalations_audit_details = [...instalations_audit_details, installationAuditData]
+                        }
+                    }
+                }      
+            })
+
+
         })
 
         let accumAgency = 0
@@ -497,9 +551,7 @@ const getDataForTables = async(request, response) => {
         let hp_perc = 0
         let general_total = 0
         let general_perc = 0
-        let v_total = 0
         let v_perc = 0
-        let pv_total = 0
         let pv_perc = 0
         
         let electric_total = 0
@@ -523,11 +575,9 @@ const getDataForTables = async(request, response) => {
                     }
                     else if(category.id === VENTA){
                         v_perc += category.percentage
-                        v_total += 1
                     }
                     else if(category.id === POSVENTA){
                         pv_perc += category.percentage
-                        pv_total += 1
                     }
                 })
             }
