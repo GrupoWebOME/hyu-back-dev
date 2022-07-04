@@ -547,7 +547,7 @@ const getDataForTables = async(request, response) => {
             }
         })
 
-        const agency_by_types = {
+        let agency_by_types = {
             electric_perc: electric_perc / electric_total,
             img_perc: img_perc / img_total,
             hme_perc: hme_perc / hme_total,
@@ -556,6 +556,28 @@ const getDataForTables = async(request, response) => {
             general_perc: general_perc / general_total,
             pv_perc: pv_perc
         }
+
+        let total_cat = 0
+        let total_agency = 0
+
+        if(agency_by_types.general_perc !== null){
+            total_cat+= 1
+            total_agency+= agency_by_types.general_perc
+        }
+        if(agency_by_types.v_perc !== null){
+            total_cat+= 1
+            total_agency+= agency_by_types.v_perc
+        }
+        if(agency_by_types.pv_perc !== null){
+            total_cat+= 1
+            total_agency+= agency_by_types.pv_perc
+        }
+        if(agency_by_types.hme_perc !== null){
+            total_cat+= 1
+            total_agency+= agency_by_types.hme_perc
+        }
+
+        agency_by_types['total_agency'] = total_agency/total_cat
 
         agency_audit_details = accumAgency / instalations_audit_details.length
 
