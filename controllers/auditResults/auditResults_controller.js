@@ -522,11 +522,11 @@ const getDataForTables = async(request, response) => {
                         general_total += 1
                     }
                     else if(category.id === VENTA){
-                        v_perc += category.totalCriterionsPercByCat
+                        v_perc += category.percentage
                         v_total += 1
                     }
                     else if(category.id === POSVENTA){
-                        pv_perc += category.totalCriterionsPercByCat
+                        pv_perc += category.percentage
                         pv_total += 1
                     }
                 })
