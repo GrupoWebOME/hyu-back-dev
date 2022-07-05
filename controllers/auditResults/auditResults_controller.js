@@ -1127,13 +1127,15 @@ const getDataForFullAudit = async(request, response) => {
             })
     
             let accumAgency = 0
-    
-            let hp_total = 0
+
             let hp_perc = 0
-            let general_total = 0
             let general_perc = 0
             let v_perc = 0
             let pv_perc = 0
+            let hp_perc_total = 0
+            let general_perc_total = 0
+            let v_perc_total = 0
+            let pv_perc_total = 0
             
             let electric_total = 0
             let electric_perc = 0
@@ -1141,24 +1143,32 @@ const getDataForFullAudit = async(request, response) => {
             let img_perc = 0
             let hme_total = 0
             let hme_perc = 0
-    
+
+            let total_values = 0
+
             instalations_audit_details.forEach((installation) => {
                 if(installation && installation.categories){
                     accumAgency += installation.categories[installation.categories.length - 1].auditTotalResult
                     installation.categories.forEach((category) => {
                         if(category.id === HYUNDAI_PROMISE){
-                            hp_perc += category.percentageByInstallation
-                            hp_total += 1
+                            hp_perc_total += 1
+                            hp_perc += category.pass
+                            total_values += category.total
                         }
                         else if(category.id === GENERAL){
-                            general_perc += category.percentageByInstallation
-                            general_total += 1
+                            general_perc_total += 1
+                            general_perc += category.pass
+                            total_values += category.total
                         }
                         else if(category.id === VENTA){
-                            v_perc += category.percentage
+                            v_perc += category.pass * (installation.installation.sales_weight_per_installation/100)
+                            v_perc_total += 1
+                            total_values += category.total * (installation.installation.sales_weight_per_installation/100)
                         }
                         else if(category.id === POSVENTA){
-                            pv_perc += category.percentage
+                            pv_perc += category.pass * (installation.installation.post_sale_weight_per_installation/100)
+                            pv_perc_total += 1
+                            total_values += category.total * (installation.installation.post_sale_weight_per_installation/100)
                         }
                     })
                 }
@@ -1177,60 +1187,41 @@ const getDataForFullAudit = async(request, response) => {
                     }
                 }
             })
-    
+
             let agency_by_types = {
                 electric_perc: (electric_total === 0)? null: electric_perc / electric_total,
                 img_perc: (img_total === 0)? null: img_perc / img_total,
                 hme_perc: (hme_total === 0)? null: hme_perc / hme_total,
-                hp_perc: (hp_total === 0)? null: hp_perc / hp_total,
-                v_perc: v_perc,
-                general_perc: (general_total === 0)? null: general_perc / general_total,
-                pv_perc: pv_perc
-            }
-    
-            let total_cat = 0
-            let total_agency = 0
-    
-            if(agency_by_types.general_perc !== null){
-                total_cat+= 1
-                total_agency+= agency_by_types.general_perc
-            }
-            if(agency_by_types.v_perc !== null){
-                total_cat+= 1
-                total_agency+= agency_by_types.v_perc
-            }
-            if(agency_by_types.pv_perc !== null){
-                total_cat+= 1
-                total_agency+= agency_by_types.pv_perc
-            }
-            if(agency_by_types.hp_perc !== null){
-                total_cat+= 1
-                total_agency+= agency_by_types.hp_perc
-            }
-    
-            agency_by_types['total_agency'] = (total_cat !== 0) ? total_agency/total_cat: null
-    
-            agency_audit_details = accumAgency / instalations_audit_details.length
-    
-            let data = {
-                code: dealershipByID.code,
-                name: dealershipByID.name,
-                ionic5_quaterly_billing: dealershipByID.ionic5_quaterly_billing,
-                vn_quaterly_billing: dealershipByID.vn_quaterly_billing,
-                electric_quaterly_billing: dealershipByID.electric_quaterly_billing,
-                percentage_total: agency_by_types.total_agency,
-                percentage_general: agency_by_types.general_perc,
-                percentage_venta: agency_by_types.v_perc,
-                percentage_postventa: agency_by_types.pv_perc,
-                percentage_HP: agency_by_types.hp_perc,
-                percentage_audit_electric: agency_by_types.electric_perc,
-                percentage_audit_img: agency_by_types.img_perc,
-                percentage_audit_hme: agency_by_types.hme_perc,
+
+                hp_perc: (hp_perc_total === 0)? null: hp_perc * 100 / total_values,
+                v_perc: (v_perc_total === 0)? null: v_perc * 100 / total_values,
+                general_perc: (general_perc_total === 0)? null: general_perc * 100 / total_values,
+                pv_perc: (pv_perc_total === 0)? null: pv_perc * 100 / total_values
             }
 
-            compliance_audit += agency_by_types.total_agency !== null? agency_by_types.total_agency : 0
+            const total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
 
-            arrayDealershipsAudit = [...arrayDealershipsAudit, data]
+            agency_by_types['total_agency'] = total_agency
+        
+        let data = {
+            code: dealershipByID.code,
+            name: dealershipByID.name,
+            ionic5_quaterly_billing: dealershipByID.ionic5_quaterly_billing,
+            vn_quaterly_billing: dealershipByID.vn_quaterly_billing,
+            electric_quaterly_billing: dealershipByID.electric_quaterly_billing,
+            percentage_total: agency_by_types.total_agency,
+            percentage_general: agency_by_types.general_perc,
+            percentage_venta: agency_by_types.v_perc,
+            percentage_postventa: agency_by_types.pv_perc,
+            percentage_HP: agency_by_types.hp_perc,
+            percentage_audit_electric: agency_by_types.electric_perc,
+            percentage_audit_img: agency_by_types.img_perc,
+            percentage_audit_hme: agency_by_types.hme_perc,
+        }
+
+        compliance_audit += agency_by_types.total_agency !== null? agency_by_types.total_agency : 0
+
+        arrayDealershipsAudit = [...arrayDealershipsAudit, data]
         }
 
         const audit_data = {
