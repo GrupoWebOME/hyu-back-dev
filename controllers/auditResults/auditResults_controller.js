@@ -362,6 +362,7 @@ const getDataForTables = async(request, response) => {
             let totalPassElectricAudit = 0
             
             let totalCritValid = 0
+            let totalCriterionWeight = 0
 
             element.criterions.forEach((criterion, index) => {                
                 let isValidType = false
@@ -376,7 +377,10 @@ const getDataForTables = async(request, response) => {
                    !isValidType){
                 }
                 else{
+
+                    totalCriterionWeight += criterion.criterion_id.value
                     totalCriterionsForInst += 1
+
                     if(criterion.criterion_id.isImgAudit){
                         totalImgAudit+= criterion.criterion_id.value
                         if(criterion.pass)
@@ -448,6 +452,7 @@ const getDataForTables = async(request, response) => {
                                 percentageByInstallation: (accum * 100)/totalAccum,
                                 totalCriterionsByCat: totalCriterionsByCat,
                                 percentage: perc,
+                                partialPercentage: (accum * 100) / totalCriterionWeight
                             }
                             categories = [...categories, category]
 
@@ -493,6 +498,7 @@ const getDataForTables = async(request, response) => {
                                 percentageByInstallation: (accum * 100)/totalAccum,
                                 totalCriterionsByCat: totalCriterionsByCat,
                                 percentage: perc,
+                                partialPercentage: (accum * 100) / totalCriterionWeight
                             }
                             categories = [...categories, category]
                         }
