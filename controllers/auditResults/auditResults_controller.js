@@ -547,12 +547,14 @@ const getDataForTables = async(request, response) => {
 
         let accumAgency = 0
 
-        let hp_total = 0
         let hp_perc = 0
-        let general_total = 0
         let general_perc = 0
         let v_perc = 0
         let pv_perc = 0
+        let hp_perc_total = 0
+        let general_perc_total = 0
+        let v_perc_total = 0
+        let pv_perc_total = 0
         
         let electric_total = 0
         let electric_perc = 0
@@ -561,23 +563,30 @@ const getDataForTables = async(request, response) => {
         let hme_total = 0
         let hme_perc = 0
 
+        let total_values = 0
+
         instalations_audit_details.forEach((installation) => {
             if(installation && installation.categories){
                 accumAgency += installation.categories[installation.categories.length - 1].auditTotalResult
                 installation.categories.forEach((category) => {
+                    if(category.total !== undefined){
+                        total_values += category.total
+                    }
                     if(category.id === HYUNDAI_PROMISE){
-                        hp_perc += category.percentageByInstallation
-                        hp_total += 1
+                        hp_perc_total += 1
+                        hp_perc += category.pass
                     }
                     else if(category.id === GENERAL){
-                        general_perc += category.percentageByInstallation
-                        general_total += 1
+                        general_perc_total += 1
+                        general_perc += category.pass
                     }
                     else if(category.id === VENTA){
-                        v_perc += category.percentage
+                        v_perc += category.pass
+                        v_perc_total += 1
                     }
                     else if(category.id === POSVENTA){
-                        pv_perc += category.percentage
+                        pv_perc += category.pass
+                        pv_perc_total += 1
                     }
                 })
             }
@@ -601,33 +610,15 @@ const getDataForTables = async(request, response) => {
             electric_perc: (electric_total === 0)? null: electric_perc / electric_total,
             img_perc: (img_total === 0)? null: img_perc / img_total,
             hme_perc: (hme_total === 0)? null: hme_perc / hme_total,
-            hp_perc: (hp_total === 0)? null: hp_perc / hp_total,
-            v_perc: v_perc,
-            general_perc: (general_total === 0)? null: general_perc / general_total,
-            pv_perc: pv_perc
+            hp_perc: (hp_perc_total === 0)? null: hp_perc * 100 / total_values,
+            v_perc: (v_perc_total === 0)? null: v_perc * 100 / total_values,
+            general_perc: (general_perc_total === 0)? null: general_perc * 100 / total_values,
+            pv_perc: (pv_perc_total === 0)? null: pv_perc * 100 / total_values
         }
 
-        let total_cat = 0
-        let total_agency = 0
+        const total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
 
-        if(agency_by_types.general_perc !== null){
-            total_cat+= 1
-            total_agency+= agency_by_types.general_perc
-        }
-        if(agency_by_types.v_perc !== null){
-            total_cat+= 1
-            total_agency+= agency_by_types.v_perc
-        }
-        if(agency_by_types.pv_perc !== null){
-            total_cat+= 1
-            total_agency+= agency_by_types.pv_perc
-        }
-        if(agency_by_types.hp_perc !== null){
-            total_cat+= 1
-            total_agency+= agency_by_types.hp_perc
-        }
-
-        agency_by_types['total_agency'] = total_agency/total_cat
+        agency_by_types['total_agency'] = total_agency
 
         agency_audit_details = accumAgency / instalations_audit_details.length
 
