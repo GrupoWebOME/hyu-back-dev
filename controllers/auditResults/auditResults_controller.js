@@ -457,8 +457,11 @@ const getDataForTables = async(request, response) => {
                             categories = [...categories, category]
 
                             let totalResult = 0
+                            let newTotal = 0
+
                             if(categories.length>0){
                                 categories.forEach((category) => {
+                                    newTotal += category.partialPercentage
                                     totalResult += (category.pass * 100)/category.total
                                     const percByCrit = category.totalCriterionsByCat * 100 / totalCriterionsForInst
                                     category["totalCriterionsPercByCat"] = percByCrit * category.percentage / 100
@@ -471,7 +474,7 @@ const getDataForTables = async(request, response) => {
                                 categories = [...categories, categoriesAux]
                             }
                             
-                            auditTotalResult = totalResult / categories.length
+                            auditTotalResult = newTotal //totalResult / categories.length
                             categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
 
                             installationAuditData['categories'] = categories
@@ -515,8 +518,10 @@ const getDataForTables = async(request, response) => {
                         if(totalCritValid === totalCriterionsForInst){
 
                             let totalResult = 0
+                            let newTotal = 0
                             if(categories.length>0){
                                 categories.forEach((category) => {
+                                    newTotal += category.partialPercentage
                                     totalResult += (category.pass * 100)/category.total
                                     const percByCrit = category.totalCriterionsByCat * 100 / totalCriterionsForInst
                                     category["totalCriterionsPercByCat"] = percByCrit * category.percentage / 100
@@ -529,7 +534,7 @@ const getDataForTables = async(request, response) => {
                                 categories = [...categories, categoriesAux]
                             }
 
-                            auditTotalResult = totalResult / categories.length
+                            auditTotalResult = newTotal //totalResult / categories.length
                             categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
 
                             installationAuditData['categories'] = categories
