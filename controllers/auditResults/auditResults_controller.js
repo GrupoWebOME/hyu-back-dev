@@ -580,14 +580,14 @@ const getDataForTables = async(request, response) => {
                         total_values += category.total
                     }
                     else if(category.id === VENTA){
-                        v_perc += category.pass * installation.installation.sales_weight_per_installation
+                        v_perc += category.pass * (installation.installation.sales_weight_per_installation/100)
                         v_perc_total += 1
-                        total_values += category.total * installation.installation.sales_weight_per_installation
+                        total_values += category.total * (installation.installation.sales_weight_per_installation/100)
                     }
                     else if(category.id === POSVENTA){
-                        pv_perc += category.pass * installation.installation.post_sale_weight_per_installation
+                        pv_perc += category.pass * (installation.installation.post_sale_weight_per_installation/100)
                         pv_perc_total += 1
-                        total_values += category.total * installation.installation.post_sale_weight_per_installation
+                        total_values += category.total * (installation.installation.post_sale_weight_per_installation/100)
                     }
                 })
             }
