@@ -569,24 +569,25 @@ const getDataForTables = async(request, response) => {
             if(installation && installation.categories){
                 accumAgency += installation.categories[installation.categories.length - 1].auditTotalResult
                 installation.categories.forEach((category) => {
-                    if(category.total !== undefined){
-                        total_values += category.total
-                    }
                     if(category.id === HYUNDAI_PROMISE){
                         hp_perc_total += 1
                         hp_perc += category.pass
+                        total_values += category.total
                     }
                     else if(category.id === GENERAL){
                         general_perc_total += 1
                         general_perc += category.pass
+                        total_values += category.total
                     }
                     else if(category.id === VENTA){
-                        v_perc += category.pass
+                        v_perc += category.pass * installation.installation.sales_weight_per_installation
                         v_perc_total += 1
+                        total_values += category.total * installation.installation.sales_weight_per_installation
                     }
                     else if(category.id === POSVENTA){
-                        pv_perc += category.pass
+                        pv_perc += category.pass * installation.installation.post_sale_weight_per_installation
                         pv_perc_total += 1
+                        total_values += category.total * installation.installation.post_sale_weight_per_installation
                     }
                 })
             }
@@ -610,6 +611,7 @@ const getDataForTables = async(request, response) => {
             electric_perc: (electric_total === 0)? null: electric_perc / electric_total,
             img_perc: (img_total === 0)? null: img_perc / img_total,
             hme_perc: (hme_total === 0)? null: hme_perc / hme_total,
+
             hp_perc: (hp_perc_total === 0)? null: hp_perc * 100 / total_values,
             v_perc: (v_perc_total === 0)? null: v_perc * 100 / total_values,
             general_perc: (general_perc_total === 0)? null: general_perc * 100 / total_values,
