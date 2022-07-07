@@ -416,21 +416,21 @@ const updateDealership = async(request, response) => {
             updatedFields['email'] = email
         if(name_surname_manager)
             updatedFields['name_surname_manager'] = name_surname_manager
-        if(previous_year_sales)
+        if(previous_year_sales !== null && previous_year_sales !== undefined)
             updatedFields['previous_year_sales'] = previous_year_sales
-        if(referential_sales)
+        if(referential_sales !== null && referential_sales !== undefined)
             updatedFields['referential_sales'] = referential_sales
-        if(post_sale_spare_parts_previous_year)
+        if(post_sale_spare_parts_previous_year !== null && post_sale_spare_parts_previous_year !== undefined)
             updatedFields['post_sale_spare_parts_previous_year'] = post_sale_spare_parts_previous_year
-        if(post_sale_referential_spare_parts)
+        if(post_sale_referential_spare_parts !== null && post_sale_referential_spare_parts !== undefined)
             updatedFields['post_sale_referential_spare_parts'] = post_sale_referential_spare_parts
-        if(vn_quaterly_billing)
+        if(vn_quaterly_billing !== null && vn_quaterly_billing !== undefined)
             updatedFields['vn_quaterly_billing'] = vn_quaterly_billing
-        if(electric_quaterly_billing)
+        if(electric_quaterly_billing !== null && electric_quaterly_billing !== undefined)
             updatedFields['electric_quaterly_billing'] = electric_quaterly_billing
-        if(ionic5_quaterly_billing)
+        if(ionic5_quaterly_billing !== null && ionic5_quaterly_billing !== undefined)
             updatedFields['ionic5_quaterly_billing'] = ionic5_quaterly_billing
-        if(post_sale_daily_income)
+        if(post_sale_daily_income !== null && post_sale_daily_income !== undefined)
             updatedFields['post_sale_daily_income'] = post_sale_daily_income
         updatedFields['updatedAt'] = Date.now()
 
