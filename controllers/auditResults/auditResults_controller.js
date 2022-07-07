@@ -719,7 +719,7 @@ const getDataForTables = async(request, response) => {
                 const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
                 const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
                 if(existAr || existSt){
-                    auditsResultsAux[indexEl].criterions[index].pass = false
+                    auditsResults[indexEl].criterions[index].pass = false
                 }
             })
         })
@@ -761,7 +761,7 @@ const getDataForTables = async(request, response) => {
 
             totalWeightPerc +=  sales_weight_per_installation + post_sale_weight_per_installation
 
-            element.criterions.forEach((criterion, index) => {                
+            element.criterions.forEach((criterion, index) => {     
                 let isValidType = false
                 criterion.criterion_id.installationType.forEach((type) => {
                     if(type._id.toString() === element.installation_id.installation_type._id.toString()){
@@ -773,7 +773,7 @@ const getDataForTables = async(request, response) => {
                    criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP || 
                    !isValidType){
                 }
-                else{
+                else{ 
                     totalCriterionWeight += criterion.criterion_id.value
                     totalCriterionsForInst += 1
 
