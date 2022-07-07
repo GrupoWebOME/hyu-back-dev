@@ -719,7 +719,7 @@ const getDataForTables = async(request, response) => {
                 const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
                 const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
                 if(existAr || existSt){
-                    auditsResults[indexEl].criterions[index].pass = false
+                    auditsResultsAux[indexEl].criterions[index].pass = false
                 }
             })
         })
