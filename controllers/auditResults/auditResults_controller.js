@@ -693,6 +693,7 @@ const getDataForTables = async(request, response) => {
                                                         }) 
                                             
         auditsResults.forEach((element) => {
+
             const orderedCriterionsArray = element.criterions.sort(function (a, b) {
                 if (a.criterion_id.standard._id.toString() > b.criterion_id.standard._id.toString()) {
                   return 1;
@@ -702,13 +703,21 @@ const getDataForTables = async(request, response) => {
                 }
                 return 0;
             })
+
             orderedCriterionsArray.forEach((criterion) => {
-                if(criterion.criterion_id.standard.isCore && !criterion.pass){
+                if(!criterion.pass){
                     orderedCriterionsArray.filter((el, index) => {
-                       if(criterion.criterion_id.standard._id.toString() === el.criterion_id.standard._id.toString()){
-                            orderedCriterionsArray[index].pass = false
-                       }
+                        if(criterion.criterion_id.standard._id.toString() === el.criterion_id.standard._id.toString()){
+                                orderedCriterionsArray[index].pass = false
+                        }
                     })
+                    if(criterion.criterion_id.standard.isCore){
+                        orderedCriterionsArray.filter((el, index) => {
+                            if(criterion.criterion_id.area._id.toString() === el.criterion_id.area._id.toString()){
+                                orderedCriterionsArray[index].pass = false
+                            }
+                        })
+                    }
                 }
             })
         })
@@ -1097,12 +1106,19 @@ const getDataForAudit = async(request, response) => {
                 return 0;
             })
             orderedCriterionsArray.forEach((criterion) => {
-                if(criterion.criterion_id.standard.isCore && !criterion.pass){
+                if(!criterion.pass){
                     orderedCriterionsArray.filter((el, index) => {
                         if(criterion.criterion_id.standard._id.toString() === el.criterion_id.standard._id.toString()){
-                            orderedCriterionsArray[index].pass = false
+                                orderedCriterionsArray[index].pass = false
                         }
                     })
+                    if(criterion.criterion_id.standard.isCore){
+                        orderedCriterionsArray.filter((el, index) => {
+                            if(criterion.criterion_id.area._id.toString() === el.criterion_id.area._id.toString()){
+                                orderedCriterionsArray[index].pass = false
+                            }
+                        })
+                    }
                 }
             })
         })
@@ -1299,12 +1315,19 @@ const getDataForFullAudit = async(request, response) => {
                     return 0;
                 })
                 orderedCriterionsArray.forEach((criterion) => {
-                    if(criterion.criterion_id.standard.isCore && !criterion.pass){
+                    if(!criterion.pass){
                         orderedCriterionsArray.filter((el, index) => {
                             if(criterion.criterion_id.standard._id.toString() === el.criterion_id.standard._id.toString()){
-                                orderedCriterionsArray[index].pass = false
+                                    orderedCriterionsArray[index].pass = false
                             }
                         })
+                        if(criterion.criterion_id.standard.isCore){
+                            orderedCriterionsArray.filter((el, index) => {
+                                if(criterion.criterion_id.area._id.toString() === el.criterion_id.area._id.toString()){
+                                    orderedCriterionsArray[index].pass = false
+                                }
+                            })
+                        }
                     }
                 })
             })
