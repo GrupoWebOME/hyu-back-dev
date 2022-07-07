@@ -1097,6 +1097,7 @@ const getDataForAudit = async(request, response) => {
 
         const AOH = "6226310514861f56d3c64266"
 
+        const auditsResultsAux = auditsResults        
         let arrayStandardsFalse = []
         let arrayAreasFalse = []
 
@@ -1307,7 +1308,8 @@ const getDataForFullAudit = async(request, response) => {
                                                                     select: 'name code description isCore number abbreviation'
                                                                 },
                                                             }) 
-                                                
+                                                            
+            const auditsResultsAux = auditsResults                                            
             let arrayStandardsFalse = []
             let arrayAreasFalse = []
     
@@ -1333,7 +1335,7 @@ const getDataForFullAudit = async(request, response) => {
                     const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
                     const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
                     if(existAr || existSt){
-                        auditsResultsAux[indexEl].criterions[index].pass = false
+                        auditsResults[indexEl].criterions[index].pass = false
                     }
                 })
             })
