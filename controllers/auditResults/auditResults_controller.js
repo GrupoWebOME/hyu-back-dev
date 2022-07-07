@@ -682,7 +682,8 @@ const getDataForTables = async(request, response) => {
                             msg: 'invalid audit_id', 
                             detail: `${audit_id} not found`}]}) 
         }
-        const auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
+
+        let auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
                                                 .populate({path: 'installation_id', select: '_id name code installation_type sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
                                                            populate: {path: 'installation_type', select: '_id code'}})
                                                 .populate({ path: 'criterions.criterion_id', 
@@ -691,33 +692,34 @@ const getDataForTables = async(request, response) => {
                                                                 select: 'name code description isCore number abbreviation'
                                                             },
                                                         }) 
-                                            
-        auditsResults.forEach((element) => {
+                                     
+        const auditsResultsAux = auditsResults        
+        let arrayStandardsFalse = []
+        let arrayAreasFalse = []
 
-            const orderedCriterionsArray = element.criterions.sort(function (a, b) {
-                if (a.criterion_id.standard._id.toString() > b.criterion_id.standard._id.toString()) {
-                  return 1;
-                }
-                if (a.criterion_id.standard._id.toString() < b.criterion_id.standard._id.toString()) {
-                  return -1;
-                }
-                return 0;
-            })
-
-            orderedCriterionsArray.forEach((criterion) => {
+        auditsResultsAux.forEach((element, indexEl) => {
+            element.criterions.forEach((criterion, index) => {
                 if(!criterion.pass){
-                    orderedCriterionsArray.filter((el, index) => {
-                        if(criterion.criterion_id.standard._id.toString() === el.criterion_id.standard._id.toString()){
-                                orderedCriterionsArray[index].pass = false
-                        }
-                    })
-                    if(criterion.criterion_id.standard.isCore){
-                        orderedCriterionsArray.filter((el, index) => {
-                            if(criterion.criterion_id.area._id.toString() === el.criterion_id.area._id.toString()){
-                                orderedCriterionsArray[index].pass = false
-                            }
-                        })
+                    const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                    if(!existStandard){
+                        arrayStandardsFalse = [...arrayStandardsFalse, criterion.criterion_id.standard._id.toString()]
                     }
+                    if(criterion.criterion_id.standard.isCore){
+                        const existArea = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                        if(!existArea){
+                            arrayAreasFalse = [...arrayAreasFalse, criterion.criterion_id.area._id.toString()]
+                        }
+                    }
+                }
+            })
+        })
+
+        auditsResultsAux.forEach((element, indexEl) => {
+            element.criterions.forEach((criterion, index) => {
+                const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                if(existAr || existSt){
+                    auditsResultsAux[indexEl].criterions[index].pass = false
                 }
             })
         })
@@ -1095,30 +1097,32 @@ const getDataForAudit = async(request, response) => {
 
         const AOH = "6226310514861f56d3c64266"
 
-        auditsResults.forEach((element) => {
-            const orderedCriterionsArray = element.criterions.sort(function (a, b) {
-                if (a.criterion_id.standard._id.toString() > b.criterion_id.standard._id.toString()) {
-                    return 1;
-                }
-                if (a.criterion_id.standard._id.toString() < b.criterion_id.standard._id.toString()) {
-                    return -1;
-                }
-                return 0;
-            })
-            orderedCriterionsArray.forEach((criterion) => {
+        let arrayStandardsFalse = []
+        let arrayAreasFalse = []
+
+        auditsResultsAux.forEach((element, indexEl) => {
+            element.criterions.forEach((criterion, index) => {
                 if(!criterion.pass){
-                    orderedCriterionsArray.filter((el, index) => {
-                        if(criterion.criterion_id.standard._id.toString() === el.criterion_id.standard._id.toString()){
-                                orderedCriterionsArray[index].pass = false
-                        }
-                    })
-                    if(criterion.criterion_id.standard.isCore){
-                        orderedCriterionsArray.filter((el, index) => {
-                            if(criterion.criterion_id.area._id.toString() === el.criterion_id.area._id.toString()){
-                                orderedCriterionsArray[index].pass = false
-                            }
-                        })
+                    const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                    if(!existStandard){
+                        arrayStandardsFalse = [...arrayStandardsFalse, criterion.criterion_id.standard._id.toString()]
                     }
+                    if(criterion.criterion_id.standard.isCore){
+                        const existArea = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                        if(!existArea){
+                            arrayAreasFalse = [...arrayAreasFalse, criterion.criterion_id.area._id.toString()]
+                        }
+                    }
+                }
+            })
+        })
+
+        auditsResultsAux.forEach((element, indexEl) => {
+            element.criterions.forEach((criterion, index) => {
+                const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                if(existAr || existSt){
+                    auditsResultsAux[indexEl].criterions[index].pass = false
                 }
             })
         })
@@ -1294,7 +1298,7 @@ const getDataForFullAudit = async(request, response) => {
             const dealership = arrayOfDealerships[i]
 
             const dealershipByID = await Dealership.findById(dealership)
-            const auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
+            let auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
                                                     .populate({path: 'installation_id', select: '_id name code installation_type sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
                                                                 populate: {path: 'installation_type', select: '_id code'}})
                                                     .populate({ path: 'criterions.criterion_id', 
@@ -1304,30 +1308,32 @@ const getDataForFullAudit = async(request, response) => {
                                                                 },
                                                             }) 
                                                 
-            auditsResults.forEach((element) => {
-                const orderedCriterionsArray = element.criterions.sort(function (a, b) {
-                    if (a.criterion_id.standard._id.toString() > b.criterion_id.standard._id.toString()) {
-                        return 1;
-                    }
-                    if (a.criterion_id.standard._id.toString() < b.criterion_id.standard._id.toString()) {
-                        return -1;
-                    }
-                    return 0;
-                })
-                orderedCriterionsArray.forEach((criterion) => {
+            let arrayStandardsFalse = []
+            let arrayAreasFalse = []
+    
+            auditsResultsAux.forEach((element, indexEl) => {
+                element.criterions.forEach((criterion, index) => {
                     if(!criterion.pass){
-                        orderedCriterionsArray.filter((el, index) => {
-                            if(criterion.criterion_id.standard._id.toString() === el.criterion_id.standard._id.toString()){
-                                    orderedCriterionsArray[index].pass = false
-                            }
-                        })
-                        if(criterion.criterion_id.standard.isCore){
-                            orderedCriterionsArray.filter((el, index) => {
-                                if(criterion.criterion_id.area._id.toString() === el.criterion_id.area._id.toString()){
-                                    orderedCriterionsArray[index].pass = false
-                                }
-                            })
+                        const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                        if(!existStandard){
+                            arrayStandardsFalse = [...arrayStandardsFalse, criterion.criterion_id.standard._id.toString()]
                         }
+                        if(criterion.criterion_id.standard.isCore){
+                            const existArea = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                            if(!existArea){
+                                arrayAreasFalse = [...arrayAreasFalse, criterion.criterion_id.area._id.toString()]
+                            }
+                        }
+                    }
+                })
+            })
+    
+            auditsResultsAux.forEach((element, indexEl) => {
+                element.criterions.forEach((criterion, index) => {
+                    const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                    const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                    if(existAr || existSt){
+                        auditsResultsAux[indexEl].criterions[index].pass = false
                     }
                 })
             })
