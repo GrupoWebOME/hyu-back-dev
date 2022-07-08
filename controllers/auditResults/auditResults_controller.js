@@ -735,6 +735,18 @@ const getDataForTables = async(request, response) => {
         let totalWeightPerc = 0
 
         auditsResults.forEach((element) => {
+            element.criterions.sort(function (a, b) {
+                    if (a.criterion_id.standard._id.toString() > b.criterion_id.standard._id.toString()) {
+                      return 1;
+                    }
+                    if (a.criterion_id.standard._id.toString() < b.criterion_id.standard._id.toString()) {
+                      return -1;
+                    }
+                    return 0;
+            })
+        })
+
+        auditsResults.forEach((element) => {
             let installationAuditData = {}
             installationAuditData['installation'] =  element.installation_id
             let actualCategoryID = ''
@@ -1120,6 +1132,23 @@ const getDataForAudit = async(request, response) => {
 
         auditsResultsAux.forEach((element, indexEl) => {
             element.criterions.forEach((criterion, index) => {
+                if(!criterion.pass){
+                    const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                    if(!existStandard){
+                        arrayStandardsFalse = [...arrayStandardsFalse, criterion.criterion_id.standard._id.toString()]
+                    }
+                    if(criterion.criterion_id.standard.isCore){
+                        const existArea = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                        if(!existArea){
+                            arrayAreasFalse = [...arrayAreasFalse, criterion.criterion_id.area._id.toString()]
+                        }
+                    }
+                }
+            })
+        })
+
+        auditsResultsAux.forEach((element, indexEl) => {
+            element.criterions.forEach((criterion, index) => {
                 const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
                 const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
                 if(existAr || existSt){
@@ -1313,6 +1342,23 @@ const getDataForFullAudit = async(request, response) => {
             let arrayStandardsFalse = []
             let arrayAreasFalse = []
     
+            auditsResultsAux.forEach((element, indexEl) => {
+                element.criterions.forEach((criterion, index) => {
+                    if(!criterion.pass){
+                        const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                        if(!existStandard){
+                            arrayStandardsFalse = [...arrayStandardsFalse, criterion.criterion_id.standard._id.toString()]
+                        }
+                        if(criterion.criterion_id.standard.isCore){
+                            const existArea = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                            if(!existArea){
+                                arrayAreasFalse = [...arrayAreasFalse, criterion.criterion_id.area._id.toString()]
+                            }
+                        }
+                    }
+                })
+            })
+            
             auditsResultsAux.forEach((element, indexEl) => {
                 element.criterions.forEach((criterion, index) => {
                     if(!criterion.pass){
