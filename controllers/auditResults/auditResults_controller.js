@@ -692,13 +692,15 @@ const getDataForTables = async(request, response) => {
                                                                 select: 'name code description isCore number abbreviation'
                                                             },
                                                         }) 
-                                     
-        const auditsResultsAux = auditsResults        
-        let arrayStandardsFalse = []
-        let arrayAreasFalse = []
 
-        auditsResultsAux.forEach((element, indexEl) => {
-            element.criterions.forEach((criterion, index) => {
+        const auditsResultsAux = auditsResults        
+        let arrayForCore = []
+
+        auditsResults.forEach((element) => {
+            let arrayStandardsFalse = []
+            let arrayAreasFalse = []
+
+            element.criterions.forEach((criterion) => {
                 if(!criterion.pass){
                     const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
                     if(!existStandard){
@@ -712,12 +714,19 @@ const getDataForTables = async(request, response) => {
                     }
                 }
             })
+
+            arrayForCore = [...arrayForCore, {
+                id: element.installation_id._id.toString(),
+                arrayStandardsFalse: arrayStandardsFalse,
+                arrayAreasFalse: arrayAreasFalse
+            }]
         })
 
         auditsResultsAux.forEach((element, indexEl) => {
+            const finded = arrayForCore.find( el => el.id === element.installation_id._id.toString() )
             element.criterions.forEach((criterion, index) => {
-                const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
-                const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                const existSt = finded.arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                const existAr = finded.arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
                 if(existAr || existSt){
                     auditsResultsAux[indexEl].criterions[index].pass = false
                 }
@@ -1109,12 +1118,15 @@ const getDataForAudit = async(request, response) => {
 
         const AOH = "6226310514861f56d3c64266"
 
-        const auditsResultsAux = auditsResults        
-        let arrayStandardsFalse = []
-        let arrayAreasFalse = []
+        const auditsResultsAux = auditsResults  
+              
+        let arrayForCore = []
 
-        auditsResultsAux.forEach((element, indexEl) => {
-            element.criterions.forEach((criterion, index) => {
+        auditsResults.forEach((element) => {
+            let arrayStandardsFalse = []
+            let arrayAreasFalse = []
+
+            element.criterions.forEach((criterion) => {
                 if(!criterion.pass){
                     const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
                     if(!existStandard){
@@ -1128,29 +1140,19 @@ const getDataForAudit = async(request, response) => {
                     }
                 }
             })
+
+            arrayForCore = [...arrayForCore, {
+                id: element.installation_id._id.toString(),
+                arrayStandardsFalse: arrayStandardsFalse,
+                arrayAreasFalse: arrayAreasFalse
+            }]
         })
 
         auditsResultsAux.forEach((element, indexEl) => {
+            const finded = arrayForCore.find( el => el.id === element.installation_id._id.toString() )
             element.criterions.forEach((criterion, index) => {
-                if(!criterion.pass){
-                    const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
-                    if(!existStandard){
-                        arrayStandardsFalse = [...arrayStandardsFalse, criterion.criterion_id.standard._id.toString()]
-                    }
-                    if(criterion.criterion_id.standard.isCore){
-                        const existArea = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
-                        if(!existArea){
-                            arrayAreasFalse = [...arrayAreasFalse, criterion.criterion_id.area._id.toString()]
-                        }
-                    }
-                }
-            })
-        })
-
-        auditsResultsAux.forEach((element, indexEl) => {
-            element.criterions.forEach((criterion, index) => {
-                const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
-                const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                const existSt = finded.arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                const existAr = finded.arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
                 if(existAr || existSt){
                     auditsResultsAux[indexEl].criterions[index].pass = false
                 }
@@ -1339,11 +1341,13 @@ const getDataForFullAudit = async(request, response) => {
                                                             }) 
                                                             
             const auditsResultsAux = auditsResults                                            
-            let arrayStandardsFalse = []
-            let arrayAreasFalse = []
-    
-            auditsResultsAux.forEach((element, indexEl) => {
-                element.criterions.forEach((criterion, index) => {
+            let arrayForCore = []
+
+            auditsResults.forEach((element) => {
+                let arrayStandardsFalse = []
+                let arrayAreasFalse = []
+
+                element.criterions.forEach((criterion) => {
                     if(!criterion.pass){
                         const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
                         if(!existStandard){
@@ -1357,31 +1361,21 @@ const getDataForFullAudit = async(request, response) => {
                         }
                     }
                 })
+
+                arrayForCore = [...arrayForCore, {
+                    id: element.installation_id._id.toString(),
+                    arrayStandardsFalse: arrayStandardsFalse,
+                    arrayAreasFalse: arrayAreasFalse
+                }]
             })
-            
+
             auditsResultsAux.forEach((element, indexEl) => {
+                const finded = arrayForCore.find( el => el.id === element.installation_id._id.toString() )
                 element.criterions.forEach((criterion, index) => {
-                    if(!criterion.pass){
-                        const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
-                        if(!existStandard){
-                            arrayStandardsFalse = [...arrayStandardsFalse, criterion.criterion_id.standard._id.toString()]
-                        }
-                        if(criterion.criterion_id.standard.isCore){
-                            const existArea = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
-                            if(!existArea){
-                                arrayAreasFalse = [...arrayAreasFalse, criterion.criterion_id.area._id.toString()]
-                            }
-                        }
-                    }
-                })
-            })
-    
-            auditsResultsAux.forEach((element, indexEl) => {
-                element.criterions.forEach((criterion, index) => {
-                    const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
-                    const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                    const existSt = finded.arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                    const existAr = finded.arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
                     if(existAr || existSt){
-                        auditsResults[indexEl].criterions[index].pass = false
+                        auditsResultsAux[indexEl].criterions[index].pass = false
                     }
                 })
             })
