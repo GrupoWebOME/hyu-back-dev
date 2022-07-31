@@ -782,7 +782,7 @@ const getDataForTables = async(request, response) => {
 
             totalWeightPerc +=  sales_weight_per_installation + post_sale_weight_per_installation
 
-            element.criterions.forEach((criterion, index) => {     
+            element.criterions.forEach((criterion) => {     
                 let isValidType = false
                 criterion.criterion_id.installationType.forEach((type) => {
                     if(type._id.toString() === element.installation_id.installation_type._id.toString()){
@@ -797,7 +797,6 @@ const getDataForTables = async(request, response) => {
                 else{ 
                     totalCriterionWeight += criterion.criterion_id.value
                     totalCriterionsForInst += 1
-
                     if(criterion.criterion_id.isImgAudit){
                         totalImgAudit+= criterion.criterion_id.value
                         if(criterion.pass)
@@ -816,7 +815,7 @@ const getDataForTables = async(request, response) => {
                 }
             })
 
-            element.criterions.forEach((criterion, index) => {
+            element.criterions.forEach((criterion) => {
                 let isValidType = false
                 criterion.criterion_id.installationType.forEach((type) => {
                     if(type._id.toString() === element.installation_id.installation_type._id.toString()){
@@ -829,8 +828,12 @@ const getDataForTables = async(request, response) => {
                    !isValidType){
                 }
                 else{
-                    let multiplicator = 1
+                    if(actualCategoryID.length === 0){
+                        actualCategoryID = criterion.criterion_id.category._id.toString()
+                        actualCategoryName = criterion.criterion_id.category.name.toString()
+                    }
 
+                    let multiplicator = 1
                     if(actualCategoryID === VENTA){
                         if(element.installation_id.sales_weight_per_installation !== null){
                             multiplicator = element.installation_id.sales_weight_per_installation/100
@@ -871,6 +874,7 @@ const getDataForTables = async(request, response) => {
                                 percentage: perc,
                                 partialPercentage: (accum * 100) / totalCriterionWeight
                             }
+
                             categories = [...categories, category]
 
                             let totalResult = 0
@@ -922,6 +926,7 @@ const getDataForTables = async(request, response) => {
                             }
                             categories = [...categories, category]
                         }
+
                         totalCriterionsByCat = 1
                         totalAccum = criterion.criterion_id.value
                         if(criterion.pass){
@@ -933,6 +938,18 @@ const getDataForTables = async(request, response) => {
                         actualCategoryID = criterion.criterion_id.category._id.toString()
                         actualCategoryName = criterion.criterion_id.category.name
                         if(totalCritValid === totalCriterionsForInst){
+                            const perc = ((accum * 100)/totalAccum) * multiplicator
+                            const category = {
+                                id: actualCategoryID.length>0? actualCategoryID: criterion.criterion_id.category._id.toString(),
+                                name: actualCategoryName.length>0? actualCategoryName: criterion.criterion_id.category.name,
+                                pass: accum,
+                                total: totalAccum,
+                                percentageByInstallation: (accum * 100)/totalAccum,
+                                totalCriterionsByCat: totalCriterionsByCat,
+                                percentage: perc,
+                                partialPercentage: (accum * 100) / totalCriterionWeight
+                            }
+                            categories = [...categories, category]
 
                             let totalResult = 0
                             let newTotal = 0
@@ -1461,6 +1478,12 @@ const getDataForFullAudit = async(request, response) => {
                         !isValidType){
                     }
                     else{
+
+                        if(actualCategoryID.length === 0){
+                            actualCategoryID = criterion.criterion_id.category._id.toString()
+                            actualCategoryName = criterion.criterion_id.category.name.toString()
+                        }
+
                         let multiplicator = 1
     
                         if(actualCategoryID === VENTA){
@@ -1558,9 +1581,20 @@ const getDataForFullAudit = async(request, response) => {
                                 accum = 0
                             }
                             actualCategoryID = criterion.criterion_id.category._id.toString()
-                            actualCategoryName = criterion.criterion_id.category.name
+                            actualCategoryName = criterion.criterion_id.category.name.toString()
                             if(totalCritValid === totalCriterionsForInst){
-    
+                                const perc = ((accum * 100)/totalAccum) * multiplicator
+                                const category = {
+                                    id: actualCategoryID.length>0? actualCategoryID: criterion.criterion_id.category._id.toString(),
+                                    name: actualCategoryName.length>0? actualCategoryName: criterion.criterion_id.category.name,
+                                    pass: accum,
+                                    total: totalAccum,
+                                    percentageByInstallation: (accum * 100)/totalAccum,
+                                    totalCriterionsByCat: totalCriterionsByCat,
+                                    percentage: perc,
+                                    partialPercentage: (accum * 100) / totalCriterionWeight
+                                }
+                                categories = [...categories, category]
                                 let totalResult = 0
                                 if(categories.length>0){
                                     categories.forEach((category) => {
