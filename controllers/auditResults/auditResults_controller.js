@@ -404,6 +404,7 @@ const getDataForTables = async(request, response) => {
             const sales_weight_per_installation= (element.installation_id.sales_weight_per_installation !== null)? element.installation_id.sales_weight_per_installation : 0
             const post_sale_weight_per_installation= (element.installation_id.post_sale_weight_per_installation !== null)? element.installation_id.post_sale_weight_per_installation : 0
 
+            // Es la sumatoria de los pesos de cada instalación
             totalWeightPerc +=  sales_weight_per_installation + post_sale_weight_per_installation
 
             // Criterios electricos, hme, img
@@ -449,7 +450,7 @@ const getDataForTables = async(request, response) => {
                     }
                 }
             })
-
+            // Los demás criterios
             element.criterions.forEach((criterion) => {
                 let isValidType = false
                 criterion.criterion_id.installationType.forEach((type) => {
@@ -659,10 +660,8 @@ const getDataForTables = async(request, response) => {
 
         instalations_audit_details.forEach((installation) => {
             if(installation && installation.categories){
-
                 const sales_weight_per_installation= (installation.installation.sales_weight_per_installation !== null)? installation.installation.sales_weight_per_installation : 0
                 const post_sale_weight_per_installation= (installation.installation.post_sale_weight_per_installation !== null)? installation.installation.post_sale_weight_per_installation : 0
-
                 let accumTotalWeightPerc = sales_weight_per_installation + post_sale_weight_per_installation
 
                 const coefficient = ((accumTotalWeightPerc * 100) / totalWeightPerc)/100
@@ -1241,7 +1240,6 @@ const getDataForFullAudit = async(request, response) => {
                                     percentageByInstallation: (accum * 100)/totalAccum,
                                     totalCriterionsByCat: totalCriterionsByCat,
                                     percentage: perc,
-                                    partialPercentage: (accum * 100) / totalCriterionWeight
                                 }
                                 categories = [...categories, category]
                                 let totalResult = 0
