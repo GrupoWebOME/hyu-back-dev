@@ -515,7 +515,7 @@ const getDataForTables2 = async(request, response) => {
                         }
                         actualCategoryID = criterion.criterion_id.category._id.toString()
                         actualCategoryName = criterion.criterion_id.category.name
-                        if(totalCritValid === totalCriterionsForInst){
+                        if(totalCritValid === totalCriterionsForInst && totalCriterionsForInst !== 1){
 
                             let totalResult = 0
                             let newTotal = 0
