@@ -4,9 +4,7 @@ const ObjectId = require('mongodb').ObjectId
 const createInstallationType = async(request, response) => {
     try{
         const {idSecondary, name, code} = request.body
-
         let errors = []
-
         if(!idSecondary || idSecondary.length < 1)
             errors.push({code: 400, 
                         msg: 'invalid idSecondary',
@@ -23,7 +21,6 @@ const createInstallationType = async(request, response) => {
                                 detail: `${idSecondary} is already in use`
                             })
         }
-
         if(!name || name.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid name',
@@ -40,7 +37,6 @@ const createInstallationType = async(request, response) => {
                              detail: `${name} is already in use`
                             })
         }
-
         if(!code || code.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid code',
@@ -57,21 +53,17 @@ const createInstallationType = async(request, response) => {
                              detail: `${code} is already in use`
                             })
         }
-
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
-
         const newInstallationType = new InstallationType({
             idSecondary: idSecondary,
             name: name,
             code: code
         })
-
         await newInstallationType.save()
                         .catch(error => {        
                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                         })
-
         response.status(201).json({code: 201,
                                     msg: 'the InstallationType has been created successfully',
                                     data: newInstallationType })
@@ -85,9 +77,7 @@ const updateInstallationType = async(request, response) => {
     try{
         const {id} = request.params
         const {idSecondary, name, code} = request.body
-
         let errors = []
-
         if(id && ObjectId.isValid(id)){
             const existId = await InstallationType.exists({_id: id})
                                        .catch(error => {return response.status(400).json({code: 500, 
@@ -106,7 +96,6 @@ const updateInstallationType = async(request, response) => {
                                               detail: `id not found`
                                             })   
         }
-   
         if(idSecondary){
             if(idSecondary.length < 1){
                 errors.push({code: 400, 
@@ -126,7 +115,6 @@ const updateInstallationType = async(request, response) => {
                                 })
             }
         }
-
         if(name){
             if(name.length < 1){
                 errors.push({code: 400, 
@@ -145,9 +133,7 @@ const updateInstallationType = async(request, response) => {
                                 detail: `${name} is already in use`
                                 })
             }
-            
         }
-
         if(code){
             if(code.length < 1){
                 errors.push({code: 400, 
@@ -166,14 +152,10 @@ const updateInstallationType = async(request, response) => {
                                 detail: `${code} is already in use`
                                 })
             }
-            
         }
-
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
-
         const updatedFields = {}
-
         if(idSecondary)
             updatedFields['idSecondary'] = idSecondary
         if(name)
@@ -181,12 +163,10 @@ const updateInstallationType = async(request, response) => {
         if(code)
             updatedFields['code'] = code
         updatedFields['updatedAt'] = Date.now()
-
         const updatedInstallationType = await InstallationType.findByIdAndUpdate(id, updatedFields, {new: true})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-
         response.status(201).json({code: 200,
                                     msg: 'the InstallationType has been updated successfully',
                                     data: updatedInstallationType })
@@ -199,7 +179,6 @@ const updateInstallationType = async(request, response) => {
 const deleteInstallationType = async(request, response) => {
     try{
         const {id} = request.params
-
         if(id && ObjectId.isValid(id)){
             const existId = await InstallationType.exists({_id: id})
                                           .catch(error => {return response.status(400).json({code: 500, 
@@ -218,7 +197,6 @@ const deleteInstallationType = async(request, response) => {
                                               detail: `id not found`
                                             })   
         }
-
         const deletedInstallationType = await InstallationType.findByIdAndDelete(id)
                                                 .catch(error => {        
                                                     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
@@ -235,19 +213,13 @@ const deleteInstallationType = async(request, response) => {
 const getAllInstallationType= async(request, response) => {
     try{
         const {idSecondary, name, pageReq} = request.body
-
         const page = !pageReq ? 0 : pageReq
-
         let skip = (page - 1) * 10
-
         const filter = {}
-
         if(idSecondary)
             filter['idSecondary'] = { $regex : new RegExp(idSecondary, "i") }
-            
         if(name)
             filter['name'] = { $regex : new RegExp(name, "i") }
-
         if(page === 0){
             const installationTypes = await InstallationType.find(filter)
                                              .catch(error => {        
@@ -260,25 +232,19 @@ const getAllInstallationType= async(request, response) => {
                                               msg: 'success',
                                               data: data })
         }
-            
         let countDocs = await InstallationType.countDocuments(filter)
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-
         let countPage = countDocs % 10 === 0? countDocs/10 : Math.floor((countDocs/10) + 1)
-
         if(countPage < page)
             return response.status(400).json({code: 400, msg: 'invalid page', detail: `totalPages: ${countPage}`})
-
         const installationTypes = await InstallationType.find(filter).skip(skip).limit(10)
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-
         const data = {installationTypes: installationTypes, 
                       totalPages: countPage}
-
         response.status(200).json({code: 200,
                                    msg: 'success',
                                    data: data })
@@ -289,26 +255,20 @@ const getAllInstallationType= async(request, response) => {
 }
 
 const getInstallationType = async(request, response) => {
-
     try{
         const {id} = request.params
-
-        //Validations
         if(!id)
             return response.status(400).json({code: 400,
                                                 msg: 'invalid id',
                                                 detail: 'id is a obligatory field'})
-    
         if(id && !ObjectId.isValid(id))
             return response.status(400).json({code: 400,
                                               msg: 'invalid id',
                                               detail: 'id should be an objectId'})
-    
         const instType = await InstallationType.findById(id)
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-    
         if(instType){
             response.status(200).json({code: 200,
                                        msg: 'success',

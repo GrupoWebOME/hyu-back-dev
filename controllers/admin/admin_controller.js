@@ -1,20 +1,43 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const Admin = require('../../models/admin_model')
+const Dealership = require('../../models/dealership_model')
 var ObjectId = require('mongodb').ObjectId
 
 const createAdmin = async(request, response) => {
     try{
-        const {names, surnames, emailAddress, userName, password} = request.body
+        const {names, surnames, emailAddress, userName, password, role, dealership} = request.body
 
         let errors = []
     
-        //Regex
         const regExPatternNamesAndSurname = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
         const regExPatternEmailAddress= /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
         const RegExPatternUsername = /^(?=[a-zA-Z0-9._\u00f1\u00d1]{5,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/
     
-        //Validations
+        if(!role || (role.toLowerCase() !== 'admin' && role.toLowerCase() !== 'dealership' && role.toLowerCase() !== 'auditor'))
+            errors.push({code: 400, 
+                msg: 'invalid role',
+                detail: `role should be "admin", "dealership" or "auditor"`
+            })
+        
+        if(role && role.toLowerCase() === 'dealership'){
+            if(dealership === null || dealership === undefined || !ObjectId.isValid(dealership)){
+                errors.push({code: 400, 
+                    msg: 'invalid dealership',
+                    detail: `dealership should be an objectID format`
+                })
+            }
+            else{
+                const existDealership = await Dealership.findById(dealership)
+                if(existDealership === null || existDealership === undefined){
+                    errors.push({code: 400, 
+                        msg: 'invalid dealership',
+                        detail: `dealership not found`
+                    })
+                }
+            }
+        }
+
         if(!names || !names.match(regExPatternNamesAndSurname))
             errors.push({code: 400, 
                          msg: 'invalid names',
@@ -58,7 +81,7 @@ const createAdmin = async(request, response) => {
         if(!password || password.length < 8)
             errors.push({code: 400, 
                          msg: 'invalid password',
-                         detail: `${userName} is not valid password format. The password field can only contain a valid email, and is required`
+                         detail: `${userName} is not valid password format. The password field can only contain a valid password, and is required`
                         })
     
         if(errors.length > 0)
@@ -74,7 +97,8 @@ const createAdmin = async(request, response) => {
             surnames: surnames,
             emailAddress: emailAddress,
             userName: userName,
-            password: passwordHash
+            password: passwordHash,
+            role: role.toLowerCase()
         })
     
         const token = jwt.sign(
@@ -99,9 +123,9 @@ const createAdmin = async(request, response) => {
 const loginAdmin = async(request, response) => {
     try{
         const {user, password} = request.body
-        if(!user || !password)
-            {   console.log("entra")
-                throw new Error({errors: [{code: 401, msg: 'unauthorized access', detail: 'invalid credentials'}]})}
+        if(!user || !password){   
+            return response.status(401).json({errors: [{code: 401, msg: 'unauthorized access', detail: 'invalid credentials'}]})
+        }
 
         const admin = await Admin.findOne({$or: [{userName: user},{emailAddress: user}]})
 
@@ -138,16 +162,14 @@ const loginAdmin = async(request, response) => {
 const updateAdmin = async(request, response) => {
     try{
         const {id} = request.params
-        const {names, surnames, emailAddress, userName, password} = request.body
+        const {names, surnames, emailAddress, userName, password, role, dealership} = request.body
 
         let errors = []
     
-        //Regex
         const regExPatternNamesAndSurname = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
         const regExPatternEmailAddress= /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
         const RegExPatternUsername = /^(?=[a-zA-Z0-9._\u00f1\u00d1]{5,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/
     
-        //Validations
         if(!id)
             return response.status(400).json({code: 400,
                                               msg: 'invalid id',
@@ -168,6 +190,30 @@ const updateAdmin = async(request, response) => {
                                                   detail: 'id not found'})
         }
 
+        if(role !== undefined && role !== null && role.toLowerCase() !== 'admin' && role.toLowerCase() !== 'dealership' && role.toLowerCase() !== 'auditor')
+            errors.push({code: 400, 
+                msg: 'invalid role',
+                detail: `role should be "admin", "dealership" or "auditor"`
+            })
+        
+        if(role !== undefined && role !== null && role.toLowerCase() === 'dealership'){
+            if(dealership === null || dealership === undefined || !ObjectId.isValid(dealership)){
+                errors.push({code: 400, 
+                    msg: 'invalid dealership',
+                    detail: `dealership should be an objectID format`
+                })
+            }
+            else{
+                const existDealership = await Dealership.findById(dealership)
+                if(existDealership === null || existDealership === undefined){
+                    errors.push({code: 400, 
+                        msg: 'invalid dealership',
+                        detail: `dealership not found`
+                    })
+                }
+            }
+        }
+
         if(names && !names.match(regExPatternNamesAndSurname))
             errors.push({code: 400, 
                          msg: 'invalid names',
@@ -185,7 +231,7 @@ const updateAdmin = async(request, response) => {
                          msg: 'invalid emailAddress',
                          detail: `${emailAddress} is not valid emailAddress format. The emailAddress field can only contain a valid email`
                         })
-        else{
+        else if(emailAddress){
             const adminExist = await Admin.findOne({emailAddress: emailAddress.toLowerCase()})
             if(adminExist && adminExist._id.toString() !== id)
                 errors.push({code: 400, 
@@ -199,7 +245,7 @@ const updateAdmin = async(request, response) => {
                          msg: 'invalid userName',
                          detail: `${userName} is not valid userName format. The userName field can only contain a valid email`
                         })
-        else{
+        else if(userName){
             const adminExist = await Admin.findOne({userName: userName.toLowerCase()})
             if(adminExist && adminExist._id.toString() !== id)
                 errors.push({code: 400, 
@@ -242,6 +288,12 @@ const updateAdmin = async(request, response) => {
             
         if(password)
             editAdmin['password'] = passwordHash
+
+        if(role)
+            editAdmin['role'] = role.toLowerCase()
+
+        if(dealership)
+            editAdmin['dealership'] = dealership
 
         editAdmin['updatedAt'] = Date.now()
 
@@ -301,7 +353,7 @@ const deleteAdmin = async(request, response) => {
 
 const getAllAdmins = async(request, response) => {
     try{
-        const {names, surnames, emailAddress, userName, pageReq} = request.body
+        const {names, surnames, emailAddress, userName, role, dealership, pageReq} = request.body
 
         const page = !pageReq ? 0 : pageReq
 
@@ -320,6 +372,12 @@ const getAllAdmins = async(request, response) => {
             
         if(userName)
             filter['userName'] = new RegExp((userName).toLowerCase())
+
+        if(role)
+            filter['role'] = new RegExp((role).toLowerCase())
+
+        if(dealership)
+            filter['dealership'] = new RegExp((dealership).toLowerCase())
 
         if(page === 0){
             const admins = await Admin.find(filter)
@@ -359,7 +417,6 @@ const getAdmin = async(request, response) => {
 
     const {id} = request.params
 
-    //Validations
     if(!id)
         return response.status(400).json({code: 400,
                                             msg: 'invalid id',

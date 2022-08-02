@@ -7,13 +7,9 @@ var ObjectId = require('mongodb').ObjectId
 const getAllInstallation = async(request, response) => {
     try{
         const {name, code, dealership, installation_type, phone, province, country, email, pageReq} = request.body
-
         const page = !pageReq ? 0 : pageReq
-
         let skip = (page - 1) * 10
-
         const filter = {}
-
         if(name)
             filter['name'] = { $regex : new RegExp(name, "i") } 
         if(code)
@@ -42,25 +38,19 @@ const getAllInstallation = async(request, response) => {
                                               msg: 'success',
                                               data: data })
         }
-            
         let countDocs = await Installation.countDocuments(filter)
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-
         let countPage = countDocs % 10 === 0? countDocs/10 : Math.floor((countDocs/10) + 1)
-
         if((countPage < page) && page !==1)
             return response.status(400).json({code: 400, msg: 'invalid page', detail: `totalPages: ${countPage}`})
-
         const installations = await Installation.find(filter).skip(skip).limit(10).populate({path: 'dealership installation_type contacts'})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-
         const data = {installations: installations, 
                       totalPages: countPage}
-
         response.status(200).json({code: 200,
                                    msg: 'success',
                                    data: data })
@@ -74,9 +64,7 @@ const createInstallation = async(request, response) => {
     try{
         const {name, autonomous_community, code, address, dealership, installation_type, population, postal_code, phone, active, province, email, refer_value,
                latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, contacts, sales_weight_per_installation, post_sale_weight_per_installation } = request.body
-
         let errors = []
-
         if(contacts && Array.isArray(contacts)){
             for(let i = 0; i<contacts.length; i++){
                 const existContact = await Personal.findById(contacts[i])
@@ -87,9 +75,7 @@ const createInstallation = async(request, response) => {
                     return response.status(400).json({errors: [{code: 400, msg: 'invalid contacts', detail: 'invalid contacts'}]})
                 }
             }
-            
         }
-
         if(!name || name.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid name',
@@ -106,19 +92,16 @@ const createInstallation = async(request, response) => {
                              detail: `${name} is already in use`
                             })
         }
-
         if(!autonomous_community || autonomous_community.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid autonomous_community',
                             detail: `autonomous_community is required`
                         })
-
         if(!code || code.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid code',
                             detail: `code is required`
                         })
-
         if(!installation_type || (installation_type.length < 1 || (installation_type && !ObjectId.isValid(installation_type))))
             errors.push({code: 400, 
                         msg: 'invalid installation_type',
@@ -135,7 +118,6 @@ const createInstallation = async(request, response) => {
                                 detail: `${installation_type} not found`
                             })
         }
-
         if(!dealership || (dealership.length < 1 || (dealership && !ObjectId.isValid(dealership))))
             errors.push({code: 400, 
                         msg: 'invalid dealership',
@@ -152,109 +134,91 @@ const createInstallation = async(request, response) => {
                                 detail: `${dealership} not found`
                             })
         }
-
         if(address && address.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid address',
                             detail: `address is required`
                         })
-
         if(population && population.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid population',
                             detail: `population is required`
                         })
-
         if(postal_code && postal_code.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid postal_code',
                             detail: `postal_code is required`
                         })
-
         if(phone && phone.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid phone',
                             detail: `phone is required`
                         })
-
         if(active !== undefined && active !== null && (active !== true && active !== false))
                     errors.push({code: 400, 
                                     msg: 'invalid active',
                                     detail: `invalid format`
                                 })
-            
         if(!province && province.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid province',
                             detail: `province is required`
                         })
-   
         if(email && email.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid email',
                             detail: `email is required`
                         })
-        
         if(sales_weight_per_installation && typeof sales_weight_per_installation !== 'number')
             errors.push({code: 400, 
                             msg: 'invalid sales_weight_per_installation',
                             detail: `sales_weight_per_installation should be a number value`
                         })   
-        
         if(post_sale_weight_per_installation && typeof post_sale_weight_per_installation !== 'number')
             errors.push({code: 400, 
                             msg: 'invalid post_sale_weight_per_installation',
                             detail: `post_sale_weight_per_installation should be a number value`
                         })   
-        
         if(latitude && latitude.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid latitude',
                             detail: `latitude is required`
                         })
-            
         if(length && typeof length !== "number")
             errors.push({code: 400, 
                             msg: 'invalid length',
                             detail: `length should be a number`
                         })
-
         if(isSale !== undefined && isSale !== null && (isSale !== true && isSale !== false))
             errors.push({code: 400, 
                             msg: 'invalid isSale',
                             detail: `invalid format`
                         })
-
         if(isPostSale !== undefined && isPostSale !== null && (isPostSale !== true && isPostSale !== false))
             errors.push({code: 400, 
                             msg: 'invalid isPostSale',
                             detail: `invalid format`
                         })
-
         if(isHP !== undefined && isHP !== null && (isHP !== true && isHP !== false))
             errors.push({code: 400, 
                             msg: 'invalid isHP',
                             detail: `invalid format`
                         })
-
         if(m2Exp && typeof m2Exp !== "number")
             errors.push({code: 400, 
                             msg: 'invalid m2Exp',
                             detail: `invalid format`
                         })
-
         if(m2PostSale && typeof m2PostSale !== "number")
             errors.push({code: 400, 
                             msg: 'invalid m2PostSale',
                             detail: `invalid format`
                         })                                                                                            
-
         if(m2Rec && typeof m2Rec !== "number")
             errors.push({code: 400, 
                             msg: 'invalid m2Rec',
                             detail: `invalid format`
                         })     
-
         if(refer_value){
             if(!Array.isArray(refer_value))
                 errors.push({code: 400, 
@@ -271,10 +235,8 @@ const createInstallation = async(request, response) => {
                 })
             }
         }
-                        
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
-
         const newInstallation = new Installation({
             name, 
             autonomous_community, 
@@ -300,14 +262,11 @@ const createInstallation = async(request, response) => {
             contacts,
             refer_value
         })
-
         await newInstallation.save()
                         .catch(error => {        
                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                         })
-
         await Dealership.findByIdAndUpdate(dealership, {$push: { installations: newInstallation._id }})
-
         response.status(201).json({code: 201,
                                     msg: 'the newInstallation has been created successfully',
                                     data: newInstallation })
@@ -318,26 +277,20 @@ const createInstallation = async(request, response) => {
 }
 
 const getInstallation = async(request, response) => {
-
     try{
         const {id} = request.params
-
-        //Validations
         if(!id)
             return response.status(400).json({code: 400,
                                                 msg: 'invalid id',
                                                 detail: 'id is a obligatory field'})
-    
         if(id && !ObjectId.isValid(id))
             return response.status(400).json({code: 400,
                                               msg: 'invalid id',
                                               detail: 'id should be an objectId'})
-    
         const instType = await Installation.findById(id).populate({path: 'dealership installation_type contacts'})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-    
         if(instType){
             response.status(200).json({code: 200,
                                        msg: 'success',
@@ -359,10 +312,8 @@ const updateInstallation = async(request, response) => {
         const {name, autonomous_community, code, address, dealership, installation_type, population, postal_code, phone, active, province, email, refer_value,
                latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, sales_weight_per_installation, post_sale_weight_per_installation, contacts } = request.body
         const {id} = request.params
-
         let errors = []
         let installation = null
-
         if(id && ObjectId.isValid(id)){
             installation = await Installation.findById(id)
                                           .catch(error => {return response.status(400).json({code: 500, 
@@ -381,7 +332,6 @@ const updateInstallation = async(request, response) => {
                                               detail: `id not found`
                                             })   
         }
-
         if(contacts && Array.isArray(contacts)){
             for(let i = 0; i<contacts.length; i++){
                 const existContact = await Personal.findById(contacts[i])
@@ -394,7 +344,6 @@ const updateInstallation = async(request, response) => {
             }
             
         }
-
         if(name && name.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid name',
@@ -411,19 +360,16 @@ const updateInstallation = async(request, response) => {
                              detail: `${name} is already in use`
                             })
         }
-
         if(autonomous_community && autonomous_community.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid autonomous_community',
                             detail: `autonomous_community is required`
                         })
-
         if(code && code.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid code',
                             detail: `code is required`
                         })
-
         if(installation_type && (installation_type.length < 1 || (installation_type && !ObjectId.isValid(installation_type))))
             errors.push({code: 400, 
                         msg: 'invalid installation_type',
@@ -440,7 +386,6 @@ const updateInstallation = async(request, response) => {
                                 detail: `${installation_type} not found`
                             })
         }
-
         if(dealership && (dealership.length < 1 || (dealership && !ObjectId.isValid(dealership))))
             errors.push({code: 400, 
                         msg: 'invalid dealership',
@@ -457,109 +402,91 @@ const updateInstallation = async(request, response) => {
                                 detail: `${dealership} not found`
                             })
         }
-
         if(address && address.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid address',
                             detail: `address is required`
                         })
-
         if(population && population.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid population',
                             detail: `population is required`
                         })
-
         if(postal_code && postal_code.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid postal_code',
                             detail: `postal_code is required`
                         })
-
         if(phone && phone.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid phone',
                             detail: `phone is required`
                         })
-
         if(active !== undefined && active !== null && (active !== true && active !== false))
                     errors.push({code: 400, 
                                     msg: 'invalid active',
                                     detail: `invalid format`
                                 })
-            
         if(province && province.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid province',
                             detail: `province is required`
                         })
-   
         if(email && email.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid email',
                             detail: `email is required`
                         })
-            
         if(latitude && latitude.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid latitude',
                             detail: `latitude is required`
                         })
-            
         if(length && typeof length !== "number")
             errors.push({code: 400, 
                             msg: 'invalid length',
                             detail: `length is required`
                         })
-
         if(isSale !== undefined && isSale !== null && (isSale !== true && isSale !== false))
             errors.push({code: 400, 
                             msg: 'invalid isSale',
                             detail: `invalid format`
                         })
-
         if(isPostSale !== undefined && isPostSale !== null && (isPostSale !== true && isPostSale !== false))
             errors.push({code: 400, 
                             msg: 'invalid isPostSale',
                             detail: `invalid format`
                         })
-
         if(isHP !== undefined && isHP !== null && (isHP !== true && isHP !== false))
             errors.push({code: 400, 
                             msg: 'invalid isHP',
                             detail: `invalid format`
                         })
-
         if(m2Exp && typeof m2Exp !== "number")
             errors.push({code: 400, 
                             msg: 'invalid m2Exp',
                             detail: `invalid format`
                         })
-
         if(m2PostSale && typeof m2PostSale !== "number")
             errors.push({code: 400, 
                             msg: 'invalid m2PostSale',
                             detail: `invalid format`
                         })                                                                                            
-
         if(m2Rec && typeof m2Rec !== "number")
             errors.push({code: 400, 
                             msg: 'invalid m2Rec',
                             detail: `invalid format`
                         })     
-                        
         if(sales_weight_per_installation && typeof sales_weight_per_installation !== 'number')
             errors.push({code: 400, 
                             msg: 'invalid sales_weight_per_installation',
                             detail: `sales_weight_per_installation should be a number value`
                         })   
-        
         if(post_sale_weight_per_installation && typeof post_sale_weight_per_installation !== 'number')
             errors.push({code: 400, 
                             msg: 'invalid post_sale_weight_per_installation',
                             detail: `post_sale_weight_per_installation should be a number value`
                         })  
-
         if(refer_value){
             if(!Array.isArray(refer_value))
                 errors.push({code: 400, 
@@ -576,12 +503,9 @@ const updateInstallation = async(request, response) => {
                 })
             }
         }
-        
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
-
         const updatedFields = {}
-
         if(name)
             updatedFields['name'] = name
         if(autonomous_community)
@@ -631,12 +555,10 @@ const updateInstallation = async(request, response) => {
         if(refer_value)
             updatedFields['refer_value'] = refer_value
         updatedFields['updatedAt'] = Date.now()
-
         const updatedInstallation = await Installation.findByIdAndUpdate(id, updatedFields, {new: true})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-
         response.status(201).json({code: 200,
                                     msg: 'the Installation has been updated successfully',
                                     data: updatedInstallation })
@@ -649,7 +571,6 @@ const updateInstallation = async(request, response) => {
 const deleteInstallation = async(request, response) => {
     try{
         const {id} = request.params
-
         if(id && ObjectId.isValid(id)){
             const existId = await Installation.exists({_id: id})
                                           .catch(error => {return response.status(400).json({code: 500, 
@@ -668,17 +589,14 @@ const deleteInstallation = async(request, response) => {
                                               detail: `id not found`
                                             })   
         }
-
         const deletedInstallation = await Installation.findByIdAndDelete(id)
                                                 .catch(error => {        
                                                     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                                 })
-        
         await Dealership.findByIdAndUpdate(deletedInstallation.dealership, {$pull: { installations: id }})
                         .catch(error => {        
                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                         })
-        
         response.status(201).json({code: 201,
                                     msg: 'the Installation has been deleted successfully',
                                     data: deletedInstallation })

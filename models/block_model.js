@@ -13,6 +13,8 @@ const blockSchema = new Schema({
     category: {type: Schema.Types.ObjectId, ref: 'Category'},
     isAgency: {type: Boolean,
                default: false },
+    category_abbreviation: {type: String,
+                            required: true},
     createdAt: {type: Date,
                 default: Date.now},
     updatedAt: {type: Date,

@@ -6,10 +6,8 @@ const ObjectId = require('mongodb').ObjectId
 const createAudit = async(request, response) => {
     try{
         let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions} = request.body
-
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
-
         if(!name)
             errors.push({code: 400, 
                          msg: 'invalid name',
@@ -24,7 +22,6 @@ const createAudit = async(request, response) => {
                              detail: `${name} is in use`
                             })
         }
-
         if(installation_type && !Array.isArray(installation_type)){
             errors.push({code: 400, 
                 msg: 'invalid installation_type',
@@ -49,7 +46,6 @@ const createAudit = async(request, response) => {
                 }
             })
         }
-
         if(!initial_date){
             errors.push({code: 400, 
                             msg: 'invalid initial_date',
@@ -79,14 +75,12 @@ const createAudit = async(request, response) => {
                 arrayDate[2] = '0'+arrayDate[2]
             end_date = `${arrayDate[0]}-${arrayDate[1]}-${arrayDate[2]}`
         }
-
         if(end_date && !end_date.match(regexDate) || initial_date > end_date){
             errors.push({code: 400, 
                 msg: 'invalid end_date',
                 detail: `end_date should be yyyy-mm-dd format, and should be >= initial_date`
             })
         }
-
         if(!criterions || (criterions && (criterions.length <= 0 || !Array.isArray(criterions)))){
             errors.push({code: 400, 
                          msg: 'invalid criterions',
@@ -102,7 +96,6 @@ const createAudit = async(request, response) => {
                 }) 
             }
         }
-
         if(installation_exceptions && (installation_exceptions.length <= 0 || !Array.isArray(installation_exceptions))){
             errors.push({code: 400, 
                          msg: 'invalid criterions',
@@ -127,16 +120,13 @@ const createAudit = async(request, response) => {
                 }
             })
         }
-
         if(isAgency!==null && isAgency!==undefined && typeof isAgency !== 'boolean')
             errors.push({code: 400, 
                         msg: 'invalid isAgency',
                         detail: `isAgency should be a boolean type`
                         }) 
-
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
-
         const newAudit = new Audit({
             name: name,
             installation_type,
@@ -145,12 +135,10 @@ const createAudit = async(request, response) => {
             criterions,
             isAgency: (isAgency && isAgency === true)? true : false,
         })
-
         await newAudit.save()
                         .catch(error => {        
                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error 2', detail: error.message}]})
                         })
-
         response.status(201).json({code: 201,
                                     msg: 'the audit has been created successfully',
                                     data: newAudit })
@@ -164,12 +152,9 @@ const updateAudit = async(request, response) => {
     try{
         let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions} = request.body
         const {id} = request.params
-
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
-
         let auditById = null
-
         if(id && ObjectId.isValid(id)){
             auditById = await Audit.findById(id)
                                        .catch(error => {return response.status(400).json({code: 500, 
@@ -188,7 +173,6 @@ const updateAudit = async(request, response) => {
                                               detail: `id not found`
                                             })   
         }
-        
         if(end_date && end_date.match(regexDate)){
             const arrayDate = end_date.split('-')
             if(arrayDate[1].length<2)
@@ -197,7 +181,6 @@ const updateAudit = async(request, response) => {
                 arrayDate[2] = '0'+arrayDate[2]
             end_date = `${arrayDate[0]}-${arrayDate[1]}-${arrayDate[2]}`
         }
-
         if(initial_date && initial_date.match(regexDate)){
             const arrayDate = initial_date.split('-')
             if(arrayDate[1].length<2)
@@ -206,7 +189,6 @@ const updateAudit = async(request, response) => {
                 arrayDate[2] = '0'+arrayDate[2]
             initial_date = `${arrayDate[0]}-${arrayDate[1]}-${arrayDate[2]}`
         }
-
         if(name){
             const audit = await Audit.exists({name: { $regex : new RegExp(name, "i") } })
             const audit2 = await Audit.exists({name: name })
@@ -216,7 +198,6 @@ const updateAudit = async(request, response) => {
                              detail: `${name} is in use`
                             })
         }
-
         if(installation_type && !Array.isArray(installation_type)){
             errors.push({code: 400, 
                 msg: 'invalid installation_type',
@@ -241,27 +222,23 @@ const updateAudit = async(request, response) => {
                 }
             })
         }
-
         if(initial_date && (!initial_date.match(regexDate) || initial_date > end_date)){
             errors.push({code: 400, 
                 msg: 'invalid initial_date',
                 detail: `initial_date should be yyyy-mm-dd format, and initial_date should be <= end_date`
             })
         }
-
         if(end_date && !end_date.match(regexDate) || initial_date > end_date){
             errors.push({code: 400, 
                 msg: 'invalid end_date',
                 detail: `end_date should be yyyy-mm-dd format`
             })
         }
-
         if(isAgency!==null && isAgency!==undefined && typeof isAgency !== 'boolean')
             errors.push({code: 400, 
                         msg: 'invalid isAgency',
                         detail: `isAgency should be a boolean type`
                         }) 
-                        
         if(criterions && (criterions && (criterions.length <= 0 || !Array.isArray(criterions)))){
             errors.push({code: 400, 
                             msg: 'invalid criterions',
@@ -302,12 +279,9 @@ const updateAudit = async(request, response) => {
                 }
             })
         }
-
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
-
         const updatedFields = {}
-
         if(name)
             updatedFields['name'] = name
         if(installation_type)
@@ -320,14 +294,11 @@ const updateAudit = async(request, response) => {
             updatedFields['criterions'] = criterions
         if(isAgency !== null && isAgency !== undefined)
             updatedFields['isAgency'] = isAgency
-            
         updatedFields['updatedAt'] = Date.now()
-
         const updatedAudit = await Audit.findByIdAndUpdate(id, updatedFields, {new: true})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-
         response.status(200).json({code: 200,
                                     msg: 'the Audit has been updated successfully',
                                     data: updatedAudit })
@@ -340,7 +311,6 @@ const updateAudit = async(request, response) => {
 const deleteAudit = async(request, response) => {
     try{
         const {id} = request.params
-
         if(id && ObjectId.isValid(id)){
             const existId = await Audit.exists({_id: id})
                                           .catch(error => {return response.status(400).json({code: 500, 
@@ -375,13 +345,9 @@ const deleteAudit = async(request, response) => {
 const getAllAudit= async(request, response) => {
     try{
         const { name, installation_type, start_date, end_date, pageReq} = request.body
-
         const page = !pageReq ? 0 : pageReq
-
         let skip = (page - 1) * 10
-
         const filter = {}
-
         if(installation_type && !ObjectId.isValid(installation_type)){
             return response.status(400).json({code: 400, 
                                               msg: 'invalid installation_type',
@@ -396,7 +362,6 @@ const getAllAudit= async(request, response) => {
             filter['start_date'] = {$gt : start_date}
             filter['end_date'] = {$lt : end_date}
         }
-
         if(page === 0){
             const audits = await Audit.find(filter).populate("installation_type criterions.criterion")
                                              .catch(error => {        
@@ -409,27 +374,21 @@ const getAllAudit= async(request, response) => {
                                               msg: 'success',
                                               data: data })
         }
-            
         let countDocs = await Audit.countDocuments(filter)
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-
         let countPage = countDocs % 10 === 0? countDocs/10 : Math.floor((countDocs/10) + 1)
-
         if((countPage < page) && page !== 1)
             return response.status(400).json({code: 400, 
                                               msg: 'invalid page', 
                                               detail: `totalPages: ${countPage}`})
-
         const audits = await Audit.find(filter).skip(skip).limit(10).populate("installation_type criterions.criterion")
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-
         const data = {audits: audits, 
                       totalPages: countPage}
-
         return response.status(200).json({code: 200,
                                    msg: 'success',
                                    data: data })
@@ -442,23 +401,18 @@ const getAllAudit= async(request, response) => {
 const getAudit = async(request, response) => {
     try{
         const {id} = request.params
-
-        //Validations
         if(!id)
             return response.status(400).json({code: 400,
                                                 msg: 'invalid id',
                                                 detail: 'id is a obligatory field'})
-    
         if(id && !ObjectId.isValid(id))
             return response.status(400).json({code: 400,
                                               msg: 'invalid id',
                                               detail: 'id should be an objectId'})
-    
         const audit = await Audit.findById(id).populate("installation_type")
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-    
         if(audit){
             response.status(200).json({code: 200,
                                        msg: 'success',

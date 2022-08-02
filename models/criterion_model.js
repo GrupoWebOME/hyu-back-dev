@@ -31,6 +31,7 @@ const criterionSchema = new Schema({
     photo: {type: Boolean, default: false },
     saleCriterion: {type: Boolean, default: false },
     hmesComment: {type: String, default: null },
+    criterion_abbreviation: {type: String},
     createdAt: {type: Date,
                 default: Date.now},
     updatedAt: {type: Date,

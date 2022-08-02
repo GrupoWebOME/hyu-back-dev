@@ -4,9 +4,7 @@ const ObjectId = require('mongodb').ObjectId
 const createCriterionType = async(request, response) => {
     try{
         const {idSecondary, name} = request.body
-
         let errors = []
-
         if(!idSecondary || idSecondary.length < 1)
             errors.push({code: 400, 
                         msg: 'invalid idSecondary',
@@ -23,7 +21,6 @@ const createCriterionType = async(request, response) => {
                                 detail: `${idSecondary} is already in use`
                             })
         }
-
         if(!name || name.length < 1)
             errors.push({code: 400, 
                             msg: 'invalid name',
@@ -40,20 +37,16 @@ const createCriterionType = async(request, response) => {
                              detail: `${name} is already in use`
                             })
         }
-
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
-
         const newCriterionType = new CriterionType({
             idSecondary: idSecondary,
             name: name
         })
-
         await newCriterionType.save()
                         .catch(error => {        
                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                         })
-
         response.status(201).json({code: 201,
                                     msg: 'the CriterionType has been created successfully',
                                     data: newCriterionType })
@@ -67,9 +60,7 @@ const updateCriterionType = async(request, response) => {
     try{
         const {id} = request.params
         const {idSecondary, name} = request.body
-
         let errors = []
-
         if(id && ObjectId.isValid(id)){
             const existId = await CriterionType.exists({_id: id})
                                        .catch(error => {return response.status(400).json({code: 500, 
@@ -88,7 +79,6 @@ const updateCriterionType = async(request, response) => {
                                               detail: `id not found`
                                             })   
         }
-   
         if(idSecondary){
             if(idSecondary.length < 1){
                 errors.push({code: 400, 
@@ -108,7 +98,6 @@ const updateCriterionType = async(request, response) => {
                                 })
             }
         }
-
         if(name){
             if(name.length < 1){
                 errors.push({code: 400, 
@@ -127,25 +116,19 @@ const updateCriterionType = async(request, response) => {
                                 detail: `${name} is already in use`
                                 })
             }
-            
         }
-
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
-
         const updatedFields = {}
-
         if(idSecondary)
             updatedFields['idSecondary'] = idSecondary
         if(name)
             updatedFields['name'] = name
         updatedFields['updatedAt'] = Date.now()
-
         const updatedCriterionType = await CriterionType.findByIdAndUpdate(id, updatedFields, {new: true})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-
         response.status(201).json({code: 200,
                                     msg: 'the CriterionType has been updated successfully',
                                     data: updatedCriterionType })
@@ -158,7 +141,6 @@ const updateCriterionType = async(request, response) => {
 const deleteCriterionType = async(request, response) => {
     try{
         const {id} = request.params
-
         if(id && ObjectId.isValid(id)){
             const existId = await CriterionType.exists({_id: id})
                                           .catch(error => {return response.status(400).json({code: 500, 
@@ -177,7 +159,6 @@ const deleteCriterionType = async(request, response) => {
                                               detail: `id not found`
                                             })   
         }
-
         const deletedCriterionType = await CriterionType.findByIdAndDelete(id)
                                                 .catch(error => {        
                                                     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
@@ -194,19 +175,13 @@ const deleteCriterionType = async(request, response) => {
 const getAllCriterionType= async(request, response) => {
     try{
         const {idSecondary, name, pageReq} = request.body
-
         const page = !pageReq ? 0 : pageReq
-
         let skip = (page - 1) * 10
-
         const filter = {}
-
         if(idSecondary)
             filter['idSecondary'] = { $regex : new RegExp(idSecondary, "i") }
-            
         if(name)
             filter['name'] = { $regex : new RegExp(name, "i") }
-
         if(page === 0){
             const criterionTypes = await CriterionType.find(filter)
                                              .catch(error => {        
@@ -214,30 +189,23 @@ const getAllCriterionType= async(request, response) => {
                                              })
             const data = {criterionTypes: criterionTypes, 
                           totalPages: 1}
-
             return response.status(200).json({code: 200,
                                               msg: 'success',
                                               data: data })
         }
-            
         let countDocs = await CriterionType.countDocuments(filter)
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-
         let countPage = countDocs % 10 === 0? countDocs/10 : Math.floor((countDocs/10) + 1)
-
         if((countPage < page) && page !== 1)
             return response.status(400).json({code: 400, msg: 'invalid page', detail: `totalPages: ${countPage}`})
-
         const criterionTypes = await CriterionType.find(filter).skip(skip).limit(10)
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-
         const data = {criterionTypes: criterionTypes, 
                       totalPages: countPage}
-
         response.status(200).json({code: 200,
                                    msg: 'success',
                                    data: data })
@@ -248,21 +216,16 @@ const getAllCriterionType= async(request, response) => {
 }
 
 const getCriterionType = async(request, response) => {
-
     try{
         const {id} = request.params
-
-        //Validations
         if(!id)
             return response.status(400).json({code: 400,
                                                 msg: 'invalid id',
                                                 detail: 'id is a obligatory field'})
-    
         if(id && !ObjectId.isValid(id))
             return response.status(400).json({code: 400,
                                               msg: 'invalid id',
                                               detail: 'id should be an objectId'})
-    
         const criterion = await CriterionType.findById(id)
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
@@ -281,7 +244,6 @@ const getCriterionType = async(request, response) => {
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
     }  
-    
 }
 
 module.exports = {createCriterionType, updateCriterionType, deleteCriterionType, getAllCriterionType, getCriterionType}
