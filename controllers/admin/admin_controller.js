@@ -98,7 +98,8 @@ const createAdmin = async(request, response) => {
             emailAddress: emailAddress,
             userName: userName,
             password: passwordHash,
-            role: role.toLowerCase()
+            role: role.toLowerCase(),
+            dealership: dealership? dealership: null
         })
     
         const token = jwt.sign(
