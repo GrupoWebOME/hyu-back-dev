@@ -26,6 +26,7 @@ const adminSchema = new Schema({
               required: true,
               trim: true},
        dealership: {type: Schema.Types.ObjectId,
+                    ref: 'Dealership',
                     default: null },
        isMain: {type: Boolean, 
               default: false},
