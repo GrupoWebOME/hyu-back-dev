@@ -400,7 +400,7 @@ const getAllAdmins = async(request, response) => {
                                               msg: 'invalid page', 
                                               detail: `totalPages: ${countPage}`})
 
-        const admins = await Admin.find(filter).skip(skip).limit(10)
+        const admins = await Admin.find(filter).populate('dealership').skip(skip).limit(10)
         
         const data = {admins: admins, 
                       totalPages: countPage}
