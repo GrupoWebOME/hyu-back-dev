@@ -381,7 +381,7 @@ const getAllAdmins = async(request, response) => {
             filter['dealership'] = new RegExp((dealership).toLowerCase())
 
         if(page === 0){
-            const admins = await Admin.find(filter)
+            const admins = await Admin.find(filter).populate('dealership')
             
             const data = {admins: admins, 
                           totalPages: 1}
