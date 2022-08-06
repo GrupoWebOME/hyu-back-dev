@@ -663,32 +663,28 @@ const getDataForTables = async(request, response) => {
                 const sales_weight_per_installation= (installation.installation.sales_weight_per_installation !== null)? installation.installation.sales_weight_per_installation : 0
                 const post_sale_weight_per_installation= (installation.installation.post_sale_weight_per_installation !== null)? installation.installation.post_sale_weight_per_installation : 0
                 let accumTotalWeightPerc = sales_weight_per_installation + post_sale_weight_per_installation
-
                 const coefficient = ((accumTotalWeightPerc * 100) / totalWeightPerc)/100
 
                 accumAgency += installation.categories[installation.categories.length - 1].auditTotalResult
                 installation.categories.forEach((category) => {
                     if(category.id === HYUNDAI_PROMISE){
                         hp_perc_total += 1
-                        hp_perc += category.pass * coefficient
-                        total_values += category.total * coefficient
+                        hp_perc += category.partialPercentage * coefficient
                     }
                     else if(category.id === GENERAL){
                         general_perc_total += 1
-                        general_perc += category.pass * coefficient
-                        total_values += category.total * coefficient
+                        general_perc += category.partialPercentage * coefficient
                     }
                     else if(category.id === VENTA){
-                        v_perc += category.pass * coefficient
                         v_perc_total += 1
-                        total_values += category.total * coefficient
+                        v_perc += category.partialPercentage * coefficient
                     }
                     else if(category.id === POSVENTA){
-                        pv_perc += category.pass * coefficient
                         pv_perc_total += 1
-                        total_values += category.total * coefficient
+                        pv_perc += category.partialPercentage * coefficient
                     }
                 })
+
             }
 
             if(installation && installation.instalation_audit_types){
@@ -712,10 +708,10 @@ const getDataForTables = async(request, response) => {
             img_perc: (img_total === 0)? null: img_perc / img_total,
             hme_perc: (hme_total === 0)? null: hme_perc / hme_total,
 
-            hp_perc: (hp_perc_total === 0)? null: hp_perc * 100 / total_values,
-            v_perc: (v_perc_total === 0)? null: v_perc * 100 / total_values,
-            general_perc: (general_perc_total === 0)? null: general_perc * 100 / total_values,
-            pv_perc: (pv_perc_total === 0)? null: pv_perc * 100 / total_values
+            hp_perc: (hp_perc === 0)? null: hp_perc,
+            v_perc: (v_perc === 0)? null: v_perc,
+            general_perc: (general_perc === 0)? null: general_perc,
+            pv_perc: (pv_perc === 0)? null: pv_perc
         }
 
         const total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
@@ -1298,39 +1294,34 @@ const getDataForFullAudit = async(request, response) => {
             let total_values = 0
 
             instalations_audit_details.forEach((installation) => {
-
-                const sales_weight_per_installation= (installation.installation.sales_weight_per_installation !== null)? installation.installation.sales_weight_per_installation : 0
-                const post_sale_weight_per_installation= (installation.installation.post_sale_weight_per_installation !== null)? installation.installation.post_sale_weight_per_installation : 0
-
-                let accumTotalWeightPerc = sales_weight_per_installation + post_sale_weight_per_installation
-
-                const coefficient = ((accumTotalWeightPerc * 100) / totalWeightPerc)/100
-
                 if(installation && installation.categories){
+                    const sales_weight_per_installation= (installation.installation.sales_weight_per_installation !== null)? installation.installation.sales_weight_per_installation : 0
+                    const post_sale_weight_per_installation= (installation.installation.post_sale_weight_per_installation !== null)? installation.installation.post_sale_weight_per_installation : 0
+                    let accumTotalWeightPerc = sales_weight_per_installation + post_sale_weight_per_installation
+                    const coefficient = ((accumTotalWeightPerc * 100) / totalWeightPerc)/100
+    
                     accumAgency += installation.categories[installation.categories.length - 1].auditTotalResult
                     installation.categories.forEach((category) => {
                         if(category.id === HYUNDAI_PROMISE){
                             hp_perc_total += 1
-                            hp_perc += category.pass * coefficient
-                            total_values += category.total * coefficient
+                            hp_perc += category.partialPercentage * coefficient
                         }
                         else if(category.id === GENERAL){
                             general_perc_total += 1
-                            general_perc += category.pass * coefficient
-                            total_values += category.total * coefficient
+                            general_perc += category.partialPercentage * coefficient
                         }
                         else if(category.id === VENTA){
-                            v_perc += category.pass * coefficient
                             v_perc_total += 1
-                            total_values += category.total * coefficient
+                            v_perc += category.partialPercentage * coefficient
                         }
                         else if(category.id === POSVENTA){
-                            pv_perc += category.pass * coefficient
                             pv_perc_total += 1
-                            total_values += category.total * coefficient
+                            pv_perc += category.partialPercentage * coefficient
                         }
                     })
+    
                 }
+    
                 if(installation && installation.instalation_audit_types){
                     if(installation.instalation_audit_types.percImgAudit !== null){
                         img_perc+= installation.instalation_audit_types.percImgAudit
@@ -1346,16 +1337,16 @@ const getDataForFullAudit = async(request, response) => {
                     }
                 }
             })
-
+    
             let agency_by_types = {
                 electric_perc: (electric_total === 0)? null: electric_perc / electric_total,
                 img_perc: (img_total === 0)? null: img_perc / img_total,
                 hme_perc: (hme_total === 0)? null: hme_perc / hme_total,
-
-                hp_perc: (hp_perc_total === 0)? null: hp_perc * 100 / total_values,
-                v_perc: (v_perc_total === 0)? null: v_perc * 100 / total_values,
-                general_perc: (general_perc_total === 0)? null: general_perc * 100 / total_values,
-                pv_perc: (pv_perc_total === 0)? null: pv_perc * 100 / total_values
+    
+                hp_perc: (hp_perc === 0)? null: hp_perc,
+                v_perc: (v_perc === 0)? null: v_perc,
+                general_perc: (general_perc === 0)? null: general_perc,
+                pv_perc: (pv_perc === 0)? null: pv_perc
             }
 
             const total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
