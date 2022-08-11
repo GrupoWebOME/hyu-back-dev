@@ -103,7 +103,7 @@ const updateBlock = async(request, response) => {
                                                   msg: 'invalid id',
                                                   detail: 'id not found'
                                                 })
-            else if(existCategory.abbreviation){
+            else if(existId.abbreviation){
                 const index = existId.category_abbreviation.lastIndexOf('.')
                 category_abbreviation = `${existId.category_abbreviation.substring(0, index+1)}${number}`
             }
