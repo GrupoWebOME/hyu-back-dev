@@ -63,7 +63,7 @@ const createCriterion = async(request, response) => {
                                 detail: `standard not found`
                                 })    
                 }
-                else if(number){
+                else if(number && existStandard.standard_abbreviation){
                     criterion_abbreviation = `${existStandard.standard_abbreviation}.${number}`
                 }     
             }
@@ -243,6 +243,7 @@ const updateCriterion = async(request, response) => {
         const {description, number, value, comment, installationType, standard, auditResponsable, criterionType,
                isException, isHmeAudit, isImgAudit, isElectricAudit, photo, saleCriterion, hmesComment,
                imageUrl, imageComment, hmeCode } = request.body
+
         let criterion_abbreviation = null
         let errors = []
         if(id && ObjectId.isValid(id)){
@@ -258,8 +259,10 @@ const updateCriterion = async(request, response) => {
                                                 })
             }
             else{
-                const index = existId.criterion_abbreviation.lastIndexOf('.')
-                criterion_abbreviation = `${existId.criterion_abbreviation.substring(0, index+1)}${number}`
+                if(existId?.criterion_abbreviation){
+                    const index = existId.criterion_abbreviation.lastIndexOf('.')
+                    criterion_abbreviation = `${existId.criterion_abbreviation.substring(0, index+1)}${number}`
+                }
             }
         }
         else{
