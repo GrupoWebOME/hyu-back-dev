@@ -31,7 +31,8 @@ const createStandard = async(request, response) => {
                                 detail: `area not found`
                                 })  
                 }
-                else if(number){
+                
+                else if(number && existArea.area_abbreviation){
                     standard_abbreviation = `${existArea.area_abbreviation}.${number}`
                 }        
             }
@@ -128,7 +129,7 @@ const updateStandard = async(request, response) => {
                                                   detail: 'id not found'
                                                 })
             }
-            else{
+            else if(existId?.standard_abbreviation){
                 const index = existId.standard_abbreviation.lastIndexOf('.')
                 standard_abbreviation = `${existId.standard_abbreviation.substring(0, index+1)}${number}`
             }
