@@ -34,7 +34,7 @@ const createArea = async(request, response) => {
                                 msg: 'invalid block',
                                 detail: `block not found`
                                 })
-                else if(number){
+                else if(number && existBlock.category_abbreviation){
                     area_abbreviation = `${existBlock.category_abbreviation}.${number}`
                 }        
             }
@@ -118,7 +118,7 @@ const updateArea = async(request, response) => {
                                                   detail: 'id not found'
                                                 })
             }
-            else{
+            else if(existId.area_abbreviation){
                 const index = existId.area_abbreviation.lastIndexOf('.')
                 area_abbreviation = `${existId.area_abbreviation.substring(0, index+1)}${number}`
             }
