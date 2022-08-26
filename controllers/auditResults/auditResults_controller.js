@@ -317,8 +317,6 @@ const getDataForTables = async(request, response) => {
         let auditResultsWithoutInactiveInst = [] 
         
         auditsResults.forEach((element) => {
-            console.log('entra', element.installation_id)
-
             if(element.installation_id.active && element.installation_id.dealership.active){
                 auditResultsWithoutInactiveInst = [...auditResultsWithoutInactiveInst, element]
             }
