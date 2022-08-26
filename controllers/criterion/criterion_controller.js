@@ -363,7 +363,6 @@ const updateCriterion = async(request, response) => {
             }
             else if(isValid){
                 exceptions.forEach(async(exception) => {
-                    console.log(exception, ObjectId.isValid(exception))
                     if(typeof exception !== 'string' || !ObjectId.isValid(exception)){
                         errors.push({code: 400, 
                             msg: 'invalid exception',
