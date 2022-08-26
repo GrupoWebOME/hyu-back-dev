@@ -392,7 +392,6 @@ const updateCriterion = async(request, response) => {
         const criterion = await Criterion.findById(id)
         let diff = 0
         if(value !== null && value !== undefined && typeof value === 'number'){
-            console.log(criterion.value)
             diff = value - criterion.value
         }
         if(description && description.length < 1){
