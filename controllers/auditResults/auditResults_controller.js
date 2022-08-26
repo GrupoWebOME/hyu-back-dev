@@ -305,8 +305,8 @@ const getDataForTables = async(request, response) => {
         }
         //Obtengo todas los resultados de auditorías que pertenezcan a las instalaciones de una agencia en particular, y una auditoría en particular
         let auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
-                                                .populate({path: 'installation_id', select: '_id active name code installation_type dealership sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
-                                                           populate: {path: 'installation_type dealership', select: '_id code active'}})
+                                                .populate({path: 'installation_id', select: '_id name code installation_type sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
+                                                           populate: {path: 'installation_type', select: '_id code'}})
                                                 .populate({ path: 'criterions.criterion_id', 
                                                             populate: {
                                                                 path: 'standard block area category auditResponsable criterionType installationType',
@@ -314,19 +314,11 @@ const getDataForTables = async(request, response) => {
                                                             },
                                                         }) 
 
-        let auditResultsWithoutInactiveInst = [] 
-        
-        auditsResults.forEach((element) => {
-            if(element.installation_id.active && element.installation_id.dealership.active){
-                auditResultsWithoutInactiveInst = [...auditResultsWithoutInactiveInst, element]
-            }
-        } )          
-                   
-        const auditsResultsAux = auditResultsWithoutInactiveInst        
+        const auditsResultsAux = auditsResults        
         let arrayForCore = []
 
         //Recorro el arreglo de resultados
-        auditResultsWithoutInactiveInst.forEach((element) => {
+        auditsResults.forEach((element) => {
             let arrayStandardsFalse = []
             let arrayAreasFalse = []
 
@@ -377,7 +369,7 @@ const getDataForTables = async(request, response) => {
         let totalWeightPerc = 0
 
         //Ordeno el arreglo por standard id
-        auditResultsWithoutInactiveInst.forEach((element) => {
+        auditsResults.forEach((element) => {
             element.criterions.sort(function (a, b) {
                     if (a.criterion_id.standard._id.toString() > b.criterion_id.standard._id.toString()) {
                       return 1;
@@ -389,7 +381,7 @@ const getDataForTables = async(request, response) => {
             })
         })
 
-        auditResultsWithoutInactiveInst.forEach((element) => {
+        auditsResults.forEach((element) => {
             let installationAuditData = {}
             installationAuditData['installation'] =  element.installation_id
             let actualCategoryID = ''
@@ -731,7 +723,7 @@ const getDataForTables = async(request, response) => {
         let data = {
             audit_name: existAudit.name,
             dealership_details: dealershipByID,
-            audit_criterions_details: auditResultsWithoutInactiveInst,
+            audit_criterions_details: auditsResults,
             instalations_audit_details: instalations_audit_details,
             agency_audit_details: agency_audit_details,
             agency_by_types: agency_by_types
@@ -776,8 +768,8 @@ const getDataForAudit = async(request, response) => {
         }
 
         auditsResults = await AuditResults.find({audit_id: audit_id})
-                                                .populate({path: 'installation_id', select: '_id active name installation_type dealership', 
-                                                            populate: {path: 'installation_type dealership', select: '_id code active'}})
+                                                .populate({path: 'installation_id', select: '_id name installation_type', 
+                                                                                                populate: {path: 'installation_type', select: '_id code'}})
                                                 .populate({ path: 'criterions.criterion_id', 
                                                     populate: {
                                                         path: 'standard category criterionType installationType',
@@ -787,19 +779,11 @@ const getDataForAudit = async(request, response) => {
 
         const AOH = "6226310514861f56d3c64266"
 
-        let auditResultsWithoutInactiveInst = []
-
-        auditsResults.forEach((element) => {
-            if(element.installation_id.active && element.installation_id.dealership.active){
-                auditResultsWithoutInactiveInst = [...auditResultsWithoutInactiveInst, element]
-            }
-        } )  
-
-        const auditsResultsAux = auditResultsWithoutInactiveInst  
+        const auditsResultsAux = auditsResults  
               
         let arrayForCore = []
 
-        auditResultsWithoutInactiveInst.forEach((element) => {
+        auditsResults.forEach((element) => {
             let arrayStandardsFalse = []
             let arrayAreasFalse = []
 
@@ -854,7 +838,7 @@ const getDataForAudit = async(request, response) => {
         let totalValueDeal_for_installation = 0
         let totalValuesPassDeal_for_installation = 0
 
-        auditResultsWithoutInactiveInst.forEach((element) => {
+        auditsResults.forEach((element) => {
             let isValidType = false
             element.criterions.forEach((criterion, index) => {
                 criterion.criterion_id.installationType.forEach((type) => {
@@ -991,22 +975,13 @@ const getDataForFullAudit = async(request, response) => {
         }
 
         auditsResults = await AuditResults.find({audit_id: audit_id})
-                                                .populate({path: 'installation_id', select: 'dealership active', 
-                                                populate: {path: 'dealership', select: 'active'}})
-
-        let auditResultsWithoutInactiveInst = []
-
-        auditsResults.forEach((element) => {
-            if(element.installation_id.active && element.installation_id.dealership.active){
-                auditResultsWithoutInactiveInst = [...auditResultsWithoutInactiveInst, element]
-            }
-        } )  
+                                                .populate({path: 'installation_id', select: 'dealership'})
 
         let arrayOfDealerships = []
 
-        auditResultsWithoutInactiveInst.forEach((element) => {
-            if(!arrayOfDealerships.includes(element.installation_id.dealership._id.toString())){
-                arrayOfDealerships = [...arrayOfDealerships, element.installation_id.dealership._id.toString()]
+        auditsResults.forEach((element) => {
+            if(!arrayOfDealerships.includes(element.installation_id.dealership.toString())){
+                arrayOfDealerships = [...arrayOfDealerships, element.installation_id.dealership.toString()]
             }
         })
 
@@ -1017,26 +992,19 @@ const getDataForFullAudit = async(request, response) => {
 
             const dealershipByID = await Dealership.findById(dealership)
             let auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
-                                                    .populate({path: 'installation_id', select: '_id name code dealership active installation_type sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
-                                                                populate: {path: 'installation_type dealership', select: '_id code active'}})
+                                                    .populate({path: 'installation_id', select: '_id name code installation_type sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
+                                                                populate: {path: 'installation_type', select: '_id code'}})
                                                     .populate({ path: 'criterions.criterion_id', 
                                                                 populate: {
                                                                     path: 'standard block area category auditResponsable criterionType installationType',
-                                                                    select: 'name code description isCore active number abbreviation'
+                                                                    select: 'name code description isCore number abbreviation'
                                                                 },
                                                             }) 
-            let auditResultsWithoutInactiveInst = []
-
-            auditsResults.forEach((element) => {
-                if(element.installation_id.active && element.installation_id.dealership.active){
-                    auditResultsWithoutInactiveInst = [...auditResultsWithoutInactiveInst, element]
-                }
-            } )  
-
-            const auditsResultsAux = auditResultsWithoutInactiveInst                                            
+                                                            
+            const auditsResultsAux = auditsResults                                            
             let arrayForCore = []
 
-            auditResultsWithoutInactiveInst.forEach((element) => {
+            auditsResults.forEach((element) => {
                 let arrayStandardsFalse = []
                 let arrayAreasFalse = []
 
@@ -1083,7 +1051,7 @@ const getDataForFullAudit = async(request, response) => {
 
             let totalWeightPerc = 0
 
-            auditResultsWithoutInactiveInst.forEach((element) => {
+            auditsResults.forEach((element) => {
                 let installationAuditData = {}
                 installationAuditData['installation'] =  element.installation_id
                 let actualCategoryID = ''
