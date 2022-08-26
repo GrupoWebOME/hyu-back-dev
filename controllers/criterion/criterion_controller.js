@@ -6,6 +6,7 @@ const Area = require('../../models/area_model')
 const Block = require('../../models/block_model')
 const Category = require('../../models/category_model')
 const CriterionType = require('../../models/criterionType_model')
+const Installation = require('../../models/installation_schema')
 const ObjectId = require('mongodb').ObjectId
 
 const createCriterion = async(request, response) => {
@@ -242,7 +243,7 @@ const updateCriterion = async(request, response) => {
         const {id} = request.params
         const {description, number, value, comment, installationType, standard, auditResponsable, criterionType,
                isException, isHmeAudit, isImgAudit, isElectricAudit, photo, saleCriterion, hmesComment,
-               imageUrl, imageComment, hmeCode } = request.body
+               imageUrl, imageComment, hmeCode, exceptions } = request.body
 
         let criterion_abbreviation = null
         let errors = []
@@ -350,6 +351,37 @@ const updateCriterion = async(request, response) => {
                                 msg: 'invalid criterionType',
                                 detail: `${criterionType} not found`
                                 })
+            }
+        }
+        if(exceptions){
+            let isValid = true
+            if(!Array.isArray(exceptions)){
+                errors.push({code: 400, 
+                    msg: 'invalid exceptions',
+                    detail: `exceptions should be an array type`
+                    })   
+            }
+            else if(isValid){
+                exceptions.forEach(async(exception) => {
+                    console.log(exception, ObjectId.isValid(exception))
+                    if(typeof exception !== 'string' || !ObjectId.isValid(exception)){
+                        errors.push({code: 400, 
+                            msg: 'invalid exception',
+                            detail: `exception should be an a objectId`
+                            })   
+                        isValid = false
+                    }
+                    else{
+                        const existInstallation = await Installation.findOne({_id: exception})
+                        if(!existInstallation){
+                            errors.push({code: 400, 
+                                msg: 'invalid exception',
+                                detail: `installationid not found`
+                                })   
+                            isValid = false
+                        }
+                    }
+                })
             }
         }
         if(number !== null && number !== undefined && typeof number !== 'number')
@@ -465,6 +497,8 @@ const updateCriterion = async(request, response) => {
             updatedFields['saleCriterion'] = saleCriterion
         if(hmesComment)
             updatedFields['hmesComment'] = hmesComment
+        if(exceptions)
+            updatedFields['exceptions'] = exceptions
         updatedFields['updatedAt'] = Date.now()
         const updatedCriterion = await Criterion.findByIdAndUpdate(id, updatedFields, {new: true})
                                               .catch(error => {        
