@@ -14,6 +14,8 @@ const dealershipSchema = new Schema({
         installations: [{type: Schema.Types.ObjectId}],
         location: {type: String, 
                 required: true},
+        active: {type: Boolean,
+                 default: true},
         province: {type: String,
                         required: true},
         autonomous_community: {type: String, 
