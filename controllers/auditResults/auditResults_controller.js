@@ -305,8 +305,8 @@ const getDataForTables = async(request, response) => {
         }
         //Obtengo todas los resultados de auditorías que pertenezcan a las instalaciones de una agencia en particular, y una auditoría en particular
         let auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
-                                                .populate({path: 'installation_id', select: '_id name code installation_type sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
-                                                           populate: {path: 'installation_type', select: '_id code'}})
+                                                .populate({path: 'installation_id', select: '_id active name code installation_type dealership sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
+                                                            populate: {path: 'installation_type dealership', select: '_id code active'}})
                                                 .populate({ path: 'criterions.criterion_id', 
                                                             populate: {
                                                                 path: 'standard block area category auditResponsable criterionType installationType',
@@ -314,11 +314,20 @@ const getDataForTables = async(request, response) => {
                                                             },
                                                         }) 
 
-        const auditsResultsAux = auditsResults        
+        let auditResultsWithoutInactiveInst = [] 
+
+        auditsResults.forEach((element) => {
+            if(element.installation_id.active && element.installation_id.dealership.active){
+                auditResultsWithoutInactiveInst = [...auditResultsWithoutInactiveInst, element]
+            }
+        } )          
+
+        const auditsResultsAux = auditResultsWithoutInactiveInst       
+
         let arrayForCore = []
 
         //Recorro el arreglo de resultados
-        auditsResults.forEach((element) => {
+        auditResultsWithoutInactiveInst.forEach((element) => {
             let arrayStandardsFalse = []
             let arrayAreasFalse = []
 
@@ -369,7 +378,7 @@ const getDataForTables = async(request, response) => {
         let totalWeightPerc = 0
 
         //Ordeno el arreglo por standard id
-        auditsResults.forEach((element) => {
+        auditResultsWithoutInactiveInst.forEach((element) => {
             element.criterions.sort(function (a, b) {
                     if (a.criterion_id.standard._id.toString() > b.criterion_id.standard._id.toString()) {
                       return 1;
@@ -381,7 +390,7 @@ const getDataForTables = async(request, response) => {
             })
         })
 
-        auditsResults.forEach((element) => {
+        auditResultsWithoutInactiveInst.forEach((element) => {
             let installationAuditData = {}
             installationAuditData['installation'] =  element.installation_id
             let actualCategoryID = ''
@@ -768,8 +777,8 @@ const getDataForAudit = async(request, response) => {
         }
 
         auditsResults = await AuditResults.find({audit_id: audit_id})
-                                                .populate({path: 'installation_id', select: '_id name installation_type', 
-                                                                                                populate: {path: 'installation_type', select: '_id code'}})
+                                                .populate({path: 'installation_id', select: '_id active name installation_type dealership', 
+                                                            populate: {path: 'installation_type dealership', select: '_id code active'}})
                                                 .populate({ path: 'criterions.criterion_id', 
                                                     populate: {
                                                         path: 'standard category criterionType installationType',
@@ -779,11 +788,19 @@ const getDataForAudit = async(request, response) => {
 
         const AOH = "6226310514861f56d3c64266"
 
-        const auditsResultsAux = auditsResults  
+        let auditResultsWithoutInactiveInst = []
+
+        auditsResults.forEach((element) => {
+            if(element.installation_id.active && element.installation_id.dealership.active){
+                auditResultsWithoutInactiveInst = [...auditResultsWithoutInactiveInst, element]
+            }
+        } )  
+
+        const auditsResultsAux = auditResultsWithoutInactiveInst   
               
         let arrayForCore = []
 
-        auditsResults.forEach((element) => {
+        auditResultsWithoutInactiveInst.forEach((element) => {
             let arrayStandardsFalse = []
             let arrayAreasFalse = []
 
@@ -838,7 +855,7 @@ const getDataForAudit = async(request, response) => {
         let totalValueDeal_for_installation = 0
         let totalValuesPassDeal_for_installation = 0
 
-        auditsResults.forEach((element) => {
+        auditResultsWithoutInactiveInst.forEach((element) => {
             let isValidType = false
             element.criterions.forEach((criterion, index) => {
                 criterion.criterion_id.installationType.forEach((type) => {
@@ -975,13 +992,22 @@ const getDataForFullAudit = async(request, response) => {
         }
 
         auditsResults = await AuditResults.find({audit_id: audit_id})
-                                                .populate({path: 'installation_id', select: 'dealership'})
+                                            .populate({path: 'installation_id', select: 'dealership active', 
+                                                        populate: {path: 'dealership', select: 'active'}})
+
+        let auditResultsWithoutInactiveInst  = []
+
+        auditsResults.forEach((element) => {
+            if(element.installation_id.active && element.installation_id.dealership.active){
+                auditResultsWithoutInactiveInst = [...auditResultsWithoutInactiveInst, element]
+            }
+        })
 
         let arrayOfDealerships = []
 
-        auditsResults.forEach((element) => {
-            if(!arrayOfDealerships.includes(element.installation_id.dealership.toString())){
-                arrayOfDealerships = [...arrayOfDealerships, element.installation_id.dealership.toString()]
+        auditResultsWithoutInactiveInst.forEach((element) => {
+            if(!arrayOfDealerships.includes(element.installation_id.dealership._id.toString())){
+                arrayOfDealerships = [...arrayOfDealerships, element.installation_id.dealership._id.toString()]
             }
         })
 
@@ -992,19 +1018,27 @@ const getDataForFullAudit = async(request, response) => {
 
             const dealershipByID = await Dealership.findById(dealership)
             let auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
-                                                    .populate({path: 'installation_id', select: '_id name code installation_type sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
-                                                                populate: {path: 'installation_type', select: '_id code'}})
+                                                    .populate({path: 'installation_id', select: '_id name code dealership active installation_type sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
+                                                                populate: {path: 'installation_type dealership', select: '_id code active'}})
                                                     .populate({ path: 'criterions.criterion_id', 
                                                                 populate: {
                                                                     path: 'standard block area category auditResponsable criterionType installationType',
-                                                                    select: 'name code description isCore number abbreviation'
+                                                                    select: 'name code description isCore active number abbreviation'
                                                                 },
                                                             }) 
                                                             
-            const auditsResultsAux = auditsResults                                            
-            let arrayForCore = []
+            let auditResultsWithoutInactiveInst = []
 
             auditsResults.forEach((element) => {
+                if(element.installation_id.active && element.installation_id.dealership.active){
+                    auditResultsWithoutInactiveInst = [...auditResultsWithoutInactiveInst, element]
+                }
+            } )  
+
+            const auditsResultsAux = auditResultsWithoutInactiveInst                                            
+            let arrayForCore = []
+
+            auditResultsWithoutInactiveInst.forEach((element) => {
                 let arrayStandardsFalse = []
                 let arrayAreasFalse = []
 
@@ -1051,7 +1085,7 @@ const getDataForFullAudit = async(request, response) => {
 
             let totalWeightPerc = 0
 
-            auditsResults.forEach((element) => {
+            auditResultsWithoutInactiveInst.forEach((element) => {
                 let installationAuditData = {}
                 installationAuditData['installation'] =  element.installation_id
                 let actualCategoryID = ''
@@ -1299,24 +1333,28 @@ const getDataForFullAudit = async(request, response) => {
                     const post_sale_weight_per_installation= (installation.installation.post_sale_weight_per_installation !== null)? installation.installation.post_sale_weight_per_installation : 0
                     let accumTotalWeightPerc = sales_weight_per_installation + post_sale_weight_per_installation
                     const coefficient = ((accumTotalWeightPerc * 100) / totalWeightPerc)/100
-    
+
                     accumAgency += installation.categories[installation.categories.length - 1].auditTotalResult
                     installation.categories.forEach((category) => {
                         if(category.id === HYUNDAI_PROMISE){
                             hp_perc_total += 1
-                            hp_perc += category.partialPercentage * coefficient
+                            hp_perc += category.pass * coefficient
+                            total_values += category.total * coefficient
                         }
                         else if(category.id === GENERAL){
                             general_perc_total += 1
-                            general_perc += category.partialPercentage * coefficient
+                            general_perc += category.pass * coefficient
+                            total_values += category.total * coefficient
                         }
                         else if(category.id === VENTA){
                             v_perc_total += 1
-                            v_perc += category.partialPercentage * coefficient
+                            v_perc += category.pass * coefficient
+                            total_values += category.total * coefficient
                         }
                         else if(category.id === POSVENTA){
                             pv_perc_total += 1
-                            pv_perc += category.partialPercentage * coefficient
+                            pv_perc += category.pass * coefficient
+                            total_values += category.total * coefficient
                         }
                     })
     
@@ -1337,16 +1375,16 @@ const getDataForFullAudit = async(request, response) => {
                     }
                 }
             })
-    
+
             let agency_by_types = {
                 electric_perc: (electric_total === 0)? null: electric_perc / electric_total,
                 img_perc: (img_total === 0)? null: img_perc / img_total,
                 hme_perc: (hme_total === 0)? null: hme_perc / hme_total,
     
-                hp_perc: (hp_perc === 0)? null: hp_perc,
-                v_perc: (v_perc === 0)? null: v_perc,
-                general_perc: (general_perc === 0)? null: general_perc,
-                pv_perc: (pv_perc === 0)? null: pv_perc
+                hp_perc: (hp_perc_total === 0)? null: hp_perc * 100 / total_values,
+                v_perc: (v_perc_total === 0)? null: v_perc * 100 / total_values,
+                general_perc: (general_perc_total === 0)? null: general_perc * 100 / total_values,
+                pv_perc: (pv_perc_total === 0)? null: pv_perc * 100 / total_values
             }
 
             const total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
