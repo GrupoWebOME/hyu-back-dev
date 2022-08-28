@@ -154,6 +154,10 @@ const Criterion = require('../../controllers/criterion/criterion_controller')
 
 api.post('/all', Criterion.getAllCriterion)
 
+api.post('/filter', Criterion.filtersCriterions)
+
+api.post('/filterByAudit', Criterion.filtersAuditCriterions)
+
 /**
  * @swagger
  * /api/criterion/all:
@@ -844,7 +848,5 @@ api.delete('/:id', Criterion.deleteCriterion)
  *                                  type: string
  *                                  example: something went wrong on the server
  */
-
-api.post('/filter', Criterion.filtersCriterions)
 
 module.exports = api
