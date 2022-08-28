@@ -7,6 +7,7 @@ const Block = require('../../models/block_model')
 const Category = require('../../models/category_model')
 const CriterionType = require('../../models/criterionType_model')
 const Installation = require('../../models/installation_schema')
+const Audit = require('../../models/audit_model')
 const ObjectId = require('mongodb').ObjectId
 var mongoose = require('mongoose')
 
@@ -690,12 +691,8 @@ const filtersCriterions = async(request, response) => {
                 })  
         }
 
-        if(installation_id)
-            filter['exceptions'] = { $nin: [installation_id] }
-        if(audit_id)
-            filter['audit_id'] = audit_id
         if(page === 0){ 
-            let id_inst = mongoose.Types.ObjectId(installation_id);
+            let id_inst = mongoose.Types.ObjectId(installation_id)
             const criterions = await Criterion.find(filter).populate({path: 'installationType standard block area auditResponsable criterionType category'})
                                               .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
@@ -754,6 +751,52 @@ const filtersCriterions = async(request, response) => {
     }  
 }
 
+const filtersAuditCriterions = async(request, response) => {
+    try{
+        const {installation_id, audit_id} = request.body
+
+        if(installation_id && !ObjectId.isValid(installation_id)){
+            return response.status(400).json({code: 400, 
+                msg: 'invalid installation_id',
+                detail: `format should be a ObjectId`
+                })  
+        }
+        if(audit_id && !ObjectId.isValid(audit_id)){
+            return response.status(400).json({code: 400, 
+                msg: 'invalid audit_id',
+                detail: `format should be a ObjectId`
+                })  
+        }
+
+        let id_inst = mongoose.Types.ObjectId(installation_id)
+        const audit = await Audit.findById(audit_id).select('criterions installation_exceptions').populate('criterions.criterion')
+                                            .catch(error => {        
+                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                                            })
+                        
+        let criterionsFilter = []
+        if(audit?.criterions && audit.criterions.length > 0){
+            if(!audit.installation_exceptions.includes(id_inst)){
+                criterionsFilter = audit.criterions.map((element) => {
+                    if(!element.criterion.exceptions.includes(id_inst) && !element.exceptions.includes(id_inst)){
+                        return element
+                    }
+                })
+            }
+        }
+
+        const data = {criterions: criterionsFilter, 
+                        totalPages: 1}
+
+        return response.status(200).json({code: 200,
+                                            msg: 'success',
+                                            data: data })
+    }
+   catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+    }  
+}
+
 const getCriterion = async(request, response) => {
     try{
         const {id} = request.params
@@ -784,4 +827,4 @@ const getCriterion = async(request, response) => {
     } 
 }
 
-module.exports = {createCriterion, updateCriterion, deleteCriterion, getAllCriterion, filtersCriterions, getCriterion}
+module.exports = {createCriterion, updateCriterion, deleteCriterion, getAllCriterion, filtersCriterions, getCriterion, filtersAuditCriterions}
