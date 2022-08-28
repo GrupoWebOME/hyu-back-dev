@@ -8,6 +8,7 @@ const Category = require('../../models/category_model')
 const CriterionType = require('../../models/criterionType_model')
 const Installation = require('../../models/installation_schema')
 const ObjectId = require('mongodb').ObjectId
+var mongoose = require('mongoose')
 
 const createCriterion = async(request, response) => {
     try{
@@ -670,6 +671,89 @@ const getAllCriterion = async(request, response) => {
     }  
 }
 
+const filtersCriterions = async(request, response) => {
+    try{
+        const {installation_id, pageReq} = request.body
+        const page = !pageReq ? 0 : pageReq
+        let skip = (page - 1) * 10
+        const filter = {}
+        if(installation_id && !ObjectId.isValid(installation_id)){
+            return response.status(400).json({code: 400, 
+                msg: 'invalid installation_id',
+                detail: `format should be a ObjectId`
+                })  
+        }
+        if(audit_id && !ObjectId.isValid(audit_id)){
+            return response.status(400).json({code: 400, 
+                msg: 'invalid audit_id',
+                detail: `format should be a ObjectId`
+                })  
+        }
+
+        if(installation_id)
+            filter['exceptions'] = { $nin: [installation_id] }
+        if(audit_id)
+            filter['audit_id'] = audit_id
+        if(page === 0){ 
+            let id_inst = mongoose.Types.ObjectId(installation_id);
+            const criterions = await Criterion.find(filter).populate({path: 'installationType standard block area auditResponsable criterionType category'})
+                                              .catch(error => {        
+                                                return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                                              })
+
+            let criterionsFilter = []
+            if(criterions && criterions.length > 0){
+                criterionsFilter = criterions.map((element) => {
+                    if(!element.exceptions.includes(id_inst)){
+                        return element
+                    }
+                })
+            }
+                                              
+            const data = {criterions: criterionsFilter, 
+                          totalPages: 1}
+
+            return response.status(200).json({code: 200,
+                                              msg: 'success',
+                                              data: data })
+        }
+
+        let countDocs = await Criterion.countDocuments(filter)
+                                        .catch(error => {        
+                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                                        })
+                                        
+        let countPage = countDocs % 10 === 0? countDocs/10 : Math.floor((countDocs/10) + 1)
+        if((countPage < page) && page !== 1)
+            return response.status(400).json({code: 400, 
+                                              msg: 'invalid page', 
+                                              detail: `totalPages: ${countPage}`})
+
+        const criterions = await Criterion.find(filter).skip(skip).limit(10).populate({path: 'installationType standard block area auditResponsable criterionType category'})
+                                          .catch(error => {        
+                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                                          })
+
+        let criterionsFilter = []
+        if(criterions && criterions.length > 0){
+            criterionsFilter = criterions.map((element) => {
+                if(!element.exceptions.includes(id_inst)){
+                    return element
+                }
+            })
+        }
+
+        const data = {criterions: criterionsFilter, 
+                      totalPages: countPage}
+        response.status(200).json({code: 200,
+                                   msg: 'success',
+                                   data: data })
+    }
+   catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+    }  
+}
+
 const getCriterion = async(request, response) => {
     try{
         const {id} = request.params
@@ -700,4 +784,4 @@ const getCriterion = async(request, response) => {
     } 
 }
 
-module.exports = {createCriterion, updateCriterion, deleteCriterion, getAllCriterion, getCriterion}
+module.exports = {createCriterion, updateCriterion, deleteCriterion, getAllCriterion, filtersCriterions, getCriterion}
