@@ -845,4 +845,6 @@ api.delete('/:id', Criterion.deleteCriterion)
  *                                  example: something went wrong on the server
  */
 
+api.post('/filter', Criterion.filtersCriterions)
+
 module.exports = api
