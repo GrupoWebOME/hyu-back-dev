@@ -202,7 +202,7 @@ const createDealership = async(request, response) => {
 
 const updateDealership = async(request, response) => {
     try{
-        const {name, cif, code, address, autonomous_community, location, province, postal_code, phone, email, name_surname_manager, previous_year_sales, referential_sales, 
+        const {name, cif, code, address, autonomous_community, location, province, postal_code, phone, email, name_surname_manager, previous_year_sales, referential_sales, active, 
             post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income} = request.body
         const {id} = request.params
         let errors = []
@@ -328,6 +328,12 @@ const updateDealership = async(request, response) => {
                             detail: `vn_quaterly_billing should be a number value`
                         })   
                         
+        if(active !== undefined && active !== null && active !== true && active !== false)
+            errors.push({code: 400, 
+                msg: 'invalid active',
+                detail: `active should be a boolean`
+            })                          
+
         if(electric_quaterly_billing && typeof electric_quaterly_billing !== 'number')
             errors.push({code: 400, 
                             msg: 'invalid electric_quaterly_billing',
@@ -359,6 +365,8 @@ const updateDealership = async(request, response) => {
             updatedFields['postal_code'] = postal_code
         if(phone)
             updatedFields['phone'] = phone
+        if(active !== undefined && active !== null)
+            updatedFields['active'] = active
         if(email)
             updatedFields['email'] = email
         if(name_surname_manager)
