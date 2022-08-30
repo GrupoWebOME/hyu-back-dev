@@ -283,6 +283,7 @@ const getDataForTables = async(request, response) => {
                            detail: `${dealership_id} is not an ObjectId`}]})
         }
         const dealershipByID = await Dealership.findById(dealership_id)
+
         if(!dealershipByID)
             return response.status(400).json({code: 404, 
                                               msg: 'invalid dealership_id',
@@ -330,9 +331,8 @@ const getDataForTables = async(request, response) => {
         auditResultsWithoutInactiveInst.forEach((element) => {
             let arrayStandardsFalse = []
             let arrayAreasFalse = []
-
             element.criterions.forEach((criterion) => {
-                if(!criterion.pass){
+                if(!criterion.pass && !criterion.criterion_id.exceptions.includes(element.installation_id._id)){
                     const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
                     if(!existStandard){
                         arrayStandardsFalse = [...arrayStandardsFalse, criterion.criterion_id.standard._id.toString()]
@@ -427,7 +427,8 @@ const getDataForTables = async(request, response) => {
                 // Si es inválido
                 if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
                    criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
-                   criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP || 
+                   criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP ||
+                   criterion.criterion_id.exceptions.includes(element.installation_id._id) ||
                    !isValidType){
                 }
                 // Si es válido
@@ -471,6 +472,7 @@ const getDataForTables = async(request, response) => {
                 if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
                    criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
                    criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP || 
+                   criterion.criterion_id.exceptions.includes(element.installation_id._id) ||
                    !isValidType){
                 }
                 // El criterio aplica
@@ -1121,6 +1123,7 @@ const getDataForFullAudit = async(request, response) => {
                     if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
                         criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
                         criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP || 
+                        criterion.criterion_id.exceptions.includes(element.installation_id._id) ||
                         !isValidType){
                     }
                     else{
@@ -1153,6 +1156,7 @@ const getDataForFullAudit = async(request, response) => {
                     if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
                         criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
                         criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP || 
+                        criterion.criterion_id.exceptions.includes(element.installation_id._id) ||
                         !isValidType){
                     }
                     else{
