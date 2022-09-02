@@ -5,9 +5,10 @@ const Dealership = require('../../models/dealership_model')
 var ObjectId = require('mongodb').ObjectId
 
 const createAdmin = async(request, response) => {
+    
     try{
         const {names, surnames, emailAddress, userName, password, role, dealership} = request.body
-
+        const { jwt } = request.jwt
         let errors = []
     
         const regExPatternNamesAndSurname = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
@@ -355,6 +356,7 @@ const deleteAdmin = async(request, response) => {
 const getAllAdmins = async(request, response) => {
     try{
         const {names, surnames, emailAddress, userName, role, dealership, pageReq} = request.body
+        const adminRole = request.jwt.admin.role
 
         const page = !pageReq ? 0 : pageReq
 
@@ -374,8 +376,14 @@ const getAllAdmins = async(request, response) => {
         if(userName)
             filter['userName'] = new RegExp((userName).toLowerCase())
 
-        if(role)
-            filter['role'] = new RegExp((role).toLowerCase())
+        if( role || adminRole === 'admin'){
+            if(adminRole !== 'admin' || (adminRole === 'admin' && (role === 'dealership' || role === 'auditor'))){
+                filter['role'] = new RegExp((role).toLowerCase())
+            }
+            else{
+                filter['role'] = new RegExp(/auditor|dealership/)
+            }
+        }
 
         if(dealership)
             filter['dealership'] = new RegExp((dealership).toLowerCase())
