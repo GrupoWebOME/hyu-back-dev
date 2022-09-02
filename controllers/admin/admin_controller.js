@@ -425,6 +425,7 @@ const getAllAdmins = async(request, response) => {
 const getAdmin = async(request, response) => {
 
     const {id} = request.params
+    const { role, _id } = request.jwt.admin
 
     if(!id)
         return response.status(400).json({code: 400,
@@ -438,7 +439,13 @@ const getAdmin = async(request, response) => {
 
     const admin = await Admin.findById(id)
 
-    if(admin){
+    if(role !== 'main' && admin.id.toString() !== _id.toString() && admin.role !== 'dealership' && admin.role !== 'auditor'){
+        return response.status(401).json({code: 401,
+            msg: 'invalid credentials',
+            detail: 'you do not have permissions'})
+    }
+
+    else if(admin){
         response.status(200).json({code: 200,
                                    msg: 'success',
                                    data: admin})
