@@ -324,6 +324,14 @@ const updateAdmin = async(request, response) => {
 const deleteAdmin = async(request, response) => {
     try{
         const {id} = request.params
+        const adminRole = request.jwt.admin.role
+
+        if(adminRole !== 'main'){
+            return response.status(401).json({code: 401,
+                msg: 'invalid credentials',
+                detail: 'you do not have permissions'})
+        }
+        
         //Validations
         if(!id)
             return response.status(400).json({code: 400,
