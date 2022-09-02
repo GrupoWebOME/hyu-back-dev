@@ -172,6 +172,7 @@ const updateAdmin = async(request, response) => {
     try{
         const {id} = request.params
         const {names, surnames, emailAddress, userName, password, role, dealership} = request.body
+        const { adminRole, _id } = request.jwt.admin
 
         let errors = []
     
@@ -193,6 +194,12 @@ const updateAdmin = async(request, response) => {
         
         if(id){
             admin = await Admin.findById(id)
+            if(admin && (admin.role === 'admin' || admin.role === 'main') && adminRole !== 'main' && admin.id.toString() !== _id.toString()){
+                return response.status(401).json({code: 401,
+                            msg: 'invalid credentials',
+                            detail: 'you do not have permissions to update this admin'})
+            }
+
             if (!admin)
                 return response.status(404).json({code: 404,
                                                   msg: 'invalid id',
