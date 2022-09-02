@@ -186,7 +186,7 @@ apiAdmin.post('/all', authenticationAdminMain.validate, Admin.getAllAdmins)
  *                                  example: something went wrong on the server
  */
 
-apiAdmin.get('/:id', Admin.getAdmin)
+apiAdmin.get('/:id', authenticationAdminMain.validate, Admin.getAdmin)
 
 /**
  * @swagger
