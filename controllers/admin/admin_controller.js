@@ -8,13 +8,20 @@ const createAdmin = async(request, response) => {
     
     try{
         const {names, surnames, emailAddress, userName, password, role, dealership} = request.body
-        const { jwt } = request.jwt
+        const adminRole = request.jwt.admin.role
+
         let errors = []
     
         const regExPatternNamesAndSurname = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
         const regExPatternEmailAddress= /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
         const RegExPatternUsername = /^(?=[a-zA-Z0-9._\u00f1\u00d1]{5,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/
     
+        if(adminRole !== 'main' && (!role || (role.toLowerCase() !== 'dealership' && role.toLowerCase() !== 'auditor'))){
+            return response.status(401).json({code: 401,
+                msg: 'invalid credentials',
+                detail: 'you do not have permissions for creating admin type'})
+        }
+
         if(!role || (role.toLowerCase() !== 'admin' && role.toLowerCase() !== 'dealership' && role.toLowerCase() !== 'auditor'))
             errors.push({code: 400, 
                 msg: 'invalid role',
@@ -331,7 +338,7 @@ const deleteAdmin = async(request, response) => {
                 msg: 'invalid credentials',
                 detail: 'you do not have permissions'})
         }
-        
+
         //Validations
         if(!id)
             return response.status(400).json({code: 400,
