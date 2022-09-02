@@ -20,15 +20,17 @@ const validate = async(request, response, next) => {
             decodedToken = false
         }
         else{
-            decodedToken = decoded.admin.isMain
+            decodedToken = decoded
         }
     })
 
-    if(decodedToken !== true)
+    if(decodedToken === false)
         return response.status(401).json({code: 401,
                                           msg: 'invalid credentials',
                                           detail: 'you do not have permissions'})
     
+    request.jwt = decodedToken
+
     next()
 }
 
