@@ -134,6 +134,7 @@ const createAudit = async(request, response) => {
             end_date: end_date? end_date : null,
             criterions,
             isAgency: (isAgency && isAgency === true)? true : false,
+            status: 'created'
         })
         await newAudit.save()
                         .catch(error => {        
