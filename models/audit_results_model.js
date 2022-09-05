@@ -8,6 +8,10 @@ const auditResultsSchema = new Schema({
         criterion_id: {type: Schema.Types.ObjectId, ref: 'Criterion'},
         pass: {type: Boolean, default: true}
     }],
+    state: {
+        type: String,
+        default: 'created'
+    },
     createdAt: {type: Date,
                 default: Date.now},
     updatedAt: {type: Date,
