@@ -134,7 +134,6 @@ const createAudit = async(request, response) => {
             end_date: end_date? end_date : null,
             criterions,
             isAgency: (isAgency && isAgency === true)? true : false,
-            status: 'created'
         })
         await newAudit.save()
                         .catch(error => {        
@@ -151,7 +150,7 @@ const createAudit = async(request, response) => {
 
 const updateAudit = async(request, response) => {
     try{
-        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions, status} = request.body
+        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions} = request.body
         const {id} = request.params
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
@@ -280,20 +279,9 @@ const updateAudit = async(request, response) => {
                 }
             })
         }
-
-        if(status !== null && status !== undefined && status !== 'created' && status !== 'canceled' && status !== 'planned' &&
-           status !== 'in_process' && status !== 'auditor_signed' && status !== 'auditor_end' && status !== 'closed' ){
-                errors.push({code: 400, 
-                             msg: 'invalid status',
-                             detail: `status should be created, canceled, planned, in_process, auditor_signed, auditor_end, or closed`
-                            })  
-           }
-
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
-
         const updatedFields = {}
-        
         if(name)
             updatedFields['name'] = name
         if(installation_type)
@@ -306,8 +294,6 @@ const updateAudit = async(request, response) => {
             updatedFields['criterions'] = criterions
         if(isAgency !== null && isAgency !== undefined)
             updatedFields['isAgency'] = isAgency
-        if(status)
-            updatedFields['status'] = status
         updatedFields['updatedAt'] = Date.now()
         const updatedAudit = await Audit.findByIdAndUpdate(id, updatedFields, {new: true})
                                         .catch(error => {        
