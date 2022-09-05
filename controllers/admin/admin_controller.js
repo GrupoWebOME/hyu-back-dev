@@ -86,7 +86,7 @@ const createAdmin = async(request, response) => {
                             })
         }
     
-        if(!password || password.length < 8)
+        if(!password || password.length < 6)
             errors.push({code: 400, 
                          msg: 'invalid password',
                          detail: `${userName} is not valid password format. The password field can only contain a valid password, and is required`
@@ -270,7 +270,7 @@ const updateAdmin = async(request, response) => {
                             })
         }
     
-        if(password && password.length < 8)
+        if(password && password.length < 6)
             errors.push({code: 400, 
                          msg: 'invalid password',
                          detail: `${userName} is not valid password format. The password field can only contain a valid email`
