@@ -102,7 +102,8 @@ const createAuditResults = async(request, response) => {
             const newAuditResults = new AuditResults({
             audit_id,
             installation_id,
-            criterions
+            criterions,
+            state: 'created'
         })
 
         await newAuditResults.save()
