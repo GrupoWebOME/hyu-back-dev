@@ -122,7 +122,7 @@ const createAuditResults = async(request, response) => {
 
 const updateAuditResults = async(request, response) => {
     try{
-        const {audit_id, installation_id, criterions} = request.body
+        const {audit_id, installation_id, criterions, status} = request.body
         const {id} = request.params
 
         let errors = []
@@ -211,6 +211,14 @@ const updateAuditResults = async(request, response) => {
                 }
             })
         }
+
+        if(status !== null && status !== undefined && status !== 'created' && status !== 'canceled' && status !== 'planned' &&
+           status !== 'in_process' && status !== 'auditor_signed' && status !== 'auditor_end' && status !== 'closed' ){
+                errors.push({code: 400, 
+                             msg: 'invalid status',
+                             detail: `status should be created, canceled, planned, in_process, auditor_signed, auditor_end, or closed`
+                            })  
+        }
         
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
@@ -223,6 +231,8 @@ const updateAuditResults = async(request, response) => {
             updatedFields['installation_id'] = installation_id
         if(criterions)
             updatedFields['criterions'] = criterions
+        if(status)
+            updatedFields['status'] = status
         updatedFields['updatedAt'] = Date.now()
 
         const updatedAuditResults = await AuditResults.findByIdAndUpdate(id, updatedFields, {new: true})
