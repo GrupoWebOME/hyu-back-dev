@@ -120,9 +120,10 @@ const createAuditResults = async(request, response) => {
     }
 }
 
+/*
 const updateAuditResults = async(request, response) => {
     try{
-        const {audit_id, installation_id, criterions, state} = request.body
+        const {audit_id, installation_id, criterions, status} = request.body
         const {id} = request.params
 
         let errors = []
@@ -181,7 +182,13 @@ const updateAuditResults = async(request, response) => {
             }
         }
 
-        if(criterions){
+        if(!criterions || !Array.isArray(criterions)){
+            errors.push({code: 400, 
+                msg: 'invalid criterions',
+                detail: `criterions is an obligatory field, and should be an array type`
+            })
+        }
+        else if(criterions){
             criterions.forEach(async(element) => {
                 if(!element.hasOwnProperty("criterion_id") || !element.hasOwnProperty("pass")){
                     errors.push({code: 400, 
@@ -206,8 +213,8 @@ const updateAuditResults = async(request, response) => {
             })
         }
 
-        if(state !== null && state !== undefined && state !== 'created' && state !== 'canceled' && state !== 'planned' &&
-            state !== 'in_process' && state !== 'auditor_signed' && state !== 'auditor_end' && state !== 'closed' ){
+        if(status !== null && status !== undefined && status !== 'created' && status !== 'canceled' && status !== 'planned' &&
+           status !== 'in_process' && status !== 'auditor_signed' && status !== 'auditor_end' && status !== 'closed' ){
                 errors.push({code: 400, 
                              msg: 'invalid status',
                              detail: `status should be created, canceled, planned, in_process, auditor_signed, auditor_end, or closed`
@@ -225,10 +232,10 @@ const updateAuditResults = async(request, response) => {
             updatedFields['installation_id'] = installation_id
         if(criterions)
             updatedFields['criterions'] = criterions
-        if(state)
-            updatedFields['state'] = state
+        if(status)
+            updatedFields['status'] = status
         updatedFields['updatedAt'] = Date.now()
-        console.log('updatefields: ', updatedFields)
+
         const updatedAuditResults = await AuditResults.findByIdAndUpdate(id, updatedFields, {new: true})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
@@ -242,9 +249,47 @@ const updateAuditResults = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
     }
 }
+*/
+
+const deleteAuditResults = async(request, response) => {
+    try{
+        const {id} = request.params
+
+        if(id && ObjectId.isValid(id)){
+            const existId = await Audit.exists({_id: id})
+                                          .catch(error => {return response.status(400).json({code: 500, 
+                                                                                            msg: 'error id',
+                                                                                            detail: error.message
+                                                                                            })} )  
+            if(!existId)
+                return response.status(400).json({code: 400, 
+                                                  msg: 'invalid id',
+                                                  detail: 'id not found'
+                                                })
+        }
+        else{
+            return response.status(400).json({code: 400, 
+                                              msg: 'invalid id',
+                                              detail: `id not found`
+                                            })   
+        }
+        const deletedAudit = await Audit.findByIdAndDelete(id)
+                                        .catch(error => {        
+                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                                        })
+        response.status(201).json({code: 200,
+                                    msg: 'the Audit has been deleted successfully',
+                                    data: deletedAudit })
+    }
+    catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
+    }
+}
 
 const getDataForTables = async(request, response) => {
+
     const {dealership_id, audit_id} = request.body
+    
     try{
         if(!ObjectId.isValid(dealership_id)){
             return response.status(400).json(
@@ -274,7 +319,9 @@ const getDataForTables = async(request, response) => {
                             msg: 'invalid audit_id', 
                             detail: `${audit_id} not found`}]}) 
         }
+
         //Obtengo todas los resultados de auditorías que pertenezcan a las instalaciones de una agencia en particular, y una auditoría en particular
+
         let auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
                                                 .populate({path: 'installation_id', select: '_id active name code installation_type dealership sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
                                                             populate: {path: 'installation_type dealership', select: '_id code active'}})
@@ -1441,6 +1488,129 @@ const getAuditResByAuditIDAndInstallationID = async(request, response) => {
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
     }  
+}
+
+const updateAuditResults = async(request, response) => {
+    try{
+        const {audit_id, installation_id, criterions, state} = request.body
+        const {id} = request.params
+
+        let errors = []
+        let audiResultstById = null
+
+        if(id && ObjectId.isValid(id)){
+            audiResultstById = await AuditResults.findById(id)
+                                       .catch(error => {return response.status(400).json({code: 500, 
+                                                                                          msg: 'error id',
+                                                                                          detail: error.message
+                                                                                        })} )  
+            if(!audiResultstById)
+                return response.status(400).json({code: 400, 
+                                                  msg: 'invalid id',
+                                                  detail: 'id not found'
+                                                })
+        }
+        else{
+            return response.status(400).json({code: 400, 
+                                              msg: 'invalid id',
+                                              detail: `id not found`
+                                            })   
+        }
+
+        if(audit_id){
+            if(!ObjectId.isValid(audit_id)){
+                errors.push({code: 400, 
+                    msg: 'invalid audit_id',
+                    detail: `${audit_id} is not an ObjectId`
+                })  
+            }
+            else{
+                const existAudit = await Audit.exists({_id: audit_id})
+                if(!existAudit)
+                    errors.push({code: 400, 
+                                msg: 'invalid audit_id',
+                                detail: `${audit_id} not found`
+                                })   
+            }
+        }
+
+        if(installation_id){
+            if(!ObjectId.isValid(installation_id)){
+                errors.push({code: 400, 
+                    msg: 'invalid installation_id',
+                    detail: `${installation_id} is not an ObjectId`
+                })  
+            }
+            else{
+                const existInstallation = await Installation.exists({_id: installation_id})
+                if(!existInstallation)
+                    errors.push({code: 400, 
+                                msg: 'invalid installation_id',
+                                detail: `${installation_id} not found`
+                                })   
+            }
+        }
+
+        if(criterions){
+            criterions.forEach(async(element) => {
+                if(!element.hasOwnProperty("criterion_id") || !element.hasOwnProperty("pass")){
+                    errors.push({code: 400, 
+                        msg: 'invalid criterions',
+                        detail: `criterions should be contains criterion_id and pass fields`
+                    })
+                }
+                else if(!ObjectId.isValid(element.criterion_id)){
+                    errors.push({code: 400, 
+                        msg: 'invalid criterion_id',
+                        detail: `${element.criterion_id} is not an ObjectId`
+                    })  
+                }
+                else{                
+                    const existCriterion = await Criterion.exists({_id: element.criterion_id})
+                    if(!existCriterion)
+                        errors.push({code: 400, 
+                                    msg: 'invalid criterion_id',
+                                    detail: `${element.criterion_id} not found`
+                                    })        
+                }
+            })
+        }
+
+        if(state !== null && state !== undefined && state !== 'created' && state !== 'canceled' && state !== 'planned' &&
+            state !== 'in_process' && state !== 'auditor_signed' && state !== 'auditor_end' && state !== 'closed' ){
+                errors.push({code: 400, 
+                             msg: 'invalid status',
+                             detail: `status should be created, canceled, planned, in_process, auditor_signed, auditor_end, or closed`
+                            })  
+        }
+        
+        if(errors.length > 0)
+            return response.status(400).json({errors: errors})
+
+        const updatedFields = {}
+
+        if(audit_id)
+            updatedFields['audit_id'] = audit_id
+        if(installation_id)
+            updatedFields['installation_id'] = installation_id
+        if(criterions)
+            updatedFields['criterions'] = criterions
+        if(state)
+            updatedFields['state'] = state
+        updatedFields['updatedAt'] = Date.now()
+        console.log('updatefields: ', updatedFields)
+        const updatedAuditResults = await AuditResults.findByIdAndUpdate(id, updatedFields, {new: true})
+                                        .catch(error => {        
+                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                                        })
+
+        response.status(200).json({code: 200,
+                                    msg: 'the AuditResults has been updated successfully',
+                                    data: updatedAuditResults })
+    }
+    catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
+    }
 }
 
 module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables, getAuditResByAuditIDAndInstallationID, getDataForAudit, getDataForFullAudit}
