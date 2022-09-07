@@ -122,7 +122,7 @@ const createAuditResults = async(request, response) => {
 
 const updateAuditResults = async(request, response) => {
     try{
-        const {audit_id, installation_id, criterions, status} = request.body
+        const {audit_id, installation_id, criterions, state} = request.body
         const {id} = request.params
 
         let errors = []
@@ -206,8 +206,8 @@ const updateAuditResults = async(request, response) => {
             })
         }
 
-        if(status !== null && status !== undefined && status !== 'created' && status !== 'canceled' && status !== 'planned' &&
-           status !== 'in_process' && status !== 'auditor_signed' && status !== 'auditor_end' && status !== 'closed' ){
+        if(state !== null && state !== undefined && state !== 'created' && state !== 'canceled' && state !== 'planned' &&
+            state !== 'in_process' && state !== 'auditor_signed' && state !== 'auditor_end' && state !== 'closed' ){
                 errors.push({code: 400, 
                              msg: 'invalid status',
                              detail: `status should be created, canceled, planned, in_process, auditor_signed, auditor_end, or closed`
@@ -225,10 +225,10 @@ const updateAuditResults = async(request, response) => {
             updatedFields['installation_id'] = installation_id
         if(criterions)
             updatedFields['criterions'] = criterions
-        if(status)
-            updatedFields['status'] = status
+        if(state)
+            updatedFields['state'] = state
         updatedFields['updatedAt'] = Date.now()
-
+        console.log('updatefields: ', updatedFields)
         const updatedAuditResults = await AuditResults.findByIdAndUpdate(id, updatedFields, {new: true})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
@@ -237,41 +237,6 @@ const updateAuditResults = async(request, response) => {
         response.status(200).json({code: 200,
                                     msg: 'the AuditResults has been updated successfully',
                                     data: updatedAuditResults })
-    }
-    catch(error){
-        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
-    }
-}
-
-const deleteAuditResults = async(request, response) => {
-    try{
-        const {id} = request.params
-
-        if(id && ObjectId.isValid(id)){
-            const existId = await Audit.exists({_id: id})
-                                          .catch(error => {return response.status(400).json({code: 500, 
-                                                                                            msg: 'error id',
-                                                                                            detail: error.message
-                                                                                            })} )  
-            if(!existId)
-                return response.status(400).json({code: 400, 
-                                                  msg: 'invalid id',
-                                                  detail: 'id not found'
-                                                })
-        }
-        else{
-            return response.status(400).json({code: 400, 
-                                              msg: 'invalid id',
-                                              detail: `id not found`
-                                            })   
-        }
-        const deletedAudit = await Audit.findByIdAndDelete(id)
-                                        .catch(error => {        
-                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-                                        })
-        response.status(201).json({code: 200,
-                                    msg: 'the Audit has been deleted successfully',
-                                    data: deletedAudit })
     }
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
