@@ -181,13 +181,7 @@ const updateAuditResults = async(request, response) => {
             }
         }
 
-        if(!criterions || !Array.isArray(criterions)){
-            errors.push({code: 400, 
-                msg: 'invalid criterions',
-                detail: `criterions is an obligatory field, and should be an array type`
-            })
-        }
-        else if(criterions){
+        if(criterions){
             criterions.forEach(async(element) => {
                 if(!element.hasOwnProperty("criterion_id") || !element.hasOwnProperty("pass")){
                     errors.push({code: 400, 
