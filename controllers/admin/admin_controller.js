@@ -14,7 +14,6 @@ const createAdmin = async(request, response) => {
     
         const regExPatternNamesAndSurname = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
         const regExPatternEmailAddress= /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
-        const RegExPatternUsername = /^(?=[a-zA-Z0-9._\u00f1\u00d1]{5,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/
     
         if(adminRole !== 'main' && (!role || (role.toLowerCase() !== 'dealership' && role.toLowerCase() !== 'auditor'))){
             return response.status(401).json({code: 401,
@@ -72,7 +71,7 @@ const createAdmin = async(request, response) => {
                             })
         }
     
-        if(!userName || !userName.match(RegExPatternUsername))
+        if(!userName)
             errors.push({code: 400, 
                          msg: 'invalid userName',
                          detail: `${userName} is not valid userName format. The userName field can only contain a valid userName, and is required`
@@ -178,7 +177,6 @@ const updateAdmin = async(request, response) => {
     
         const regExPatternNamesAndSurname = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
         const regExPatternEmailAddress= /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
-        const RegExPatternUsername = /^(?=[a-zA-Z0-9._\u00f1\u00d1]{5,20}$)(?!.*[_.]{2})[^_.].*[^_.]$/
     
         if(!id)
             return response.status(400).json({code: 400,
@@ -256,7 +254,7 @@ const updateAdmin = async(request, response) => {
                             })
         }
     
-        if(userName && !userName.match(RegExPatternUsername))
+        if(userName)
             errors.push({code: 400, 
                          msg: 'invalid userName',
                          detail: `${userName} is not valid userName format. The userName field can only contain a valid email`
