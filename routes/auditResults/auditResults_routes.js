@@ -60,7 +60,7 @@ const AuditResults = require('../../controllers/auditResults/auditResults_contro
   */
 
  api.post('/', AuditResults.createAuditResults)
- api.post('/', AuditResults.createAuditResultsTest)
+ api.post('/createTest', AuditResults.createAuditResultsTest)
 
 /**
  * @swagger
