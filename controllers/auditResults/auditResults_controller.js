@@ -1613,4 +1613,465 @@ const updateAuditResults = async(request, response) => {
     }
 }
 
-module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables, getAuditResByAuditIDAndInstallationID, getDataForAudit, getDataForFullAudit}
+const updateTest = async(request, response) => {
+    try{
+        const {audit_id, installation_id, criterions, state} = request.body
+        const {id} = request.params
+
+        let errors = []
+        let audiResultstById = null
+        let existAudit = null
+        let existInstallation = null
+
+        if(id && ObjectId.isValid(id)){
+            audiResultstById = await AuditResults.findById(id)
+                                       .catch(error => {return response.status(400).json({code: 500, 
+                                                                                          msg: 'error id',
+                                                                                          detail: error.message
+                                                                                        })} )  
+            if(!audiResultstById)
+                return response.status(400).json({code: 400, 
+                                                  msg: 'invalid id',
+                                                  detail: 'id not found'
+                                                })
+        }
+        else{
+            return response.status(400).json({code: 400, 
+                                              msg: 'invalid id',
+                                              detail: `id not found`
+                                            })   
+        }
+
+        if(audit_id){
+            if(!ObjectId.isValid(audit_id)){
+                errors.push({code: 400, 
+                    msg: 'invalid audit_id',
+                    detail: `${audit_id} is not an ObjectId`
+                })  
+            }
+            else{
+                existAudit = await Audit.findOne({_id: audit_id}).populate({ 
+                                                                                path: 'criterions.criterion', 
+                                                                                populate: {
+                                                                                    path: 'standard block area category auditResponsable criterionType installationType',
+                                                                                    select: 'name code description isCore number abbreviation'
+                                                                                },
+                                                                            }) 
+                if(!existAudit)
+                    errors.push({code: 400, 
+                                msg: 'invalid audit_id',
+                                detail: `${audit_id} not found`
+                                })   
+            }
+        }
+
+        if(installation_id){
+            if(!ObjectId.isValid(installation_id)){
+                errors.push({code: 400, 
+                    msg: 'invalid installation_id',
+                    detail: `${installation_id} is not an ObjectId`
+                })  
+            }
+            else{
+                existInstallation = await Installation.findOne({_id: installation_id})
+                if(!existInstallation)
+                    errors.push({code: 400, 
+                                msg: 'invalid installation_id',
+                                detail: `${installation_id} not found`
+                                })   
+            }
+        }
+        
+        if(criterions){
+            criterions.forEach(async(element) => {
+                if(!element.hasOwnProperty("criterion_id") || !element.hasOwnProperty("pass")){
+                    errors.push({code: 400, 
+                        msg: 'invalid criterions',
+                        detail: `criterions should be contains criterion_id and pass fields`
+                    })
+                }
+                else if(!ObjectId.isValid(element.criterion_id)){
+                    errors.push({code: 400, 
+                        msg: 'invalid criterion_id',
+                        detail: `${element.criterion_id} is not an ObjectId`
+                    })  
+                }
+                else{                
+                    const existCriterion = await Criterion.exists({_id: element.criterion_id})
+                    if(!existCriterion)
+                        errors.push({code: 400, 
+                                    msg: 'invalid criterion_id',
+                                    detail: `${element.criterion_id} not found`
+                                    })        
+                }
+            })
+        }
+
+        if(state !== null && state !== undefined && state !== 'created' && state !== 'canceled' && state !== 'planned' &&
+            state !== 'in_process' && state !== 'auditor_signed' && state !== 'auditor_end' && state !== 'closed' ){
+                errors.push({code: 400, 
+                             msg: 'invalid status',
+                             detail: `status should be created, canceled, planned, in_process, auditor_signed, auditor_end, or closed`
+                            })  
+        }
+        
+        if(errors.length > 0)
+            return response.status(400).json({errors: errors})
+
+        //Recorro el arreglo de resultados
+        const newArrCrit = existAudit.criterions.map((element) => {
+            const criterionFinded = criterions.find((crit) => element.criterion._id.toString() === crit.criterion_id.toString())
+            return {criterion: element, pass: criterionFinded.pass}
+        })
+
+        let arrayForCore = []
+
+        //Recorro el arreglo de resultados
+        newArrCrit.forEach((element) => {
+            let arrayStandardsFalse = []
+            let arrayAreasFalse = []
+            console.log('pass: ', element.pass, ' exceptions: ', element.criterion.exceptions, ' area: ', element.criterion.criterion.area._id.toString(), ' standard: ', element.criterion.criterion.standard._id.toString())
+           
+            if(!element.pass && !element.criterion.exceptions.includes(installation_id)){
+                const existStandard = arrayStandardsFalse.includes(element.criterion.criterion.standard._id.toString())
+                if(!existStandard){
+                    arrayStandardsFalse = [...arrayStandardsFalse, element.criterion.criterion.standard._id.toString()]
+                }
+                if(element.criterion.criterion.standard.isCore){
+                    const existArea = arrayAreasFalse.includes(element.criterion.criterion.area._id.toString())
+                    if(!existArea){
+                        arrayAreasFalse = [...arrayAreasFalse, element.criterion.criterion.area._id.toString()]
+                    }
+                }
+            }
+
+            arrayForCore = [...arrayForCore, {
+                id: installation_id,
+                arrayStandardsFalse: arrayStandardsFalse,
+                arrayAreasFalse: arrayAreasFalse
+            }]
+
+        })
+
+        //Convierto en false los criterios afectados por core
+        newArrCrit.forEach((element, indexEl) => {
+            //Selecciono los elementos de arrayforcore para la instalación que me encuentro recorriendo
+            const finded = arrayForCore.find( el => el.id === installation_id.toString() )
+            const existSt = finded.arrayStandardsFalse.includes(element.criterion.criterion.standard._id.toString())
+            const existAr = finded.arrayAreasFalse.includes(element.criterion.criterion.area._id.toString())
+            if(existAr || existSt){
+                //Pongo en false los criterios afectados por el core
+                newArrCrit[indexEl].pass = false
+            }
+        })
+
+        let instalations_audit_details = []
+        let instalation_audit_types = null
+
+        const VENTA = "6233b3ace74b428c2dcf3068"
+        const POSVENTA = "6233b450e74b428c2dcf3091"
+        const HYUNDAI_PROMISE = "6233b445e74b428c2dcf3088"
+        const GENERAL = "6233b39fe74b428c2dcf305f"
+
+        let totalWeightPerc = 0
+
+        //Ordeno el arreglo por standard id
+        newArrCrit.sort(function (a, b) {
+                if (a.criterion.criterion.standard._id.toString() > b.criterion.criterion.standard._id.toString()) {
+                    return 1;
+                }
+                if (a.criterion.criterion.standard._id.toString() < b.criterion.criterion.standard._id.toString()) {
+                    return -1;
+                }
+                return 0;
+        })
+
+        newArrCrit.forEach((element) => {
+            let installationAuditData = {}
+            installationAuditData['installation'] =  installation_id
+            let actualCategoryID = ''
+            let actualCategoryName = ''
+            let accum = 0
+            let totalAccum = 0
+            let totalCriterionsByCat = 0
+            let categories = []
+            let totalCriterionsForInst = 0
+            let categoriesAux = null
+            let totalImgAudit = 0
+            let totalPassImgAudit = 0
+            let totalHmeAudit = 0
+            let totalPassHmeAudit = 0
+            let totalElectricAudit = 0
+            let totalPassElectricAudit = 0
+            let totalCritValid = 0
+            let totalCriterionWeight = 0
+
+            const sales_weight_per_installation= (existInstallation.sales_weight_per_installation !== null)? existInstallation.sales_weight_per_installation : 0
+            const post_sale_weight_per_installation= (existInstallation.post_sale_weight_per_installation !== null)? existInstallation.post_sale_weight_per_installation : 0
+
+            // Es la sumatoria de los pesos de cada instalación
+            totalWeightPerc +=  sales_weight_per_installation + post_sale_weight_per_installation
+
+            // Criterios electricos, hme, img
+                let isValidType = false
+                element.criterion.criterion.installationType.forEach((type) => {
+                    if(type._id.toString() === existInstallation.installation_type.toString()){
+                        isValidType = true
+                    }
+                })
+
+                // Si es inválido
+                if( element.criterion.criterion.category._id.toString() === VENTA && !existInstallation.isSale ||
+                    element.criterion.criterion.category._id.toString() === POSVENTA && !existInstallation.isPostSale ||
+                    element.criterion.criterion.category._id.toString() === HYUNDAI_PROMISE && !existInstallation.isHP ||
+                    element.criterion.criterion.exceptions.includes(existInstallation._id) ||
+                   !isValidType){
+                }
+                // Si es válido
+                else{ 
+                    // Peso total de los criterios que aplican
+                    totalCriterionWeight += element.criterion.criterion.value
+
+                    // Cantidad de criterios que aplican para esa instalación
+                    totalCriterionsForInst += 1
+
+                    if(element.criterion.criterion.isImgAudit){
+                        // Peso total de los criterios imgAudit que aplican
+                        totalImgAudit+= element.criterion.criterion.value
+                        if(element.pass)
+                            totalPassImgAudit+= element.criterion.criterion.value
+                            // Peso total de los criterios imgAudit que aplican
+                    }
+                    else if(element.criterion.criterion.isHmeAudit){
+                        // Peso total de los criterios hmes que aplican
+                        totalHmeAudit+= element.criterion.criterion.value
+                        if(element.pass)
+                            totalPassHmeAudit+= element.criterion.criterion.value
+                            // Peso total de los criterios hmes que aplican
+                    }
+                    else if(element.criterion.criterion.isElectricAudit){
+                        // Peso total de los criterios Electric que aplican
+                        totalElectricAudit+= element.criterion.criterion.value
+                        if(element.pass)
+                            totalPassElectricAudit+= element.criterion.criterion.value
+                            // Peso total de los criterios hmes que aplican
+                    }
+                }
+
+            // Los demás criterios
+                isValidType = false
+                element.criterion.criterion.installationType.forEach((type) => {
+                    if(type._id.toString() === existInstallation.installation_type._id.toString()){
+                        isValidType = true
+                    }
+                })
+                // El criterio no aplica
+                if( element.criterion.criterion.category._id.toString() === VENTA && !existInstallation.isSale ||
+                    element.criterion.criterion.category._id.toString() === POSVENTA && !existInstallation.isPostSale ||
+                    element.criterion.criterion.category._id.toString() === HYUNDAI_PROMISE && !existInstallation.isHP || 
+                    element.criterion.criterion.exceptions.includes(existInstallation._id) ||
+                    !isValidType){
+                }
+                // El criterio aplica
+                else{
+                    // Si actualCategoryID es igual a '', entonces le asigno el categoryID actual
+                    if(actualCategoryID.length === 0){
+                        actualCategoryID = element.criterion.criterion.category._id.toString()
+                        actualCategoryName = element.criterion.criterion.category.name.toString()
+                    }
+                    // Defino el multiplicador
+                    let multiplicator = 1
+                    if(actualCategoryID === VENTA){
+                        if(existInstallation.sales_weight_per_installation !== null){
+                            multiplicator = existInstallation.sales_weight_per_installation/100
+                        }
+                        else{
+                            multiplicator = 1
+                        }
+                    }
+                    else if(actualCategoryID === POSVENTA){
+                        if(existInstallation.post_sale_weight_per_installation !== null){
+                            multiplicator = existInstallation.post_sale_weight_per_installation/100
+                        }
+                        else{
+                            multiplicator = 1
+                        }
+                    }
+                    else{
+                        multiplicator = 1
+                    }
+
+                    totalCritValid += 1
+                    //Si la categoría actual es igual que la anterior
+                    if((element.criterion.criterion.category._id.toString() === actualCategoryID)){
+                        //Cantidad de criterios para esta categoría
+                        totalCriterionsByCat += 1
+                        if(element.pass){
+                            //Cantidad de peso acumulado de los cumplidos
+                            accum += element.criterion.criterion.value
+                        }
+                        //Cantidad acumulada de peso total para esa categoría
+                        totalAccum += element.criterion.criterion.value
+                        // Si la cantidad recorrida de criterios en esta instalación, es igual al total de criterios que tiene esa instalación
+                        // Entonces guarda la categoría en el arreglo de categorias de esa instalación.
+                        console.log('llegaaaaaaaaaaaaaaaaaaa')
+                        if(totalCritValid === totalCriterionsForInst){
+                            const perc = ((accum * 100)/totalAccum) * multiplicator
+                            const category = {
+                                id: actualCategoryID.toString(),
+                                name: actualCategoryName,
+                                pass: accum,
+                                total: totalAccum,
+                                percentageByInstallation: (accum * 100)/totalAccum,
+                                totalCriterionsByCat: totalCriterionsByCat,
+                                percentage: perc,
+                                partialPercentage: (accum * 100) / totalCriterionWeight
+                            }
+
+                            categories = [...categories, category]
+
+                            let totalResult = 0
+                            let newTotal = 0
+
+                            if(categories.length>0){
+                                categories.forEach((category) => {
+                                    newTotal += category.partialPercentage
+                                    totalResult += (category.pass * 100)/category.total
+                                    const percByCrit = category.totalCriterionsByCat * 100 / totalCriterionsForInst
+                                    category["totalCriterionsPercByCat"] = percByCrit * category.percentage / 100
+                                })
+                            }
+                            else if(totalCriterionsForInst>0){
+                                totalResult = 1
+                                const percByCrit = categoriesAux.totalCriterionsByCat * 100 / totalCriterionsForInst
+                                categoriesAux["totalCriterionsPercByCat"] = percByCrit * categoriesAux.percentage / 100
+                                categories = [...categories, categoriesAux]
+                            }
+                            
+                            //auditTotalResult es la sumatoria de partialPercentage
+                            auditTotalResult = newTotal //totalResult / categories.length
+                            categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
+
+                            installationAuditData['categories'] = categories
+
+                            instalation_audit_types = {
+                                percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
+                                percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
+                                percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
+                            }
+
+                            installationAuditData['instalation_audit_types'] =  instalation_audit_types
+
+                            instalations_audit_details = [...instalations_audit_details, installationAuditData]
+                        }
+                    }
+                    //Si la categoría actual es diferente que la anterior
+                    else{
+                        // Si no es el primer elemento del arreglo de criterios que aplican, o si tiene solo uno, lo guarda en el arreglo de categorias
+                        if(totalCritValid !== 1 || totalCriterionsForInst === 1){
+                            const perc = ((accum * 100)/totalAccum) * multiplicator
+                            const category = {
+                                id: actualCategoryID.length>0? actualCategoryID: element.criterion.criterion.category._id.toString(),
+                                name: actualCategoryName.length>0? actualCategoryName: element.criterion.criterion.category.name,
+                                pass: accum,
+                                total: totalAccum,
+                                percentageByInstallation: (accum * 100)/totalAccum,
+                                totalCriterionsByCat: totalCriterionsByCat,
+                                percentage: perc,
+                                partialPercentage: (accum * 100) / totalCriterionWeight
+                            }
+                            categories = [...categories, category]
+                        }
+
+                        totalCriterionsByCat = 1
+                        totalAccum = element.criterion.criterion.value
+                        if(element.pass){
+                            accum = element.criterion.criterion.value
+                        }
+                        else{
+                            accum = 0
+                        }
+                        actualCategoryID = element.criterion.criterion.category._id.toString()
+                        actualCategoryName = element.criterion.criterion.category.name
+                        // Si estoy recorriendo el último elemento, entonces lo almaceno
+                        if(totalCritValid === totalCriterionsForInst && totalCriterionsForInst !== 1){
+                            const perc = ((accum * 100)/totalAccum) * multiplicator
+                            const category = {
+                                id: actualCategoryID.length>0? actualCategoryID: element.criterion.criterion.category._id.toString(),
+                                name: actualCategoryName.length>0? actualCategoryName: element.criterion.criterion.category.name,
+                                pass: accum,
+                                total: totalAccum,
+                                percentageByInstallation: (accum * 100)/totalAccum,
+                                totalCriterionsByCat: totalCriterionsByCat,
+                                percentage: perc,
+                                partialPercentage: (accum * 100) / totalCriterionWeight
+                            }
+                            categories = [...categories, category]
+
+                            let totalResult = 0
+                            let newTotal = 0
+                            if(categories.length>0){
+                                categories.forEach((category) => {
+                                    newTotal += category.partialPercentage
+                                    totalResult += (category.pass * 100)/category.total
+                                    const percByCrit = category.totalCriterionsByCat * 100 / totalCriterionsForInst
+                                    category["totalCriterionsPercByCat"] = percByCrit * category.percentage / 100
+                                })
+                            }
+                            else if(totalCriterionsForInst>0){
+                                totalResult = 1
+                                const percByCrit = categoriesAux.totalCriterionsByCat * 100 / totalCriterionsForInst
+                                categoriesAux["totalCriterionsPercByCat"] = percByCrit * categoriesAux.percentage / 100
+                                categories = [...categories, categoriesAux]
+                            }
+
+                            auditTotalResult = newTotal //totalResult / categories.length
+                            categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
+
+                            installationAuditData['categories'] = categories
+
+                            instalation_audit_types = {
+                                percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
+                                percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
+                                percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
+                            }
+
+                            installationAuditData['instalation_audit_types'] =  instalation_audit_types
+
+                            instalations_audit_details = [...instalations_audit_details, installationAuditData]
+                        }
+                    }
+                }      
+        })
+
+        instalations_audit_details.forEach((element) => {
+            console.log('element: ', element)
+        })
+        const updatedFields = {}
+
+        if(audit_id)
+            updatedFields['audit_id'] = audit_id
+        if(installation_id)
+            updatedFields['installation_id'] = installation_id
+        if(criterions)
+            updatedFields['criterions'] = criterions
+        if(state)
+            updatedFields['state'] = state
+        updatedFields['instalations_audit_details'] = instalations_audit_details
+        updatedFields['updatedAt'] = Date.now()
+        const updatedAuditResults = await AuditResults.findByIdAndUpdate(id, updatedFields, {new: true})
+                                        .catch(error => {        
+                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                                        })
+
+        response.status(200).json({code: 200,
+                                    msg: 'the AuditResults has been updated successfully',
+                                    data: updatedAuditResults })
+    }
+    catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
+    }
+}
+
+
+module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables, getAuditResByAuditIDAndInstallationID, getDataForAudit, getDataForFullAudit, updateTest}
