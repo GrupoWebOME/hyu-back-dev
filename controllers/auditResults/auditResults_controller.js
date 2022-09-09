@@ -113,7 +113,7 @@ const createAuditResults = async(request, response) => {
 
         response.status(201).json({code: 201,
                                     msg: 'the auditResults has been created successfully',
-                                    data: 'newAuditResults' })
+                                    data: newAuditResults })
     }
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
@@ -2076,6 +2076,8 @@ const createAuditResultsTest = async(request, response) => {
         const {audit_id, installation_id, criterions} = request.body
 
         let errors = []
+        let existAudit = null
+        let existInstallation = null
 
         if(!audit_id){
             errors.push({code: 400, 
@@ -2091,7 +2093,13 @@ const createAuditResultsTest = async(request, response) => {
                 })  
             }
             else{
-                const existAudit = await Audit.exists({_id: audit_id})
+                existAudit = await Audit.findOne({_id: audit_id}).populate({ 
+                    path: 'criterions.criterion', 
+                    populate: {
+                        path: 'standard block area category auditResponsable criterionType installationType',
+                        select: 'name code description isCore number abbreviation'
+                    },
+                }) 
                 if(!existAudit)
                     errors.push({code: 400, 
                                 msg: 'invalid audit_id',
@@ -2121,7 +2129,7 @@ const createAuditResultsTest = async(request, response) => {
                 })  
             }
             else{
-                const existInstallation = await Installation.exists({_id: installation_id})
+                existInstallation = await Installation.findOne({_id: installation_id})
                 if(!existInstallation)
                     errors.push({code: 400, 
                                 msg: 'invalid installation_id',
@@ -2165,7 +2173,7 @@ const createAuditResultsTest = async(request, response) => {
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
 
-            //Recorro el arreglo de resultados
+        //Recorro el arreglo de resultados
         const newArrCrit = existAudit.criterions.map((element) => {
             const criterionFinded = criterions.find((crit) => element.criterion._id.toString() === crit.criterion_id.toString())
             return {criterion: element, pass: criterionFinded.pass}
@@ -2177,6 +2185,8 @@ const createAuditResultsTest = async(request, response) => {
         newArrCrit.forEach((element) => {
             let arrayStandardsFalse = []
             let arrayAreasFalse = []           
+            console.log('llega: ', element.criterion.criterion.standard)
+
             if(!element.pass && !element.criterion.exceptions.includes(installation_id)){
                 const existStandard = arrayStandardsFalse.includes(element.criterion.criterion.standard._id.toString())
                 if(!existStandard){
@@ -2195,7 +2205,6 @@ const createAuditResultsTest = async(request, response) => {
                 arrayStandardsFalse: arrayStandardsFalse,
                 arrayAreasFalse: arrayAreasFalse
             }]
-
         })
 
         //Convierto en false los criterios afectados por core
@@ -2506,7 +2515,7 @@ const createAuditResultsTest = async(request, response) => {
 
         response.status(201).json({code: 201,
                                     msg: 'the auditResults has been created successfully',
-                                    data: 'newAuditResults' })
+                                    data: newAuditResults })
     }
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
