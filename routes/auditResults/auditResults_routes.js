@@ -59,7 +59,8 @@ const AuditResults = require('../../controllers/auditResults/auditResults_contro
   *   description: Rutas de Resultados de Auditorias
   */
 
-api.post('/', AuditResults.createAuditResults)
+ api.post('/', AuditResults.createAuditResults)
+ api.post('/', AuditResults.createAuditResultsTest)
 
 /**
  * @swagger
@@ -175,7 +176,6 @@ api.post('/', AuditResults.createAuditResults)
  */
 
 api.put('/:id', AuditResults.updateAuditResults)
-api.put('/updatetest/:id', AuditResults.updateTest)
 
 /**
  * @swagger
@@ -383,9 +383,13 @@ api.delete('/:id', AuditResults.deleteAuditResults)
 
  api.post('/tables', AuditResults.getDataForTables)
 
+ api.put('/updatetest/:id', AuditResults.updateTest)
+
  api.get('/tables/audit/:audit_id', AuditResults.getDataForAudit)
 
  api.get('/tables/audit/:audit_id/details', AuditResults.getDataForFullAudit)
+
+ api.get('/tables/audit/:audit_id/details2', AuditResults.getDataForFullAuditTest)
 
  api.get('/audit/:auditid/installation/:installationid', AuditResults.getAuditResByAuditIDAndInstallationID)
 
