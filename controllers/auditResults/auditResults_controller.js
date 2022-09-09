@@ -2176,7 +2176,7 @@ const createAuditResultsTest = async(request, response) => {
         //Recorro el arreglo de resultados
         const newArrCrit = existAudit.criterions.map((element) => {
             const criterionFinded = criterions.find((crit) => element.criterion._id.toString() === crit.criterion_id.toString())
-            return {criterion: element, pass: criterionFinded.pass}
+            return {criterion: element, pass: criterionFinded?.pass}
         })
 
         let arrayForCore = []
