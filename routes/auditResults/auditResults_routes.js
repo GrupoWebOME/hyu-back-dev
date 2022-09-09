@@ -175,6 +175,7 @@ api.post('/', AuditResults.createAuditResults)
  */
 
 api.put('/:id', AuditResults.updateAuditResults)
+api.put('/updatetest/:id', AuditResults.updateTest)
 
 /**
  * @swagger
