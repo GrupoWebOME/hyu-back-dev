@@ -2056,6 +2056,7 @@ const createAuditResultsTest = async(request, response) => {
             audit_id,
             installation_id,
             criterions,
+            instalations_audit_details: array_instalations_audit_details,
             state: 'created'
         })
 
