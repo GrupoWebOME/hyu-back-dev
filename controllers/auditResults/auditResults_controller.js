@@ -2776,7 +2776,7 @@ const tablesTest = async(request, response) => {
         }
 
         const tables = await AuditAgency.findOne({audit_id: audit_id, dealership_id: dealership_id})
-        return response.status(200).json({data: audit_data})
+        return response.status(200).json({data: tables})
     }
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
