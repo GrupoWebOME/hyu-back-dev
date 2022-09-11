@@ -2016,17 +2016,6 @@ const createAuditResultsTest = async(request, response) => {
 
         agency_audit_details = accumAgency / array_instalations_audit_details.length
 
-        let data = {
-            audit_id: audit_id,
-            dealership_id: dealershipByID._id,
-            audit_name: existAudit.name,
-            dealership_details: dealershipByID,
-            audit_criterions_details: auditsResults,
-            instalations_audit_details: array_instalations_audit_details,
-            agency_audit_details: agency_audit_details,
-            agency_by_types: agency_by_types
-        }
-
         const newConsetionResult = new AuditAgency({
             audit_id: audit_id,
             dealership_id: dealershipByID._id,
@@ -2044,6 +2033,8 @@ const createAuditResultsTest = async(request, response) => {
             agency_by_types: agency_by_types
         })
 
+        const existAuditAgency = await AuditAgency.exists({audit_id: audit_id, dealership: dealershipByID._id})
+
         const newAuditResultsGen = new AuditResults({
             audit_id,
             installation_id,
@@ -2056,14 +2047,23 @@ const createAuditResultsTest = async(request, response) => {
                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                         })
 
-        await newConsetionResult.save()
-            .catch(error => {        
-                return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-            })
-
+        if(!existAuditAgency){
+            await newConsetionResult.save()
+                        .catch(error => {        
+                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                        })
+        }
+        else{
+            await AuditAgency.findOneAndUpdate({audit_id: audit_id, dealership_id: dealershipByID._id}, newConsetionResult, {new: true})
+                            .catch(error => {        
+                                return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                            })
+        }
+        
         response.status(201).json({code: 201,
-            msg: 'the auditResults has been created successfully',
-            data: newAuditResultscreated })
+                                    msg: 'the auditResults has been created successfully',
+                                    data: newAuditResultscreated,
+                                    tables: newConsetionResult })
     } catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
     }
@@ -2613,17 +2613,6 @@ const updateTest = async(request, response) => {
 
         agency_audit_details = accumAgency / array_instalations_audit_details.length
 
-        let data = {
-            audit_id: audit_id,
-            dealership_id: dealershipByID._id,
-            audit_name: existAudit.name,
-            dealership_details: dealershipByID,
-            audit_criterions_details: auditsResults,
-            instalations_audit_details: array_instalations_audit_details,
-            agency_audit_details: agency_audit_details,
-            agency_by_types: agency_by_types
-        }
-
         const updatedFields = {}
 
         if(audit_id)
@@ -2666,7 +2655,8 @@ const updateTest = async(request, response) => {
 
         response.status(200).json({code: 200,
                                     msg: 'the AuditResults has been updated successfully',
-                                    data: updatedAuditResults })
+                                    data: updatedAuditResults,
+                                    tables: newConsetionResult })
     } catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
     }
