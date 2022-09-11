@@ -333,6 +333,12 @@ const deleteAudit = async(request, response) => {
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
+
+        await AuditResults.deleteMany({audit_id: id})
+                    .catch(error => {        
+                        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                    })
+
         response.status(201).json({code: 200,
                                     msg: 'the Audit has been deleted successfully',
                                     data: deletedAudit })
