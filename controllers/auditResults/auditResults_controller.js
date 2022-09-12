@@ -2057,7 +2057,7 @@ const createAuditResultsTest = async(request, response) => {
                         })
         }
         else{
-            array_instalations_audit_details = [...array_instalations_audit_details, ...existAuditAgency.instalations_audit_details]
+            // array_instalations_audit_details = [...array_instalations_audit_details, ...existAuditAgency.instalations_audit_details]
 
             const updateConsetionResult = {
                 audit_id: audit_id,
