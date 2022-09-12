@@ -1561,10 +1561,10 @@ const createAuditResultsTest = async(request, response) => {
                 })  
             }
             else{
-                existInstallation = await Installation.findById(installation_id).populate({
+                existInstallation = await Installation.findOne({_id: installation_id}).populate({
                     path: 'installation_type dealership', 
                     select: '_id code active'})
-
+                    
                 if(!existInstallation || !existInstallation.active){
                     errors.push({code: 400, 
                                 msg: 'invalid installation_id',
@@ -1933,7 +1933,6 @@ const createAuditResultsTest = async(request, response) => {
         })
 
         array_instalations_audit_details = [...array_instalations_audit_details, instalations_audit_details]
-
         let accumAgency = 0
 
         let hp_perc = 0
@@ -1978,6 +1977,9 @@ const createAuditResultsTest = async(request, response) => {
                     else if(category.id === POSVENTA){
                         pv_perc_total += 1
                         pv_perc += category.partialPercentage * coefficient
+                    }
+                    else{
+                        console.log('category: ', category.partialPercentage * coefficient)
                     }
                 })
 
@@ -2033,24 +2035,7 @@ const createAuditResultsTest = async(request, response) => {
             agency_by_types: agency_by_types
         })
         
-        const updateConsetionResult = {
-            audit_id: audit_id,
-            dealership_id: dealershipByID._id,
-            code: dealershipByID.code,
-            name: dealershipByID.name,
-            ionic5_quaterly_billing: dealershipByID.ionic5_quaterly_billing,
-            vn_quaterly_billing: dealershipByID.vn_quaterly_billing,
-            audit_initial_date: existAudit.initial_date,
-            audit_end_date: existAudit.end_date,
-            audit_name: existAudit.name,
-            dealership_details: dealershipByID,
-            audit_criterions_details: auditsResults,
-            instalations_audit_details: array_instalations_audit_details,
-            agency_audit_details: agency_audit_details,
-            agency_by_types: agency_by_types
-        }
-
-        const existAuditAgency = await AuditAgency.exists({audit_id: audit_id, dealership: dealershipByID._id})
+        const existAuditAgency = await AuditAgency.findOne({audit_id: audit_id, dealership_id: dealershipByID._id})
 
         const newAuditResultsGen = new AuditResults({
             audit_id,
@@ -2064,6 +2049,7 @@ const createAuditResultsTest = async(request, response) => {
                         .catch(error => {        
                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                         })
+
         if(!existAuditAgency){
             await newConsetionResult.save()
                         .catch(error => {        
@@ -2071,6 +2057,25 @@ const createAuditResultsTest = async(request, response) => {
                         })
         }
         else{
+            array_instalations_audit_details = [...array_instalations_audit_details, ...existAuditAgency.instalations_audit_details]
+
+            const updateConsetionResult = {
+                audit_id: audit_id,
+                dealership_id: dealershipByID._id,
+                code: dealershipByID.code,
+                name: dealershipByID.name,
+                ionic5_quaterly_billing: dealershipByID.ionic5_quaterly_billing,
+                vn_quaterly_billing: dealershipByID.vn_quaterly_billing,
+                audit_initial_date: existAudit.initial_date,
+                audit_end_date: existAudit.end_date,
+                audit_name: existAudit.name,
+                dealership_details: dealershipByID,
+                audit_criterions_details: auditsResults,
+                instalations_audit_details: array_instalations_audit_details,
+                agency_audit_details: agency_audit_details,
+                agency_by_types: agency_by_types
+            }
+
             await AuditAgency.findOneAndUpdate({audit_id: audit_id, dealership_id: dealershipByID._id}, updateConsetionResult, {new: true})
                             .catch(error => {        
                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
