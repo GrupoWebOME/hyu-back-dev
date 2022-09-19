@@ -254,7 +254,7 @@ const updateAdmin = async(request, response) => {
                             })
         }
     
-        if(userName)
+        if(!userName)
             errors.push({code: 400, 
                          msg: 'invalid userName',
                          detail: `${userName} is not valid userName format. The userName field can only contain a valid email`
