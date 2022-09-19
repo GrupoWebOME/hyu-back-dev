@@ -2720,7 +2720,7 @@ const getDataForFullAuditTest = async(request, response) => {
                 name: element.name,
                 ionic5_quaterly_billing: element.ionic5_quaterly_billing,
                 vn_quaterly_billing: element.vn_quaterly_billing,
-                electric_quaterly_billing: element.electric_quaterly_billing,
+                electric_quaterly_billing: element.dealership_details.electric_quaterly_billing, // NEMO, esto lo emparche asi, despues miralo
                 percentage_total: element.agency_by_types.total_agency,
                 percentage_general: element.agency_by_types.general_perc,
                 percentage_venta: element.agency_by_types.v_perc,
@@ -2730,7 +2730,6 @@ const getDataForFullAuditTest = async(request, response) => {
                 percentage_audit_img: element.agency_by_types.img_perc,
                 percentage_audit_hme: element.agency_by_types.hme_perc,
             }
-
             dealership_details = [...dealership_details, data]
 
             compliance_audit += element.agency_by_types.total_agency !== null? element.agency_by_types.total_agency : 0
