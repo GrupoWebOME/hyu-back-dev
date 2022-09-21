@@ -314,6 +314,7 @@ const updateInstallation = async(request, response) => {
         const {id} = request.params
         let errors = []
         let installation = null
+        let existDealership = null
         if(id && ObjectId.isValid(id)){
             installation = await Installation.findById(id)
                                           .catch(error => {return response.status(400).json({code: 500, 
@@ -392,7 +393,7 @@ const updateInstallation = async(request, response) => {
                         detail: `dealership is required, and should be a ObjectID format`
                         })      
         else if(dealership){
-            const existDealership = await Dealership.findById(dealership)
+            existDealership = await Dealership.findById(dealership)
                                                 .catch(error => {        
                                                     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                                 })
@@ -512,8 +513,17 @@ const updateInstallation = async(request, response) => {
             updatedFields['autonomous_community'] = autonomous_community
         if(code)
             updatedFields['code'] = code
-        if(dealership)
+        if(dealership){
+            await Dealership.findOneAndUpdate({installations: {$in: [id]}}, {$pull: { installations: id }})
+                        .catch(error => {        
+                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                        })
+            await Dealership.findByIdAndUpdate(dealership, {$push: { installations: id }})
+                        .catch(error => {        
+                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                        })
             updatedFields['dealership'] = dealership
+        }
         if(address)
             updatedFields['address'] = address
         if(installation_type)
