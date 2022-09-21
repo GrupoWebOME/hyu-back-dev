@@ -681,6 +681,7 @@ const getDataForTables = async(request, response) => {
     }
 }
 
+/*
 const getDataForAudit = async(request, response) => {
     let {audit_id} = request.params
     let auditsResults = null
@@ -904,6 +905,7 @@ const getDataForAudit = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
     }
 }
+*/
 
 const getDataForFullAudit = async(request, response) => {
     const {audit_id} = request.params
@@ -2921,6 +2923,238 @@ const tablesTest = async(request, response) => {
 
         const tables = await AuditAgency.findOne({audit_id: audit_id, dealership_id: dealership_id})
         return response.status(200).json({data: tables})
+    }
+    catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
+    }
+}
+
+const getDataForAudit = async(request, response) => {
+    let {audit_id} = request.params
+    let auditsResults = null
+
+    try{
+        let existAudit = null
+
+        if(audit_id === "last"){
+            const audit = await Audit.findOne().sort({$natural:-1}).limit(1)
+            if(audit){
+                audit_id = audit._id
+            }
+            else{
+                return response.status(404).json({errors: [{code: 404, msg: 'not found', detail: "No audits in ddbb"}]})
+            }
+        }
+        if(!ObjectId.isValid(audit_id)){
+            return response.status(400).json(
+                {errors: [{code: 400, 
+                        msg: 'invalid audit_id', 
+                        detail: `${audit_id} is not an ObjectId`}]})
+        }
+        else{
+            existAudit = await Audit.findById(audit_id)
+            if(!existAudit)
+                return response.status(400).json(
+                    {errors: [{code: 400, 
+                            msg: 'invalid audit_id', 
+                            detail: `${audit_id} not found`}]}) 
+        }
+
+        let auditAgencies = await AuditAgency.find({audit_id: audit_id})
+
+        auditsResults = await AuditResults.find({audit_id: audit_id})
+                                                .populate({path: 'installation_id', select: '_id active name installation_type dealership', 
+                                                            populate: {path: 'installation_type dealership', select: '_id code active'}})
+                                                .populate({ path: 'criterions.criterion_id', 
+                                                    populate: {
+                                                        path: 'standard category criterionType installationType',
+                                                        select: 'name code description isCore'
+                                                    },
+                                                }) 
+
+        const AOH = "6226310514861f56d3c64266"
+
+        let auditResultsWithoutInactiveInst = []
+
+        auditsResults.forEach((element) => {
+            if(element.installation_id.active && element.installation_id.dealership.active){
+                auditResultsWithoutInactiveInst = [...auditResultsWithoutInactiveInst, element]
+            }
+        } )  
+
+        const auditsResultsAux = auditResultsWithoutInactiveInst   
+              
+        let arrayForCore = []
+
+        auditResultsWithoutInactiveInst.forEach((element) => {
+            let arrayStandardsFalse = []
+            let arrayAreasFalse = []
+
+            element.criterions.forEach((criterion) => {
+                if(!criterion.pass){
+                    const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                    if(!existStandard){
+                        arrayStandardsFalse = [...arrayStandardsFalse, criterion.criterion_id.standard._id.toString()]
+                    }
+                    if(criterion.criterion_id.standard.isCore){
+                        const existArea = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                        if(!existArea){
+                            arrayAreasFalse = [...arrayAreasFalse, criterion.criterion_id.area._id.toString()]
+                        }
+                    }
+                }
+            })
+
+            arrayForCore = [...arrayForCore, {
+                id: element.installation_id._id.toString(),
+                arrayStandardsFalse: arrayStandardsFalse,
+                arrayAreasFalse: arrayAreasFalse
+            }]
+        })
+
+        // convierto en false si no cumple core
+        auditsResultsAux.forEach((element, indexEl) => {
+            const finded = arrayForCore.find( el => el.id === element.installation_id._id.toString() )
+            element.criterions.forEach((criterion, index) => {
+                const existSt = finded.arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                const existAr = finded.arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                if(existAr || existSt){
+                    auditsResultsAux[indexEl].criterions[index].pass = false
+                }
+            })
+        })
+
+        let hmesValuesPass = 0
+        let hmesTotalValue = 0
+        let imgValuesPass = 0
+        let imgTotalValue = 0
+        let electricValuesPass = 0
+        let electricTotalValue = 0
+
+        let hmesValuesPassDeal = 0
+        let hmesTotalValueDeal = 0
+        let imgValuesPassDeal = 0
+        let imgTotalValueDeal = 0
+        let electricValuesPassDeal = 0
+        let electricTotalValueDeal = 0
+
+        let instalations_detail = []
+        let totalValueDeal_for_installation = 0
+        let totalValuesPassDeal_for_installation = 0
+
+        auditResultsWithoutInactiveInst.forEach((element) => {
+            let isValidType = false
+            element.criterions.forEach((criterion, index) => {
+                criterion.criterion_id.installationType.forEach((type) => {
+                    if(type._id.toString() === element.installation_id.installation_type._id.toString())
+                        isValidType = true
+                })
+                if(isValidType){    
+                    if(element.installation_id.installation_type._id.toString() === AOH){
+                        if(criterion.criterion_id.isHmeAudit){
+                            hmesTotalValueDeal+= criterion.criterion_id.value
+                            totalValueDeal_for_installation+= criterion.criterion_id.value
+                            if(criterion.pass){
+                                hmesValuesPassDeal+= criterion.criterion_id.value
+                                totalValuesPassDeal_for_installation+= criterion.criterion_id.value
+                            }
+                        }
+                        if(criterion.criterion_id.isImgAudit){
+                            imgTotalValueDeal+= criterion.criterion_id.value
+                            totalValueDeal_for_installation+= criterion.criterion_id.value
+                            if(criterion.pass){
+                                imgValuesPassDeal+= criterion.criterion_id.value
+                                totalValuesPassDeal_for_installation+= criterion.criterion_id.value
+                            }
+                        }
+                        if(criterion.criterion_id.isElectricAudit){
+                            electricTotalValueDeal+= criterion.criterion_id.value
+                            totalValueDeal_for_installation+= criterion.criterion_id.value
+                            if(criterion.pass){
+                                electricValuesPassDeal+= criterion.criterion_id.value
+                                totalValuesPassDeal_for_installation+= criterion.criterion_id.value
+                            }
+                        }
+                    }
+                    else{
+                        if(criterion.criterion_id.isHmeAudit){
+                            hmesTotalValue+= criterion.criterion_id.value
+                            totalValueDeal_for_installation+= criterion.criterion_id.value
+                            if(criterion.pass){
+                                hmesValuesPass+= criterion.criterion_id.value
+                                totalValuesPassDeal_for_installation+= criterion.criterion_id.value
+                            }
+                        }
+                        if(criterion.criterion_id.isImgAudit){
+                            imgTotalValue+= criterion.criterion_id.value
+                            totalValueDeal_for_installation+= criterion.criterion_id.value
+                            if(criterion.pass){
+                                imgValuesPass+= criterion.criterion_id.value
+                                totalValuesPassDeal_for_installation+= criterion.criterion_id.value
+                            }
+                        }
+                        if(criterion.criterion_id.isElectricAudit){
+                            electricTotalValue+= criterion.criterion_id.value
+                            totalValueDeal_for_installation+= criterion.criterion_id.value
+                            if(criterion.pass){
+                                electricValuesPass+= criterion.criterion_id.value
+                                totalValuesPassDeal_for_installation+= criterion.criterion_id.value
+                            }
+                        }
+                    }
+                }
+            })
+            totalValueDeal_for_installation = 0
+            totalValuesPassDeal_for_installation = 0
+        })
+
+        const hmes_dealership = hmesTotalValueDeal!==0? (hmesValuesPassDeal * 100)/hmesTotalValueDeal : null
+        const img_dealership = imgTotalValueDeal!==0? (imgValuesPassDeal * 100)/imgTotalValueDeal : null
+        const electric_dealership = electricTotalValueDeal!==0? (electricValuesPassDeal * 100)/electricTotalValueDeal : null
+        const hmes_inst = hmesTotalValue!==0? (hmesValuesPass * 100)/hmesTotalValue : null
+        const img_inst = imgTotalValue!==0? (imgValuesPass * 100)/imgTotalValue : null
+        const electric_inst = electricTotalValue!==0? (electricValuesPass * 100)/electricTotalValue : null
+
+        let dealerTotal = 0
+        let instTotal = 0
+        
+        if(hmes_dealership!==null)
+            dealerTotal+= 1
+        if(img_dealership!==null)
+            dealerTotal+= 1
+        if(electric_dealership!==null)
+            dealerTotal+= 1
+        if(hmes_inst!==null)
+            instTotal+= 1
+        if(img_inst!==null)
+            instTotal+= 1
+        if(electric_inst!==null)
+            instTotal+= 1
+
+        auditAgencies.forEach((element) => {
+            element.instalations_audit_details.forEach((el) => {
+                instalations_detail = [...instalations_detail, 
+                    {installation_name: el.installation.name, 
+                     installation_id: el.installation._id,
+                     perc: el.categories[el.categories.length - 1].auditTotalResult
+                }]
+            })
+        })
+
+        const data = {
+            hmes_dealership: hmes_dealership,
+            img_dealership: img_dealership,
+            electric_dealership: electric_dealership,
+            hmes_inst: hmes_inst,
+            img_inst: img_inst,
+            electric_inst: electric_inst,
+            total_dealership: (hmes_dealership + img_dealership + electric_dealership)/dealerTotal,
+            total_inst: (hmes_inst + img_inst + electric_inst)/instTotal,
+            total: (((hmes_dealership + img_dealership + electric_dealership)/dealerTotal) + ( (hmes_inst + img_inst + electric_inst)/instTotal))/2,
+            instalations_detail: instalations_detail
+        }
+
+        return response.status(200).json({data: data})
     }
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
