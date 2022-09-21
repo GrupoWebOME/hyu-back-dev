@@ -2349,7 +2349,7 @@ const updateTest = async(request, response) => {
             }
         })
 
-        const auditResultsForImgAndHme = [...auditResultsWithoutInactiveInst]
+        const auditResultsForImgAndHme = [...auditsResults]
 
         let instalations_audit_details = null
         let instalation_audit_types = null
