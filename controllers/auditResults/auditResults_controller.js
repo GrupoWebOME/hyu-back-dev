@@ -283,7 +283,7 @@ const getDataForTables = async(request, response) => {
                             totalPassImgAudit+= criterion.criterion_id.value
                             // Peso total de los criterios imgAudit que aplican
                     }
-                    else if(criterion.criterion_id.isHmeAudit){
+                    if(criterion.criterion_id.isHmeAudit){
                         // Peso total de los criterios hmes que aplican
                         totalHmeAudit+= criterion.criterion_id.value
                         if(criterion.pass)
@@ -1723,7 +1723,7 @@ const createAuditResultsTest = async(request, response) => {
                             totalPassImgAudit+= criterion.criterion_id.value
                             // Peso total de los criterios imgAudit que aplican
                     }
-                    else if(criterion.criterion_id.isHmeAudit){
+                    if(criterion.criterion_id.isHmeAudit){
                         // Peso total de los criterios hmes que aplican
                         totalHmeAudit+= criterion.criterion_id.value
                         if(criterion.pass)
@@ -2392,7 +2392,7 @@ const updateTest = async(request, response) => {
                             totalPassImgAudit+= criterion.criterion_id.value
                             // Peso total de los criterios imgAudit que aplican
                     }
-                    else if(criterion.criterion_id.isHmeAudit){
+                    if(criterion.criterion_id.isHmeAudit){
                         // Peso total de los criterios hmes que aplican
                         totalHmeAudit+= criterion.criterion_id.value
                         if(criterion.pass)
