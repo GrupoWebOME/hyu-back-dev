@@ -1665,7 +1665,7 @@ const createAuditResultsTest = async(request, response) => {
         let arrayStandardsFalse = []
         let arrayAreasFalse = []
 
-        const auditResultsForImgAndHme = [...newAuditResults]
+        const auditResultsForImgAndHme = newAuditResults
 
         newAuditResults.criterions.forEach((criterion) => {
             if(!criterion.pass && !criterion.criterion_id.exceptions.includes(newAuditResults.installation_id._id)){
@@ -1698,40 +1698,37 @@ const createAuditResultsTest = async(request, response) => {
         let totalPassHmeAudit = 0
 
         //<<<NUEVO
-        auditResultsForImgAndHme.forEach((element) => {
-            // Criterios hme, img
-            element.criterions.forEach((criterion) => {     
-                let isValidType = false
-                criterion.criterion_id.installationType.forEach((type) => {
-                    if(type._id.toString() === element.installation_id.installation_type._id.toString()){
-                        isValidType = true
-                    }
-                })
-                // Si es inválido
-                if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
-                criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
-                criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP ||
-                criterion.criterion_id.exceptions.includes(element.installation_id._id) ||
-                !isValidType){
-                }
-                // Si es válido
-                else{ 
-                    if(criterion.criterion_id.isImgAudit){
-                        // Peso total de los criterios imgAudit que aplican
-                        totalImgAudit+= criterion.criterion_id.value
-                        if(criterion.pass)
-                            totalPassImgAudit+= criterion.criterion_id.value
-                            // Peso total de los criterios imgAudit que aplican
-                    }
-                    if(criterion.criterion_id.isHmeAudit){
-                        // Peso total de los criterios hmes que aplican
-                        totalHmeAudit+= criterion.criterion_id.value
-                        if(criterion.pass)
-                            totalPassHmeAudit+= criterion.criterion_id.value
-                            // Peso total de los criterios hmes que aplican
-                    }
+        auditResultsForImgAndHme.criterions.forEach((criterion) => {     
+            let isValidType = false
+            criterion.criterion_id.installationType.forEach((type) => {
+                if(type._id.toString() === newAuditResults.installation_id.installation_type._id.toString()){
+                    isValidType = true
                 }
             })
+            // Si es inválido
+            if(criterion.criterion_id.category._id.toString() === VENTA && !newAuditResults.installation_id.isSale ||
+                criterion.criterion_id.category._id.toString() === POSVENTA && !newAuditResults.installation_id.isPostSale ||
+                criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !newAuditResults.installation_id.isHP ||
+                criterion.criterion_id.exceptions.includes(newAuditResults.installation_id._id) ||
+                !isValidType){
+            }
+            // Si es válido
+            else{ 
+                if(criterion.criterion_id.isImgAudit){
+                    // Peso total de los criterios imgAudit que aplican
+                    totalImgAudit+= criterion.criterion_id.value
+                    if(criterion.pass)
+                        totalPassImgAudit+= criterion.criterion_id.value
+                        // Peso total de los criterios imgAudit que aplican
+                }
+                if(criterion.criterion_id.isHmeAudit){
+                    // Peso total de los criterios hmes que aplican
+                    totalHmeAudit+= criterion.criterion_id.value
+                    if(criterion.pass)
+                        totalPassHmeAudit+= criterion.criterion_id.value
+                        // Peso total de los criterios hmes que aplican
+                }
+            }
         })
         //>>>
 
@@ -2349,7 +2346,7 @@ const updateTest = async(request, response) => {
             }
         })
 
-        const auditResultsForImgAndHme = [...newAuditResults]
+        const auditResultsForImgAndHme = newAuditResults
 
         let instalations_audit_details = null
         let instalation_audit_types = null
@@ -2367,40 +2364,37 @@ const updateTest = async(request, response) => {
         let totalPassHmeAudit = 0
 
         //<<<NUEVO
-        auditResultsForImgAndHme.forEach((element) => {
-            // Criterios hme, img
-            element.criterions.forEach((criterion) => {     
-                let isValidType = false
-                criterion.criterion_id.installationType.forEach((type) => {
-                    if(type._id.toString() === element.installation_id.installation_type._id.toString()){
-                        isValidType = true
-                    }
-                })
-                // Si es inválido
-                if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
-                criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
-                criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP ||
-                criterion.criterion_id.exceptions.includes(element.installation_id._id) ||
-                !isValidType){
-                }
-                // Si es válido
-                else{ 
-                    if(criterion.criterion_id.isImgAudit){
-                        // Peso total de los criterios imgAudit que aplican
-                        totalImgAudit+= criterion.criterion_id.value
-                        if(criterion.pass)
-                            totalPassImgAudit+= criterion.criterion_id.value
-                            // Peso total de los criterios imgAudit que aplican
-                    }
-                    if(criterion.criterion_id.isHmeAudit){
-                        // Peso total de los criterios hmes que aplican
-                        totalHmeAudit+= criterion.criterion_id.value
-                        if(criterion.pass)
-                            totalPassHmeAudit+= criterion.criterion_id.value
-                            // Peso total de los criterios hmes que aplican
-                    }
+        auditResultsForImgAndHme.criterions.forEach((criterion) => {     
+            let isValidType = false
+            criterion.criterion_id.installationType.forEach((type) => {
+                if(type._id.toString() === newAuditResults.installation_id.installation_type._id.toString()){
+                    isValidType = true
                 }
             })
+            // Si es inválido
+            if(criterion.criterion_id.category._id.toString() === VENTA && !newAuditResults.installation_id.isSale ||
+                criterion.criterion_id.category._id.toString() === POSVENTA && !newAuditResults.installation_id.isPostSale ||
+                criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !newAuditResults.installation_id.isHP ||
+                criterion.criterion_id.exceptions.includes(newAuditResults.installation_id._id) ||
+                !isValidType){
+            }
+            // Si es válido
+            else{ 
+                if(criterion.criterion_id.isImgAudit){
+                    // Peso total de los criterios imgAudit que aplican
+                    totalImgAudit+= criterion.criterion_id.value
+                    if(criterion.pass)
+                        totalPassImgAudit+= criterion.criterion_id.value
+                        // Peso total de los criterios imgAudit que aplican
+                }
+                if(criterion.criterion_id.isHmeAudit){
+                    // Peso total de los criterios hmes que aplican
+                    totalHmeAudit+= criterion.criterion_id.value
+                    if(criterion.pass)
+                        totalPassHmeAudit+= criterion.criterion_id.value
+                        // Peso total de los criterios hmes que aplican
+                }
+            }
         })
         //>>>
 
