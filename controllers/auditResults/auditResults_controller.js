@@ -1665,7 +1665,7 @@ const createAuditResultsTest = async(request, response) => {
         let arrayStandardsFalse = []
         let arrayAreasFalse = []
 
-        const auditResultsForImgAndHme = [...auditsResults]
+        const auditResultsForImgAndHme = [...newAuditResults]
 
         newAuditResults.criterions.forEach((criterion) => {
             if(!criterion.pass && !criterion.criterion_id.exceptions.includes(newAuditResults.installation_id._id)){
@@ -2349,7 +2349,7 @@ const updateTest = async(request, response) => {
             }
         })
 
-        const auditResultsForImgAndHme = [...auditsResults]
+        const auditResultsForImgAndHme = [...newAuditResults]
 
         let instalations_audit_details = null
         let instalation_audit_types = null
