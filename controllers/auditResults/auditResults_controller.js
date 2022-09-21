@@ -240,6 +240,61 @@ const getDataForTables = async(request, response) => {
             }]
         })
 
+        const auditResultsForImgAndHme = [...auditResultsWithoutInactiveInst]
+
+        let instalations_audit_details = []
+        let instalation_audit_types = null
+
+        const VENTA = "6233b3ace74b428c2dcf3068"
+        const POSVENTA = "6233b450e74b428c2dcf3091"
+        const HYUNDAI_PROMISE = "6233b445e74b428c2dcf3088"
+        const GENERAL = "6233b39fe74b428c2dcf305f"
+
+        let totalWeightPerc = 0
+
+        let totalImgAudit = 0
+        let totalPassImgAudit = 0
+        let totalHmeAudit = 0
+        let totalPassHmeAudit = 0
+
+        //<<<NUEVO
+        auditResultsForImgAndHme.forEach((element) => {
+            // Criterios hme, img
+            element.criterions.forEach((criterion) => {     
+                let isValidType = false
+                criterion.criterion_id.installationType.forEach((type) => {
+                    if(type._id.toString() === element.installation_id.installation_type._id.toString()){
+                        isValidType = true
+                    }
+                })
+                // Si es inválido
+                if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
+                   criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
+                   criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP ||
+                   criterion.criterion_id.exceptions.includes(element.installation_id._id) ||
+                   !isValidType){
+                }
+                // Si es válido
+                else{ 
+                    if(criterion.criterion_id.isImgAudit){
+                        // Peso total de los criterios imgAudit que aplican
+                        totalImgAudit+= criterion.criterion_id.value
+                        if(criterion.pass)
+                            totalPassImgAudit+= criterion.criterion_id.value
+                            // Peso total de los criterios imgAudit que aplican
+                    }
+                    else if(criterion.criterion_id.isHmeAudit){
+                        // Peso total de los criterios hmes que aplican
+                        totalHmeAudit+= criterion.criterion_id.value
+                        if(criterion.pass)
+                            totalPassHmeAudit+= criterion.criterion_id.value
+                            // Peso total de los criterios hmes que aplican
+                    }
+                }
+            })
+        })
+        //>>>
+
         //Convierto en false los criterios afectados por core
         auditsResultsAux.forEach((element, indexEl) => {
             //Selecciono los elementos de arrayforcore para la instalación que me encuentro recorriendo
@@ -253,16 +308,6 @@ const getDataForTables = async(request, response) => {
                 }
             })
         })
-
-        let instalations_audit_details = []
-        let instalation_audit_types = null
-
-        const VENTA = "6233b3ace74b428c2dcf3068"
-        const POSVENTA = "6233b450e74b428c2dcf3091"
-        const HYUNDAI_PROMISE = "6233b445e74b428c2dcf3088"
-        const GENERAL = "6233b39fe74b428c2dcf305f"
-
-        let totalWeightPerc = 0
 
         //Ordeno el arreglo por standard id
         auditResultsWithoutInactiveInst.forEach((element) => {
@@ -288,10 +333,10 @@ const getDataForTables = async(request, response) => {
             let categories = []
             let totalCriterionsForInst = 0
             let categoriesAux = null
-            let totalImgAudit = 0
-            let totalPassImgAudit = 0
-            let totalHmeAudit = 0
-            let totalPassHmeAudit = 0
+            // let totalImgAudit = 0
+            // let totalPassImgAudit = 0
+            // let totalHmeAudit = 0
+            // let totalPassHmeAudit = 0
             let totalElectricAudit = 0
             let totalPassElectricAudit = 0
             let totalCritValid = 0
@@ -324,6 +369,7 @@ const getDataForTables = async(request, response) => {
                     totalCriterionWeight += criterion.criterion_id.value
                     // Cantidad de criterios que aplican para esa instalación
                     totalCriterionsForInst += 1
+                    /*
                     if(criterion.criterion_id.isImgAudit){
                         // Peso total de los criterios imgAudit que aplican
                         totalImgAudit+= criterion.criterion_id.value
@@ -338,7 +384,9 @@ const getDataForTables = async(request, response) => {
                             totalPassHmeAudit+= criterion.criterion_id.value
                             // Peso total de los criterios hmes que aplican
                     }
-                    else if(criterion.criterion_id.isElectricAudit){
+                    else */ 
+                    
+                    if(criterion.criterion_id.isElectricAudit){
                         // Peso total de los criterios Electric que aplican
                         totalElectricAudit+= criterion.criterion_id.value
                         if(criterion.pass)
@@ -1616,7 +1664,9 @@ const createAuditResultsTest = async(request, response) => {
         //Recorro el arreglo de resultados
         let arrayStandardsFalse = []
         let arrayAreasFalse = []
-        
+
+        const auditResultsForImgAndHme = [...auditsResults]
+
         newAuditResults.criterions.forEach((criterion) => {
             if(!criterion.pass && !criterion.criterion_id.exceptions.includes(newAuditResults.installation_id._id)){
                 const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
@@ -1632,16 +1682,6 @@ const createAuditResultsTest = async(request, response) => {
             }
         })
 
-        //Convierto en false los criterios afectados por core
-        newAuditResults.criterions.forEach((criterion, index) => {
-            const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
-            const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
-            if(existAr || existSt){
-                //Pongo en false los criterios afectados por el core
-                newAuditResults.criterions[index].pass = false
-            }
-        })
-
         let instalations_audit_details = null
         let instalation_audit_types = null
 
@@ -1651,6 +1691,59 @@ const createAuditResultsTest = async(request, response) => {
         const GENERAL = "6233b39fe74b428c2dcf305f"
 
         let totalWeightPerc = 0
+
+        let totalImgAudit = 0
+        let totalPassImgAudit = 0
+        let totalHmeAudit = 0
+        let totalPassHmeAudit = 0
+
+        //<<<NUEVO
+        auditResultsForImgAndHme.forEach((element) => {
+            // Criterios hme, img
+            element.criterions.forEach((criterion) => {     
+                let isValidType = false
+                criterion.criterion_id.installationType.forEach((type) => {
+                    if(type._id.toString() === element.installation_id.installation_type._id.toString()){
+                        isValidType = true
+                    }
+                })
+                // Si es inválido
+                if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
+                criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
+                criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP ||
+                criterion.criterion_id.exceptions.includes(element.installation_id._id) ||
+                !isValidType){
+                }
+                // Si es válido
+                else{ 
+                    if(criterion.criterion_id.isImgAudit){
+                        // Peso total de los criterios imgAudit que aplican
+                        totalImgAudit+= criterion.criterion_id.value
+                        if(criterion.pass)
+                            totalPassImgAudit+= criterion.criterion_id.value
+                            // Peso total de los criterios imgAudit que aplican
+                    }
+                    else if(criterion.criterion_id.isHmeAudit){
+                        // Peso total de los criterios hmes que aplican
+                        totalHmeAudit+= criterion.criterion_id.value
+                        if(criterion.pass)
+                            totalPassHmeAudit+= criterion.criterion_id.value
+                            // Peso total de los criterios hmes que aplican
+                    }
+                }
+            })
+        })
+        //>>>
+
+        //Convierto en false los criterios afectados por core
+        newAuditResults.criterions.forEach((criterion, index) => {
+            const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+            const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+            if(existAr || existSt){
+                //Pongo en false los criterios afectados por el core
+                newAuditResults.criterions[index].pass = false
+            }
+        })
 
         //Ordeno el arreglo por standard id
         newAuditResults.criterions.sort(function (a, b) {
@@ -1673,10 +1766,10 @@ const createAuditResultsTest = async(request, response) => {
         let categories = []
         let totalCriterionsForInst = 0
         let categoriesAux = null
-        let totalImgAudit = 0
-        let totalPassImgAudit = 0
-        let totalHmeAudit = 0
-        let totalPassHmeAudit = 0
+        // let totalImgAudit = 0
+        // let totalPassImgAudit = 0
+        // let totalHmeAudit = 0
+        // let totalPassHmeAudit = 0
         let totalElectricAudit = 0
         let totalPassElectricAudit = 0
         let totalCritValid = 0
@@ -1709,6 +1802,7 @@ const createAuditResultsTest = async(request, response) => {
                 totalCriterionWeight += criterion.criterion_id.value
                 // Cantidad de criterios que aplican para esa instalación
                 totalCriterionsForInst += 1
+                /*
                 if(criterion.criterion_id.isImgAudit){
                     // Peso total de los criterios imgAudit que aplican
                     totalImgAudit+= criterion.criterion_id.value
@@ -1723,7 +1817,8 @@ const createAuditResultsTest = async(request, response) => {
                         totalPassHmeAudit+= criterion.criterion_id.value
                         // Peso total de los criterios hmes que aplican
                 }
-                else if(criterion.criterion_id.isElectricAudit){
+                else */ 
+                if(criterion.criterion_id.isElectricAudit){
                     // Peso total de los criterios Electric que aplican
                     totalElectricAudit+= criterion.criterion_id.value
                     if(criterion.pass)
@@ -2254,15 +2349,7 @@ const updateTest = async(request, response) => {
             }
         })
 
-        //Convierto en false los criterios afectados por core
-        newAuditResults.criterions.forEach((criterion, index) => {
-            const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
-            const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
-            if(existAr || existSt){
-                //Pongo en false los criterios afectados por el core
-                newAuditResults.criterions[index].pass = false
-            }
-        })
+        const auditResultsForImgAndHme = [...auditResultsWithoutInactiveInst]
 
         let instalations_audit_details = null
         let instalation_audit_types = null
@@ -2273,6 +2360,59 @@ const updateTest = async(request, response) => {
         const GENERAL = "6233b39fe74b428c2dcf305f"
 
         let totalWeightPerc = 0
+
+        let totalImgAudit = 0
+        let totalPassImgAudit = 0
+        let totalHmeAudit = 0
+        let totalPassHmeAudit = 0
+
+        //<<<NUEVO
+        auditResultsForImgAndHme.forEach((element) => {
+            // Criterios hme, img
+            element.criterions.forEach((criterion) => {     
+                let isValidType = false
+                criterion.criterion_id.installationType.forEach((type) => {
+                    if(type._id.toString() === element.installation_id.installation_type._id.toString()){
+                        isValidType = true
+                    }
+                })
+                // Si es inválido
+                if(criterion.criterion_id.category._id.toString() === VENTA && !element.installation_id.isSale ||
+                criterion.criterion_id.category._id.toString() === POSVENTA && !element.installation_id.isPostSale ||
+                criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !element.installation_id.isHP ||
+                criterion.criterion_id.exceptions.includes(element.installation_id._id) ||
+                !isValidType){
+                }
+                // Si es válido
+                else{ 
+                    if(criterion.criterion_id.isImgAudit){
+                        // Peso total de los criterios imgAudit que aplican
+                        totalImgAudit+= criterion.criterion_id.value
+                        if(criterion.pass)
+                            totalPassImgAudit+= criterion.criterion_id.value
+                            // Peso total de los criterios imgAudit que aplican
+                    }
+                    else if(criterion.criterion_id.isHmeAudit){
+                        // Peso total de los criterios hmes que aplican
+                        totalHmeAudit+= criterion.criterion_id.value
+                        if(criterion.pass)
+                            totalPassHmeAudit+= criterion.criterion_id.value
+                            // Peso total de los criterios hmes que aplican
+                    }
+                }
+            })
+        })
+        //>>>
+
+        //Convierto en false los criterios afectados por core
+        newAuditResults.criterions.forEach((criterion, index) => {
+            const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+            const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+            if(existAr || existSt){
+                //Pongo en false los criterios afectados por el core
+                newAuditResults.criterions[index].pass = false
+            }
+        })
 
         //Ordeno el arreglo por standard id
         newAuditResults.criterions.sort(function (a, b) {
@@ -2295,10 +2435,10 @@ const updateTest = async(request, response) => {
         let categories = []
         let totalCriterionsForInst = 0
         let categoriesAux = null
-        let totalImgAudit = 0
-        let totalPassImgAudit = 0
-        let totalHmeAudit = 0
-        let totalPassHmeAudit = 0
+        // let totalImgAudit = 0
+        // let totalPassImgAudit = 0
+        // let totalHmeAudit = 0
+        // let totalPassHmeAudit = 0
         let totalElectricAudit = 0
         let totalPassElectricAudit = 0
         let totalCritValid = 0
@@ -2331,6 +2471,7 @@ const updateTest = async(request, response) => {
                 totalCriterionWeight += criterion.criterion_id.value
                 // Cantidad de criterios que aplican para esa instalación
                 totalCriterionsForInst += 1
+                /*
                 if(criterion.criterion_id.isImgAudit){
                     // Peso total de los criterios imgAudit que aplican
                     totalImgAudit+= criterion.criterion_id.value
@@ -2345,7 +2486,8 @@ const updateTest = async(request, response) => {
                         totalPassHmeAudit+= criterion.criterion_id.value
                         // Peso total de los criterios hmes que aplican
                 }
-                else if(criterion.criterion_id.isElectricAudit){
+                else */ 
+                if(criterion.criterion_id.isElectricAudit){
                     // Peso total de los criterios Electric que aplican
                     totalElectricAudit+= criterion.criterion_id.value
                     if(criterion.pass)
