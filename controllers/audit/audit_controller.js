@@ -5,7 +5,7 @@ const ObjectId = require('mongodb').ObjectId
 
 const createAudit = async(request, response) => {
     try{
-        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions} = request.body
+        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions, auditMVE, auditElectrics, auditIonic5, isCustomAudit} = request.body
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
         if(!name)
@@ -124,6 +124,26 @@ const createAudit = async(request, response) => {
             errors.push({code: 400, 
                         msg: 'invalid isAgency',
                         detail: `isAgency should be a boolean type`
+                      })
+        if(isCustomAudit!==null && isCustomAudit!==undefined && typeof isCustomAudit !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid isCustomAudit',
+                        detail: `isCustomAudit should be a boolean type`
+                        }) 
+        if(auditIonic5!==null && auditIonic5!==undefined && typeof auditIonic5 !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid auditIonic5',
+                        detail: `auditIonic5 should be a boolean type`
+                        }) 
+        if(auditElectrics!==null && auditElectrics!==undefined && typeof auditElectrics !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid auditElectrics',
+                        detail: `auditElectrics should be a boolean type`
+                        }) 
+        if(auditMVE!==null && auditMVE!==undefined && typeof auditMVE !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid auditMVE',
+                        detail: `auditMVE should be a boolean type`
                         }) 
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
@@ -134,11 +154,17 @@ const createAudit = async(request, response) => {
             end_date: end_date? end_date : null,
             criterions,
             isAgency: (isAgency && isAgency === true)? true : false,
+            isCustomAudit: (isCustomAudit && isCustomAudit === true)? true : false,
+            auditIonic5: (auditIonic5 && auditIonic5 === false)? false : true,
+            auditElectrics: (auditElectrics && auditElectrics === false)? false : true,
+            auditMVE: (auditMVE && auditMVE === false)? false : true,
         })
+
         await newAudit.save()
                         .catch(error => {        
                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error 2', detail: error.message}]})
                         })
+                     
         response.status(201).json({code: 201,
                                     msg: 'the audit has been created successfully',
                                     data: newAudit })
