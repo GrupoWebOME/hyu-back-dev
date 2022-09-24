@@ -667,6 +667,7 @@ const getDataForTables = async(request, response) => {
 
         let data = {
             audit_name: existAudit.name,
+            audit_details: existAudit,
             dealership_details: dealershipByID,
             audit_criterions_details: auditsResults,
             instalations_audit_details: instalations_audit_details,
