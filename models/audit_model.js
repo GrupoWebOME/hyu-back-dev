@@ -18,6 +18,18 @@ const auditSchema = new Schema({
                    default: null },
     end_date: {type: Date,
                 default: null },
+    auditMVE: {
+        type: Boolean,
+        default: true
+    },
+    auditElectrics: {
+        type: Boolean,
+        default: true
+    },
+    auditIonic5: {
+        type: Boolean,
+        default: true
+    },
     createdAt: {type: Date,
                 default: Date.now},
     updatedAt: {type: Date,
