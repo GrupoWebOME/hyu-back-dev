@@ -176,7 +176,7 @@ const createAudit = async(request, response) => {
 
 const updateAudit = async(request, response) => {
     try{
-        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions} = request.body
+        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions, auditMVE, auditElectrics, auditIonic5, isCustomAudit} = request.body
         const {id} = request.params
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
@@ -264,7 +264,27 @@ const updateAudit = async(request, response) => {
             errors.push({code: 400, 
                         msg: 'invalid isAgency',
                         detail: `isAgency should be a boolean type`
+                        })
+        if(isCustomAudit!==null && isCustomAudit!==undefined && typeof isCustomAudit !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid isCustomAudit',
+                        detail: `isCustomAudit should be a boolean type`
                         }) 
+        if(auditIonic5!==null && auditIonic5!==undefined && typeof auditIonic5 !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid auditIonic5',
+                        detail: `auditIonic5 should be a boolean type`
+                        })    
+        if(auditElectrics!==null && auditElectrics!==undefined && typeof auditElectrics !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid auditElectrics',
+                        detail: `auditElectrics should be a boolean type`
+                        })       
+        if(auditMVE!==null && auditMVE!==undefined && typeof auditMVE !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid auditMVE',
+                        detail: `auditMVE should be a boolean type`
+                        })            
         if(criterions && (criterions && (criterions.length <= 0 || !Array.isArray(criterions)))){
             errors.push({code: 400, 
                             msg: 'invalid criterions',
@@ -320,6 +340,14 @@ const updateAudit = async(request, response) => {
             updatedFields['criterions'] = criterions
         if(isAgency !== null && isAgency !== undefined)
             updatedFields['isAgency'] = isAgency
+        if(auditIonic5 !== null && auditIonic5 !== undefined)
+            updatedFields['auditIonic5'] = auditIonic5
+        if(auditElectrics !== null && auditElectrics !== undefined)
+            updatedFields['auditElectrics'] = auditElectrics
+        if(auditMVE !== null && auditMVE !== undefined)
+            updatedFields['auditMVE'] = auditMVE
+        if(isCustomAudit !== null && isCustomAudit !== undefined)
+            updatedFields['isCustomAudit'] = isCustomAudit
         updatedFields['updatedAt'] = Date.now()
         const updatedAudit = await Audit.findByIdAndUpdate(id, updatedFields, {new: true})
                                         .catch(error => {        
