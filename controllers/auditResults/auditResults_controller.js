@@ -1,3 +1,4 @@
+
 const Audit = require('../../models/audit_model')
 const Dealership = require('../../models/dealership_model')
 const AuditResults = require('../../models/audit_results_model')
@@ -159,7 +160,6 @@ const deleteAuditResults = async(request, response) => {
 const getDataForTables = async(request, response) => {
 
     const {dealership_id, audit_id} = request.body
-    
     try{
         if(!ObjectId.isValid(dealership_id)){
             return response.status(400).json(
@@ -601,6 +601,8 @@ const getDataForTables = async(request, response) => {
         let img_perc = 0
         let hme_total = 0
         let hme_perc = 0
+        let agency_by_types_customs = []
+        let agency_by_types_customs_total = []
 
         let total_values = 0
         instalations_audit_details.forEach((installation) => {
@@ -628,6 +630,19 @@ const getDataForTables = async(request, response) => {
                         pv_perc_total += 1
                         pv_perc += category.partialPercentage * coefficient
                     }
+                    else{
+                        const nameCategory = category.name
+                        const promedioCategory = category.partialPercentage
+                        const indexFinded = agency_by_types_customs.findIndex((el) => el.nameCategory === nameCategory)
+                        if(indexFinded >= 0){
+                            agency_by_types_customs_total[indexFinded].total = agency_by_types_customs_total[indexFinded].total + 1
+                            agency_by_types_customs[indexFinded].promedioCategory = agency_by_types_customs[indexFinded].promedioCategory + promedioCategory
+                        }
+                        else{
+                            agency_by_types_customs_total = [...agency_by_types_customs_total, {nameCategory: nameCategory, total: 1}]
+                            agency_by_types_customs = [...agency_by_types_customs, {nameCategory: nameCategory, promedioCategory: promedioCategory}]
+                        }
+                    }
                 })
 
             }
@@ -647,7 +662,7 @@ const getDataForTables = async(request, response) => {
                 }
             }
         })
-
+        
         let agency_by_types = {
             electric_perc: (electric_total === 0)? null: electric_perc / electric_total,
             img_perc: (img_total === 0)? null: img_perc / img_total,
@@ -656,10 +671,27 @@ const getDataForTables = async(request, response) => {
             hp_perc: (hp_perc === 0)? null: hp_perc,
             v_perc: (v_perc === 0)? null: v_perc,
             general_perc: (general_perc === 0)? null: general_perc,
-            pv_perc: (pv_perc === 0)? null: pv_perc
+            pv_perc: (pv_perc === 0)? null: pv_perc,
         }
 
-        const total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
+        if(existAudit.isCustomAudit){
+            agency_by_types_customs.forEach((element, index) => {
+                agency_by_types_customs[index].promedioCategory = agency_by_types_customs[index].promedioCategory / agency_by_types_customs_total[index].total
+            })
+        }
+
+        agency_by_types_customs.pop()
+        agency_by_types['agency_by_types_customs'] = agency_by_types_customs
+
+        let total_agency = 0
+
+        if(!existAudit.isCustomAudit){
+            total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
+        } else {
+            agency_by_types_customs.forEach((element) => {
+                total_agency += element.promedioCategory
+            })
+        }
 
         agency_by_types['total_agency'] = total_agency
 
@@ -1685,7 +1717,7 @@ const createAuditResultsTest = async(request, response) => {
             }
         })
 
-        let instalations_audit_details = null
+        let instalations_audit_details = []
         let instalation_audit_types = null
 
         const VENTA = "6233b3ace74b428c2dcf3068"
@@ -1755,7 +1787,6 @@ const createAuditResultsTest = async(request, response) => {
                 }
                 return 0;
         })
-
         let installationAuditData = {}
         installationAuditData['installation'] =  newAuditResults.installation_id
         let actualCategoryID = ''
@@ -1874,7 +1905,6 @@ const createAuditResultsTest = async(request, response) => {
                 }
 
                 totalCritValid += 1
-
                 //Si la categoría actual es igual que la anterior
                 if((criterion.criterion_id.category._id.toString() === actualCategoryID)){
                     //Cantidad de criterios para esta categoría
@@ -1923,9 +1953,7 @@ const createAuditResultsTest = async(request, response) => {
                         //auditTotalResult es la sumatoria de partialPercentage
                         auditTotalResult = newTotal //totalResult / categories.length
                         categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
-
                         installationAuditData['categories'] = categories
-
                         instalation_audit_types = {
                             percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
                             percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
@@ -1935,7 +1963,6 @@ const createAuditResultsTest = async(request, response) => {
                         installationAuditData['instalation_audit_types'] =  instalation_audit_types
                         installationAuditData['installation'] =  existInstallation
                         installationAuditData['totalWeightPerc'] = totalWeightPerc
-
                         instalations_audit_details = installationAuditData
                     }
                 }
@@ -1956,7 +1983,6 @@ const createAuditResultsTest = async(request, response) => {
                         }
                         categories = [...categories, category]
                     }
-
                     totalCriterionsByCat = 1
                     totalAccum = criterion.criterion_id.value
                     if(criterion.pass){
@@ -1999,7 +2025,6 @@ const createAuditResultsTest = async(request, response) => {
                             categoriesAux["totalCriterionsPercByCat"] = percByCrit * categoriesAux.percentage / 100
                             categories = [...categories, categoriesAux]
                         }
-
                         auditTotalResult = newTotal //totalResult / categories.length
                         categories = [...categories, {auditTotalResult: auditTotalResult? auditTotalResult: 0}]
 
@@ -2013,8 +2038,8 @@ const createAuditResultsTest = async(request, response) => {
 
                         installationAuditData['installation'] =  existInstallation
                         installationAuditData['totalWeightPerc'] = totalWeightPerc
-                        
                         instalations_audit_details = [...instalations_audit_details, installationAuditData]
+
                     }
                 }
             }      
@@ -2045,10 +2070,16 @@ const createAuditResultsTest = async(request, response) => {
         let img_perc = 0
         let hme_total = 0
         let hme_perc = 0
+        let agency_by_types_customs = []
+        let agency_by_types_customs_total = []
 
         let total_values = 0
-
         array_instalations_audit_details.forEach((installation) => {
+            
+            if(Array.isArray(installation)){
+                installation = installation[0]
+            }
+
             if(installation && installation.categories){
                 const sales_weight_per_installation= (installation.installation.sales_weight_per_installation !== null)? installation.installation.sales_weight_per_installation : 0
                 const post_sale_weight_per_installation= (installation.installation.post_sale_weight_per_installation !== null)? installation.installation.post_sale_weight_per_installation : 0
@@ -2074,7 +2105,17 @@ const createAuditResultsTest = async(request, response) => {
                         pv_perc += category.partialPercentage * coefficient
                     }
                     else{
-                        console.log('category: ', category.partialPercentage * coefficient)
+                        const nameCategory = category.name
+                        const promedioCategory = category.partialPercentage
+                        const indexFinded = agency_by_types_customs.findIndex((el) => el.nameCategory === nameCategory)
+                        if(indexFinded >= 0){
+                            agency_by_types_customs_total[indexFinded].total = agency_by_types_customs_total[indexFinded].total + 1
+                            agency_by_types_customs[indexFinded].promedioCategory = agency_by_types_customs[indexFinded].promedioCategory + promedioCategory
+                        }
+                        else{
+                            agency_by_types_customs_total = [...agency_by_types_customs_total, {nameCategory: nameCategory, total: 1}]
+                            agency_by_types_customs = [...agency_by_types_customs, {nameCategory: nameCategory, promedioCategory: promedioCategory}]
+                        }
                     }
                 })
 
@@ -2107,7 +2148,24 @@ const createAuditResultsTest = async(request, response) => {
             pv_perc: (pv_perc === 0)? null: pv_perc
         }
 
-        const total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
+        if(existAudit.isCustomAudit){
+            agency_by_types_customs.forEach((element, index) => {
+                agency_by_types_customs[index].promedioCategory = agency_by_types_customs[index].promedioCategory / agency_by_types_customs_total[index].total
+            })
+        }
+
+        agency_by_types_customs.pop()
+        agency_by_types['agency_by_types_customs'] = agency_by_types_customs
+
+        let total_agency = 0
+
+        if(!existAudit.isCustomAudit){
+            total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
+        } else {
+            agency_by_types_customs.forEach((element) => {
+                total_agency += element.promedioCategory
+            })
+        }
 
         agency_by_types['total_agency'] = total_agency
 
@@ -2711,10 +2769,17 @@ const updateTest = async(request, response) => {
         let img_perc = 0
         let hme_total = 0
         let hme_perc = 0
+        let agency_by_types_customs = []
+        let agency_by_types_customs_total = []
 
         let total_values = 0
 
         array_instalations_audit_details.forEach((installation) => {
+            
+            if(Array.isArray(installation)){
+                installation = installation[0]
+            }
+
             if(installation && installation.categories){
                 const sales_weight_per_installation= (installation.installation.sales_weight_per_installation !== null)? installation.installation.sales_weight_per_installation : 0
                 const post_sale_weight_per_installation= (installation.installation.post_sale_weight_per_installation !== null)? installation.installation.post_sale_weight_per_installation : 0
@@ -2738,6 +2803,19 @@ const updateTest = async(request, response) => {
                     else if(category.id === POSVENTA){
                         pv_perc_total += 1
                         pv_perc += category.partialPercentage * coefficient
+                    }
+                    else{
+                        const nameCategory = category.name
+                        const promedioCategory = category.partialPercentage
+                        const indexFinded = agency_by_types_customs.findIndex((el) => el.nameCategory === nameCategory)
+                        if(indexFinded >= 0){
+                            agency_by_types_customs_total[indexFinded].total = agency_by_types_customs_total[indexFinded].total + 1
+                            agency_by_types_customs[indexFinded].promedioCategory = agency_by_types_customs[indexFinded].promedioCategory + promedioCategory
+                        }
+                        else{
+                            agency_by_types_customs_total = [...agency_by_types_customs_total, {nameCategory: nameCategory, total: 1}]
+                            agency_by_types_customs = [...agency_by_types_customs, {nameCategory: nameCategory, promedioCategory: promedioCategory}]
+                        }
                     }
                 })
 
@@ -2770,7 +2848,24 @@ const updateTest = async(request, response) => {
             pv_perc: (pv_perc === 0)? null: pv_perc
         }
 
-        const total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
+        if(existAudit.isCustomAudit){
+            agency_by_types_customs.forEach((element, index) => {
+                agency_by_types_customs[index].promedioCategory = agency_by_types_customs[index].promedioCategory / agency_by_types_customs_total[index].total
+            })
+        }
+
+        agency_by_types_customs.pop()
+        agency_by_types['agency_by_types_customs'] = agency_by_types_customs
+
+        let total_agency = 0
+
+        if(!existAudit.isCustomAudit){
+            total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
+        } else {
+            agency_by_types_customs.forEach((element) => {
+                total_agency += element.promedioCategory
+            })
+        }
 
         agency_by_types['total_agency'] = total_agency
 
@@ -2868,6 +2963,7 @@ const getDataForFullAuditTest = async(request, response) => {
                 percentage_audit_electric: element.agency_by_types.electric_perc,
                 percentage_audit_img: element.agency_by_types.img_perc,
                 percentage_audit_hme: element.agency_by_types.hme_perc,
+                agency_by_types_customs: element?.agency_by_types?.agency_by_types_customs
             }
             dealership_details = [...dealership_details, data]
 
