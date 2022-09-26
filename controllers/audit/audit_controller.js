@@ -153,11 +153,11 @@ const createAudit = async(request, response) => {
             initial_date,
             end_date: end_date? end_date : null,
             criterions,
-            isAgency: (isAgency && isAgency === true)? true : false,
-            isCustomAudit: (isCustomAudit && isCustomAudit === true)? true : false,
-            auditIonic5: (auditIonic5 && auditIonic5 === false)? false : true,
-            auditElectrics: (auditElectrics && auditElectrics === false)? false : true,
-            auditMVE: (auditMVE && auditMVE === false)? false : true,
+            isAgency: (isAgency !== null && isAgency !== undefined  && isAgency === true)? true : false,
+            isCustomAudit: (isCustomAudit !== null && isCustomAudit !== undefined && isCustomAudit === true)? true : false,
+            auditIonic5: (auditIonic5 !== null && auditIonic5 !== undefined  && auditIonic5 === false)? false : true,
+            auditElectrics: (auditElectrics !== null && auditElectrics !== undefined && auditElectrics === false)? false : true,
+            auditMVE: (auditMVE !== null && auditMVE !== undefined  && auditMVE === false)? false : true,
         })
 
         await newAudit.save()
