@@ -18,6 +18,14 @@ const auditSchema = new Schema({
                    default: null },
     end_date: {type: Date,
                 default: null },
+    audits: [
+        {
+            audit: {type: Schema.Types.ObjectId},
+            installations: [
+                { type: Schema.Types.ObjectId }
+            ]
+        }
+    ],
     auditMVE: {
         type: Boolean,
         default: true
