@@ -191,9 +191,9 @@ const getDataForTables = async(request, response) => {
         }
 
         //Obtengo todas los resultados de auditorías que pertenezcan a las instalaciones de una agencia en particular, y una auditoría en particular
-
         let auditsResults = await AuditResults.find({$and:[{installation_id: {$in: dealershipByID.installations}},{audit_id: audit_id}]})
-                                                .populate({path: 'installation_id', select: '_id active name code installation_type dealership sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
+                                                .populate({ path: 'installation_id', 
+                                                            select: '_id active name code installation_type dealership sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
                                                             populate: {path: 'installation_type dealership', select: '_id code active'}})
                                                 .populate({ path: 'criterions.criterion_id', 
                                                             populate: {
@@ -239,7 +239,7 @@ const getDataForTables = async(request, response) => {
                 arrayAreasFalse: arrayAreasFalse
             }]
         })
-        
+
         if(existAudit.isCustomAudit){
             arrayStandardsFalse = []
             arrayAreasFalse = []
@@ -1043,17 +1043,24 @@ const getDataForFullAudit = async(request, response) => {
                 }]
             })
 
-            auditsResultsAux.forEach((element, indexEl) => {
-                const finded = arrayForCore.find( el => el.id === element.installation_id._id.toString() )
-                element.criterions.forEach((criterion, index) => {
-                    const existSt = finded.arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
-                    const existAr = finded.arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
-                    if(existAr || existSt){
-                        auditsResultsAux[indexEl].criterions[index].pass = false
-                    }
+            if(existAudit.isCustomAudit){
+                arrayStandardsFalse = []
+                arrayAreasFalse = []
+            }
+
+            if(!existAudit.isCustomAudit){
+                auditsResultsAux.forEach((element, indexEl) => {
+                    const finded = arrayForCore.find( el => el.id === element.installation_id._id.toString() )
+                    element.criterions.forEach((criterion, index) => {
+                        const existSt = finded.arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                        const existAr = finded.arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                        if(existAr || existSt){
+                            auditsResultsAux[indexEl].criterions[index].pass = false
+                        }
+                    })
                 })
-            })
-    
+            }
+
             let instalations_audit_details = []
             let instalation_audit_types = null
     
@@ -1725,6 +1732,11 @@ const createAuditResultsTest = async(request, response) => {
             }
         })
 
+        if(existAudit.isCustomAudit){
+            arrayStandardsFalse = []
+            arrayAreasFalse = []
+        }
+
         let instalations_audit_details = []
         let instalation_audit_types = null
 
@@ -1776,14 +1788,16 @@ const createAuditResultsTest = async(request, response) => {
         //>>>
 
         //Convierto en false los criterios afectados por core
-        newAuditResults.criterions.forEach((criterion, index) => {
-            const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
-            const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
-            if(existAr || existSt){
-                //Pongo en false los criterios afectados por el core
-                newAuditResults.criterions[index].pass = false
-            }
-        })
+        if(!existAudit.isCustomAudit){
+            newAuditResults.criterions.forEach((criterion, index) => {
+                const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                if(existAr || existSt){
+                    //Pongo en false los criterios afectados por el core
+                    newAuditResults.criterions[index].pass = false
+                }
+            })
+        }
 
         //Ordeno el arreglo por standard id
         newAuditResults.criterions.sort(function (a, b) {
@@ -2415,6 +2429,11 @@ const updateTest = async(request, response) => {
             }
         })
 
+        if(existAudit.isCustomAudit){
+            arrayStandardsFalse = []
+            arrayAreasFalse = []
+        }
+
         const auditResultsForImgAndHme = newAuditResults
 
         let instalations_audit_details = null
@@ -2468,14 +2487,16 @@ const updateTest = async(request, response) => {
         //>>>
 
         //Convierto en false los criterios afectados por core
-        newAuditResults.criterions.forEach((criterion, index) => {
-            const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
-            const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
-            if(existAr || existSt){
-                //Pongo en false los criterios afectados por el core
-                newAuditResults.criterions[index].pass = false
-            }
-        })
+        if(!existAudit.isCustomAudit){
+            newAuditResults.criterions.forEach((criterion, index) => {
+                const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                if(existAr || existSt){
+                    //Pongo en false los criterios afectados por el core
+                    newAuditResults.criterions[index].pass = false
+                }
+            })
+        }
 
         //Ordeno el arreglo por standard id
         newAuditResults.criterions.sort(function (a, b) {
@@ -3117,17 +3138,24 @@ const getDataForAudit = async(request, response) => {
             }]
         })
 
+        if(existAudit.isCustomAudit){
+            arrayStandardsFalse = []
+            arrayAreasFalse = []
+        }
+
         // convierto en false si no cumple core
-        auditsResultsAux.forEach((element, indexEl) => {
-            const finded = arrayForCore.find( el => el.id === element.installation_id._id.toString() )
-            element.criterions.forEach((criterion, index) => {
-                const existSt = finded.arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
-                const existAr = finded.arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
-                if(existAr || existSt){
-                    auditsResultsAux[indexEl].criterions[index].pass = false
-                }
+        if(!existAudit.isCustomAudit){
+            auditsResultsAux.forEach((element, indexEl) => {
+                const finded = arrayForCore.find( el => el.id === element.installation_id._id.toString() )
+                element.criterions.forEach((criterion, index) => {
+                    const existSt = finded.arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                    const existAr = finded.arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                    if(existAr || existSt){
+                        auditsResultsAux[indexEl].criterions[index].pass = false
+                    }
+                })
             })
-        })
+        }
 
         let hmesValuesPass = 0
         let hmesTotalValue = 0
