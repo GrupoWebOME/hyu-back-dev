@@ -239,6 +239,11 @@ const getDataForTables = async(request, response) => {
                 arrayAreasFalse: arrayAreasFalse
             }]
         })
+        
+        if(existAudit.isCustomAudit){
+            arrayStandardsFalse = []
+            arrayAreasFalse = []
+        }
 
         const auditResultsForImgAndHme = [...auditResultsWithoutInactiveInst]
 
@@ -296,18 +301,21 @@ const getDataForTables = async(request, response) => {
         //>>>
 
         //Convierto en false los criterios afectados por core
-        auditsResultsAux.forEach((element, indexEl) => {
-            //Selecciono los elementos de arrayforcore para la instalación que me encuentro recorriendo
-            const finded = arrayForCore.find( el => el.id === element.installation_id._id.toString() )
-            element.criterions.forEach((criterion, index) => {
-                const existSt = finded.arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
-                const existAr = finded.arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
-                if(existAr || existSt){
-                    //Pongo en false los criterios afectados por el core
-                    auditsResultsAux[indexEl].criterions[index].pass = false
-                }
+        if(!existAudit.isCustomAudit){
+            auditsResultsAux.forEach((element, indexEl) => {
+                //Selecciono los elementos de arrayforcore para la instalación que me encuentro recorriendo
+                const finded = arrayForCore.find( el => el.id === element.installation_id._id.toString() )
+                element.criterions.forEach((criterion, index) => {
+                    const existSt = finded.arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                    const existAr = finded.arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+                    console.log('existAr: ', existAr, ' existSt: ', existSt)
+                    if(existAr || existSt){
+                        //Pongo en false los criterios afectados por el core
+                        auditsResultsAux[indexEl].criterions[index].pass = false
+                    }
+                })
             })
-        })
+        }
 
         //Ordeno el arreglo por standard id
         auditResultsWithoutInactiveInst.forEach((element) => {
