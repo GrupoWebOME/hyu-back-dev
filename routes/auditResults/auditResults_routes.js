@@ -386,7 +386,7 @@ api.delete('/:id', AuditResults.deleteAuditResults)
 
  api.put('/updatetest/:id', AuditResults.updateTest)
 
- api.get('/tables/audit/:audit_id', AuditResults.getDataForAudit)
+ api.post('/tables/audit/:audit_id', AuditResults.getDataForAudit)
 
  api.get('/tables/audit/:audit_id/details', AuditResults.getDataForFullAudit)
 
