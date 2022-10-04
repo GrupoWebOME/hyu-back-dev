@@ -3058,6 +3058,7 @@ const tablesTest = async(request, response) => {
 const getDataForAudit = async(request, response) => {
     let {audit_id} = request.params
     let auditsResults = null
+    let { dealership_id } = request.body
 
     try{
         let existAudit = null
@@ -3077,6 +3078,12 @@ const getDataForAudit = async(request, response) => {
                         msg: 'invalid audit_id', 
                         detail: `${audit_id} is not an ObjectId`}]})
         }
+        if(dealership_id !== null && dealership_id !== undefined && !ObjectId.isValid(dealership_id)){
+            return response.status(400).json(
+                {errors: [{code: 400, 
+                        msg: 'invalid dealership_id', 
+                        detail: `${dealership_id} is not an ObjectId`}]})
+        }
         else{
             existAudit = await Audit.findById(audit_id)
             if(!existAudit)
@@ -3086,9 +3093,15 @@ const getDataForAudit = async(request, response) => {
                             detail: `${audit_id} not found`}]}) 
         }
 
-        let auditAgencies = await AuditAgency.find({audit_id: audit_id})
+        let filter = {audit_id: audit_id}
+        if(dealership_id !== null && dealership_id !== undefined){
+            filter['dealership_id'] = dealership_id
+        }
 
-        auditsResults = await AuditResults.find({audit_id: audit_id})
+        console.log('filter: ', filter)
+        let auditAgencies = await AuditAgency.find(filter)
+
+        auditsResults = await AuditResults.find(filter)
                                                 .populate({path: 'installation_id', select: '_id active name installation_type dealership', 
                                                             populate: {path: 'installation_type dealership', select: '_id code active'}})
                                                 .populate({ path: 'criterions.criterion_id', 
