@@ -25,6 +25,17 @@ const adminSchema = new Schema({
        role: {type: String,
               required: true,
               trim: true},
+       audits: [
+              {
+                     audit: {type: Schema.Types.ObjectId, ref: 'InstallationType', default: null},
+                     dealerships: [
+                            {
+                                   dealership_id: {type: Schema.Types.ObjectId, ref: 'InstallationType', default: null},
+                                   installations: [{type: Schema.Types.ObjectId, ref: 'InstallationType', default: null}]
+                            }
+                     ]
+              }
+       ],
        dealership: {type: Schema.Types.ObjectId,
                     ref: 'Dealership',
                     default: null },
