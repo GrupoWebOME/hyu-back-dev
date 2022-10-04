@@ -308,7 +308,6 @@ const getDataForTables = async(request, response) => {
                 element.criterions.forEach((criterion, index) => {
                     const existSt = finded.arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
                     const existAr = finded.arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
-                    console.log('existAr: ', existAr, ' existSt: ', existSt)
                     if(existAr || existSt){
                         //Pongo en false los criterios afectados por el core
                         auditsResultsAux[indexEl].criterions[index].pass = false
@@ -3098,7 +3097,6 @@ const getDataForAudit = async(request, response) => {
             filter['dealership_id'] = dealership_id
         }
 
-        console.log('filter: ', filter)
         let auditAgencies = await AuditAgency.find(filter)
 
         auditsResults = await AuditResults.find(filter)
