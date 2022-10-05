@@ -1436,15 +1436,19 @@ const getAuditResByAuditIDAndInstallationID = async(request, response) => {
                                             msg: 'invalid installationid',
                                             detail: 'installationid should be an objectId'})
     
-        const auditRes = await AuditResults.findOne({audit_id: auditid, installation_id: {$in: [installationid]}})
+        let auditRes = await AuditResults.findOne({audit_id: auditid, installation_id: {$in: [installationid]}})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
-    
+
+        const adminForAudit = await Admin.find({'audits.audit': auditid, 'audits.dealerships.installations': installationid}, 'names surnames emailAddress userName role dealership _id')
+
         if(auditRes){
             response.status(200).json({code: 200,
                                        msg: 'success',
-                                       data: auditRes})
+                                       data: auditRes,
+                                       auditors: adminForAudit     
+                                    })
         }
         else{
             response.status(200).json({code: 204,
