@@ -12,6 +12,10 @@ const auditResultsSchema = new Schema({
         type: String,
         default: 'created'
     },
+    dateForAudit: {
+        type: Date,
+        default: null
+    },
     instalations_audit_details: [],
     createdAt: {type: Date,
                 default: Date.now},
