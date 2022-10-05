@@ -6,6 +6,7 @@ const Criterion = require('../../models/criterion_model')
 const Installation = require('../../models/installation_schema')
 const AuditAgency = require('../../models/audit_agency_model')
 const ObjectId = require('mongodb').ObjectId
+const Admin = require('../../models/admin_model')
 
 const createAuditResults = async(request, response) => {
     try{
@@ -2273,7 +2274,7 @@ const createAuditResultsTest = async(request, response) => {
 
 const updateTest = async(request, response) => {
     try{
-        const {audit_id, installation_id, criterions, state} = request.body
+        const {audit_id, installation_id, criterions, state, dateForAudit} = request.body
         const {id} = request.params
 
         let errors = []
@@ -2371,6 +2372,16 @@ const updateTest = async(request, response) => {
                                     })        
                 }
             })
+        }
+        
+        if(dateForAudit){
+            const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
+            if(dateForAudit.match(regexDate)){
+                errors.push({code: 400, 
+                    msg: 'invalid dateForAudit',
+                    detail: `${dateForAudit} is not a valid date`
+                })  
+            }
         }
 
         if(state !== null && state !== undefined && state !== 'created' && state !== 'canceled' && state !== 'planned' &&
@@ -2913,6 +2924,9 @@ const updateTest = async(request, response) => {
             updatedFields['criterions'] = criterions
         if(state)
             updatedFields['state'] = state
+        if(dateForAudit){
+            updatedFields['dateForAudit'] = dateForAudit
+        }
         updatedFields['updatedAt'] = Date.now()
         updatedFields['instalations_audit_details'] = instalations_audit_details
 
