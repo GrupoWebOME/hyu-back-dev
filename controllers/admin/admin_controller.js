@@ -170,7 +170,7 @@ const loginAdmin = async(request, response) => {
 const updateAdmin = async(request, response) => {
     try{
         const {id} = request.params
-        const {names, surnames, emailAddress, userName, password, role, dealership} = request.body
+        const {names, surnames, emailAddress, userName, password, role, dealership, audits} = request.body
         const { adminRole, _id } = request.jwt.admin
 
         let errors = []
@@ -234,6 +234,45 @@ const updateAdmin = async(request, response) => {
                          detail: `${names} is not valid names format. The names field can only contain letters`
                         })
     
+        if(audits){
+            if(!Array.isArray(audits) || audits.length < 1){
+                errors.push({code: 400, 
+                    msg: 'invalid audits',
+                    detail: `audits should be an array type`
+                   })
+            } else{
+                audits.forEach((element) => {
+                    if(!element.hasOwnProperty('audit') || !ObjectId.isValid(element.audit)){
+                        errors.push({code: 400, 
+                            msg: 'invalid audit field',
+                            detail: `invalid audit field in audits object && audit should be an objectID type`
+                           })
+                    }
+                    if(!element.hasOwnProperty('dealerships') || !Array.isArray(element.dealerships) || element.dealerships.length < 1){
+                        errors.push({code: 400, 
+                            msg: 'invalid dealerships field',
+                            detail: `invalid dealerships field in audits object && dealerships should be an array type`
+                        })
+                    } else{
+                        element.dealerships.forEach((dealership) => {
+                            if(!dealership.hasOwnProperty('dealership_id') || !ObjectId.isValid(dealership.dealership_id)){
+                                errors.push({code: 400, 
+                                    msg: 'invalid dealership_id field',
+                                    detail: `invalid dealership_id field in audits object && dealership_id should be an ObjectID type`
+                                })
+                            }
+                            if(!dealership.hasOwnProperty('installations') || !Array.isArray(dealership.installations)){
+                                errors.push({code: 400, 
+                                    msg: 'invalid installations field',
+                                    detail: `invalid installations field in audits object && installations should be an array type`
+                                })
+                            }
+                        })
+                    }
+                })
+            }
+        }
+        
         if(surnames && !surnames.match(regExPatternNamesAndSurname))
             errors.push({code: 400, 
                          msg: 'invalid surnames',
@@ -309,6 +348,9 @@ const updateAdmin = async(request, response) => {
         if(dealership)
             editAdmin['dealership'] = dealership
 
+        if(audits)
+            editAdmin['audits'] = audits
+        
         editAdmin['updatedAt'] = Date.now()
 
         const newAdmin = await Admin.findByIdAndUpdate(id, editAdmin, {new: true})
