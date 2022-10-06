@@ -394,4 +394,6 @@ api.delete('/:id', AuditResults.deleteAuditResults)
 
  api.get('/audit/:auditid/installation/:installationid', AuditResults.getAuditResByAuditIDAndInstallationID)
 
+ api.get('/audit/:auditid', AuditResults.getAuditResByAuditID)
+
 module.exports = api
