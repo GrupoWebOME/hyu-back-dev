@@ -5,8 +5,8 @@ const AuditResults = require('../../models/audit_results_model')
 const Criterion = require('../../models/criterion_model')
 const Installation = require('../../models/installation_schema')
 const AuditAgency = require('../../models/audit_agency_model')
-const ObjectId = require('mongodb').ObjectId
 const Admin = require('../../models/admin_model')
+const ObjectId = require('mongodb').ObjectId
 
 const createAuditResults = async(request, response) => {
     try{
@@ -241,7 +241,7 @@ const getDataForTables = async(request, response) => {
             }]
         })
 
-        if(existAudit.isCustomAudit){
+        if(existAudit?.isCustomAudit){
             arrayStandardsFalse = []
             arrayAreasFalse = []
         }
@@ -302,7 +302,7 @@ const getDataForTables = async(request, response) => {
         //>>>
 
         //Convierto en false los criterios afectados por core
-        if(!existAudit.isCustomAudit){
+        if(!existAudit?.isCustomAudit){
             auditsResultsAux.forEach((element, indexEl) => {
                 //Selecciono los elementos de arrayforcore para la instalación que me encuentro recorriendo
                 const finded = arrayForCore.find( el => el.id === element.installation_id._id.toString() )
@@ -682,7 +682,7 @@ const getDataForTables = async(request, response) => {
             pv_perc: (pv_perc === 0)? null: pv_perc,
         }
 
-        if(existAudit.isCustomAudit){
+        if(existAudit?.isCustomAudit){
             agency_by_types_customs.forEach((element, index) => {
                 agency_by_types_customs[index].promedioCategory = agency_by_types_customs[index].promedioCategory / agency_by_types_customs_total[index].total
             })
@@ -693,7 +693,7 @@ const getDataForTables = async(request, response) => {
 
         let total_agency = 0
 
-        if(!existAudit.isCustomAudit){
+        if(!existAudit?.isCustomAudit){
             total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
         } else {
             agency_by_types_customs.forEach((element) => {
@@ -1043,12 +1043,12 @@ const getDataForFullAudit = async(request, response) => {
                 }]
             })
 
-            if(existAudit.isCustomAudit){
+            if(existAudit?.isCustomAudit){
                 arrayStandardsFalse = []
                 arrayAreasFalse = []
             }
 
-            if(!existAudit.isCustomAudit){
+            if(!existAudit?.isCustomAudit){
                 auditsResultsAux.forEach((element, indexEl) => {
                     const finded = arrayForCore.find( el => el.id === element.installation_id._id.toString() )
                     element.criterions.forEach((criterion, index) => {
@@ -1415,10 +1415,56 @@ const getDataForFullAudit = async(request, response) => {
     }
 }
 
+const getAuditResByAuditIDAndInstallationID = async(request, response) => {
+    try{
+        const {auditid, installationid} = request.params
+
+        if(!auditid)
+            return response.status(400).json({code: 400,
+                                                msg: 'invalid auditid',
+                                                detail: 'id is a obligatory field'})
+        if(auditid && !ObjectId.isValid(auditid))
+            return response.status(400).json({code: 400,
+                                              msg: 'invalid auditid',
+                                              detail: 'auditid should be an objectId'})
+
+        if(!installationid)
+            return response.status(400).json({code: 400,
+                                                msg: 'invalid installationid',
+                                                detail: 'id is a obligatory field'})
+        if(installationid && !ObjectId.isValid(installationid))
+            return response.status(400).json({code: 400,
+                                            msg: 'invalid installationid',
+                                            detail: 'installationid should be an objectId'})
+    
+        let auditRes = await AuditResults.findOne({audit_id: auditid, installation_id: {$in: [installationid]}})
+                                        .catch(error => {        
+                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                                        })
+
+        const adminForAudit = await Admin.find({'audits.audit': auditid, 'audits.dealerships.installations': installationid}, 'names surnames emailAddress userName role dealership _id')
+
+        if(auditRes){
+            response.status(200).json({code: 200,
+                                       msg: 'success',
+                                       data: auditRes,
+                                       auditors: adminForAudit     
+                                    })
+        }
+        else{
+            response.status(200).json({code: 204,
+                                        msg: 'not found',
+                                        data: null})}
+    }
+    catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+    }  
+}
+
 const getAuditResByAuditID = async(request, response) => {
     try{
         const {auditid} = request.params
-        console.log('entra')
+
         if(!auditid)
             return response.status(400).json({code: 400,
                                                 msg: 'invalid auditid',
@@ -1736,7 +1782,7 @@ const createAuditResultsTest = async(request, response) => {
             }
         })
 
-        if(existAudit.isCustomAudit){
+        if(existAudit?.isCustomAudit){
             arrayStandardsFalse = []
             arrayAreasFalse = []
         }
@@ -1792,7 +1838,7 @@ const createAuditResultsTest = async(request, response) => {
         //>>>
 
         //Convierto en false los criterios afectados por core
-        if(!existAudit.isCustomAudit){
+        if(!existAudit?.isCustomAudit){
             newAuditResults.criterions.forEach((criterion, index) => {
                 const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
                 const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
@@ -2174,7 +2220,7 @@ const createAuditResultsTest = async(request, response) => {
             pv_perc: (pv_perc === 0)? null: pv_perc
         }
 
-        if(existAudit.isCustomAudit){
+        if(existAudit?.isCustomAudit){
             agency_by_types_customs.forEach((element, index) => {
                 agency_by_types_customs[index].promedioCategory = agency_by_types_customs[index].promedioCategory / agency_by_types_customs_total[index].total
             })
@@ -2185,7 +2231,7 @@ const createAuditResultsTest = async(request, response) => {
 
         let total_agency = 0
 
-        if(!existAudit.isCustomAudit){
+        if(!existAudit?.isCustomAudit){
             total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
         } else {
             agency_by_types_customs.forEach((element) => {
@@ -2373,7 +2419,7 @@ const updateTest = async(request, response) => {
                 }
             })
         }
-        
+
         if(dateForAudit){
             const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
             if(dateForAudit.match(regexDate)){
@@ -2443,7 +2489,7 @@ const updateTest = async(request, response) => {
             }
         })
 
-        if(existAudit.isCustomAudit){
+        if(existAudit?.isCustomAudit){
             arrayStandardsFalse = []
             arrayAreasFalse = []
         }
@@ -2501,7 +2547,7 @@ const updateTest = async(request, response) => {
         //>>>
 
         //Convierto en false los criterios afectados por core
-        if(!existAudit.isCustomAudit){
+        if(!existAudit?.isCustomAudit){
             newAuditResults.criterions.forEach((criterion, index) => {
                 const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
                 const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
@@ -2891,7 +2937,7 @@ const updateTest = async(request, response) => {
             pv_perc: (pv_perc === 0)? null: pv_perc
         }
 
-        if(existAudit.isCustomAudit){
+        if(existAudit?.isCustomAudit){
             agency_by_types_customs.forEach((element, index) => {
                 agency_by_types_customs[index].promedioCategory = agency_by_types_customs[index].promedioCategory / agency_by_types_customs_total[index].total
             })
@@ -2902,7 +2948,7 @@ const updateTest = async(request, response) => {
 
         let total_agency = 0
 
-        if(!existAudit.isCustomAudit){
+        if(!existAudit?.isCustomAudit){
             total_agency = (agency_by_types.hp_perc !== null? agency_by_types.hp_perc: 0) + (agency_by_types.v_perc !== null? agency_by_types.v_perc: 0) + (agency_by_types.general_perc !== null? agency_by_types.general_perc: 0) + (agency_by_types.pv_perc !== null? agency_by_types.pv_perc: 0) 
         } else {
             agency_by_types_customs.forEach((element) => {
@@ -2927,6 +2973,7 @@ const updateTest = async(request, response) => {
         if(dateForAudit){
             updatedFields['dateForAudit'] = dateForAudit
         }
+
         updatedFields['updatedAt'] = Date.now()
         updatedFields['instalations_audit_details'] = instalations_audit_details
 
@@ -3167,13 +3214,13 @@ const getDataForAudit = async(request, response) => {
             }]
         })
 
-        if(existAudit.isCustomAudit){
+        if(existAudit?.isCustomAudit){
             arrayStandardsFalse = []
             arrayAreasFalse = []
         }
 
         // convierto en false si no cumple core
-        if(!existAudit.isCustomAudit){
+        if(!existAudit?.isCustomAudit){
             auditsResultsAux.forEach((element, indexEl) => {
                 const finded = arrayForCore.find( el => el.id === element.installation_id._id.toString() )
                 element.criterions.forEach((criterion, index) => {
@@ -3323,4 +3370,4 @@ const getDataForAudit = async(request, response) => {
     }
 }
 
-module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables, getAuditResByAuditIDAndInstallationID, getDataForAudit, getDataForFullAudit, updateTest, getDataForFullAuditTest, createAuditResultsTest, tablesTest}
+module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables, getAuditResByAuditIDAndInstallationID, getAuditResByAuditID, getDataForAudit, getDataForFullAudit, updateTest, getDataForFullAuditTest, createAuditResultsTest, tablesTest}
