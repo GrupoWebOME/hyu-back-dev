@@ -1481,12 +1481,31 @@ const getAuditResByAuditID = async(request, response) => {
 
         let arrayOfInstallations = []
 
+        const adminForAudit = await Admin.find({'audits.audit': auditid}, 'names surnames emailAddress userName role dealership _id audits')
+
         for(let i = 0; i < auditRes.length; i++){
-            const adminForAudit = await Admin.find({'audits.audit': auditid, 'audits.dealerships.installations': auditRes[i].installation_id}, 'names surnames emailAddress userName role dealership _id')
            
+            let auditors = []
+            let adminFind = false
+
+            adminForAudit.forEach((admin) => {
+                admin.audits.forEach((audit) => {
+                    audit.dealerships.forEach((el) => {
+                        const ex = el.installations.includes(auditRes[i].installation_id.toString())
+                        if(ex){
+                            adminFind = true
+                        }
+                    })
+                })
+                if(adminFind){
+                    auditors = [...auditors, admin]
+                }
+            })
+
             const installationEl = {
                 installation_id: auditRes[i].installation_id,
-                auditors: adminForAudit
+                auditors: auditors,
+                dateForAudit: auditRes[i].dateForAudit
             }
            
             arrayOfInstallations = [...arrayOfInstallations, installationEl]
