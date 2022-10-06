@@ -1439,7 +1439,7 @@ const getAuditResByAuditID = async(request, response) => {
             const adminForAudit = await Admin.find({'audits.audit': auditid, 'audits.dealerships.installations': auditRes[i].installation_id}, 'names surnames emailAddress userName role dealership _id')
            
             const installationEl = {
-                id: auditRes[i].installation_id,
+                installation_id: auditRes[i].installation_id,
                 auditors: adminForAudit
             }
            
