@@ -1415,10 +1415,10 @@ const getDataForFullAudit = async(request, response) => {
     }
 }
 
-const getAuditResByAuditIDAndInstallationID = async(request, response) => {
+const getAuditResByAuditID = async(request, response) => {
     try{
-        const {auditid, installationid} = request.params
-
+        const {auditid} = request.params
+        console.log('entra')
         if(!auditid)
             return response.status(400).json({code: 400,
                                                 msg: 'invalid auditid',
@@ -1427,29 +1427,29 @@ const getAuditResByAuditIDAndInstallationID = async(request, response) => {
             return response.status(400).json({code: 400,
                                               msg: 'invalid auditid',
                                               detail: 'auditid should be an objectId'})
-
-        if(!installationid)
-            return response.status(400).json({code: 400,
-                                                msg: 'invalid installationid',
-                                                detail: 'id is a obligatory field'})
-        if(installationid && !ObjectId.isValid(installationid))
-            return response.status(400).json({code: 400,
-                                            msg: 'invalid installationid',
-                                            detail: 'installationid should be an objectId'})
     
-        let auditRes = await AuditResults.findOne({audit_id: auditid, installation_id: {$in: [installationid]}})
+        const auditRes = await AuditResults.find({audit_id: auditid}, 'audit_id installation_id dateForAudit')
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
 
-        const adminForAudit = await Admin.find({'audits.audit': auditid, 'audits.dealerships.installations': installationid}, 'names surnames emailAddress userName role dealership _id')
+        let arrayOfInstallations = []
 
+        for(let i = 0; i < auditRes.length; i++){
+            const adminForAudit = await Admin.find({'audits.audit': auditid, 'audits.dealerships.installations': auditRes[i].installation_id}, 'names surnames emailAddress userName role dealership _id')
+           
+            const installationEl = {
+                id: auditRes[i].installation_id,
+                auditors: adminForAudit
+            }
+           
+            arrayOfInstallations = [...arrayOfInstallations, installationEl]
+        }
+        
         if(auditRes){
             response.status(200).json({code: 200,
                                        msg: 'success',
-                                       data: auditRes,
-                                       auditors: adminForAudit     
-                                    })
+                                       data: arrayOfInstallations})
         }
         else{
             response.status(200).json({code: 204,
