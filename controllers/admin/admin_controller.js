@@ -172,7 +172,6 @@ const updateAdmin = async(request, response) => {
         const {id} = request.params
         const {names, surnames, emailAddress, userName, password, role, dealership, audits} = request.body
         const { adminRole, _id } = request.jwt.admin
-
         let errors = []
     
         const regExPatternNamesAndSurname = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
@@ -197,7 +196,6 @@ const updateAdmin = async(request, response) => {
                             msg: 'invalid credentials',
                             detail: 'you do not have permissions to update this admin'})
             }
-
             if (!admin)
                 return response.status(404).json({code: 404,
                                                   msg: 'invalid id',
@@ -272,7 +270,7 @@ const updateAdmin = async(request, response) => {
                 })
             }
         }
-        
+
         if(surnames && !surnames.match(regExPatternNamesAndSurname))
             errors.push({code: 400, 
                          msg: 'invalid surnames',
@@ -350,7 +348,7 @@ const updateAdmin = async(request, response) => {
 
         if(audits)
             editAdmin['audits'] = audits
-        
+
         editAdmin['updatedAt'] = Date.now()
 
         const newAdmin = await Admin.findByIdAndUpdate(id, editAdmin, {new: true})
@@ -369,6 +367,20 @@ const updateAdmin = async(request, response) => {
         response.status(200).json({code: 200,
                                    msg: 'the administrator has been updated successfully',
                                    data: {admin: newAdmin, token: token} })
+
+        if(audits){
+           for(let i=0; i < audits.length; i++){
+                for(let j=0; j < audits[i].dealerships.length; j++){
+                    for(let k=0; k < audits[i].dealerships[j].installations.length; k++){
+                        const auditInstFind = await AuditInstallation.findOne({installation_id: audits[i].dealerships[j].installations[k], audit_id: audits[i].audit})
+                        const existAuditor = auditInstFind.auditor_id.includes(id)
+                        if(auditInstFind && !existAuditor){
+                            await AuditInstallation.findByIdAndUpdate(auditInstFind._id, {$push: {auditor_id: id}})
+                        }
+                    }
+                }
+           }
+        }
     }
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
