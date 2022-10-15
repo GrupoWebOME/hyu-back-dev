@@ -12,6 +12,14 @@ const auditResultsSchema = new Schema({
         type: String,
         default: 'created'
     },
+    text: {
+        type: String,
+        default: null
+    },
+    images: [{
+        type: String,
+        default: null
+    }],
     dateForAudit: {
         type: Date,
         default: null
