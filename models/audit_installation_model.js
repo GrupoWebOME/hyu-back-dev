@@ -19,8 +19,7 @@ const auditInstallationSchema = new Schema({
        },
        auditor_id: [{
               type: Schema.Types.ObjectId, 
-              ref: 'Admin', 
-              required: true
+              ref: 'Admin'
        }],
        comment: {
               type: String, 
@@ -36,7 +35,7 @@ const auditInstallationSchema = new Schema({
        },
        audit_date: {
               type: Date,
-              default: Date.now
+              default: null
        },
        createdAt: {
               type: Date,
