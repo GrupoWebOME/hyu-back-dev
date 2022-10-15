@@ -1,4 +1,5 @@
 const Audit = require('../../models/audit_model')
+const AuditInstallation = require('../../models/audit_installation_model')
 const InstallationType = require('../../models/installationType_model')
 const Installation = require('../../models/installation_schema')
 const ObjectId = require('mongodb').ObjectId
@@ -147,6 +148,7 @@ const createAudit = async(request, response) => {
                         }) 
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
+
         const newAudit = new Audit({
             name: name,
             installation_type,
@@ -158,16 +160,32 @@ const createAudit = async(request, response) => {
             auditIonic5: (auditIonic5 !== null && auditIonic5 !== undefined  && auditIonic5 === false)? false : true,
             auditElectrics: (auditElectrics !== null && auditElectrics !== undefined && auditElectrics === false)? false : true,
             auditMVE: (auditMVE !== null && auditMVE !== undefined  && auditMVE === false)? false : true,
+            installation_exceptions: installation_exceptions? installation_exceptions : []
         })
 
         await newAudit.save()
                         .catch(error => {        
                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error 2', detail: error.message}]})
                         })
-                     
+                    
         response.status(201).json({code: 201,
                                     msg: 'the audit has been created successfully',
                                     data: newAudit })
+                                    
+        //Get all installation for installation type and not in exceptions
+        const installationsFind = await Installation.find({$and: [{installation_type: {$in: installation_type}},{_id: {$nin: installation_exceptions}}]})
+
+        //Create for all auditinstallation
+        for(let i = 0; i < installationsFind.length; i++) {
+            const newAuditInstallation = new AuditInstallation({
+                installation_id: installationsFind[i]._id,
+                dealership_id: installationsFind[i].dealership,
+                audit_id: newAudit._id,
+                audit_status: 'created'
+            })
+            await newAuditInstallation.save()
+        }
+
     }
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
