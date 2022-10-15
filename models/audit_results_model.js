@@ -6,20 +6,20 @@ const auditResultsSchema = new Schema({
     installation_id: {type: Schema.Types.ObjectId, ref: 'Installation', default: null},
     criterions: [{
         criterion_id: {type: Schema.Types.ObjectId, ref: 'Criterion'},
-        pass: {type: Boolean, default: true}
+        pass: {type: Boolean, default: true},
+        text: {
+            type: String,
+            default: null
+        },
+        images: [{
+            type: String,
+            default: null
+        }],
     }],
     state: {
         type: String,
         default: 'created'
     },
-    text: {
-        type: String,
-        default: null
-    },
-    images: [{
-        type: String,
-        default: null
-    }],
     dateForAudit: {
         type: Date,
         default: null
