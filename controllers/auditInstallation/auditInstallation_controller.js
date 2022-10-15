@@ -107,8 +107,8 @@ const getAllAuditInstallation = async(request, response) => {
             filter['audit_id'] = audit_id
             
         if(page === 0){
-            const auditInstallations = await AuditInstallation.find(filter).populate('dealership')
-            
+            const auditInstallations = await AuditInstallation.find(filter).populate('installation_id auditor_id')
+
             const data = {auditInstallations: auditInstallations, 
                           totalPages: 1}
 
