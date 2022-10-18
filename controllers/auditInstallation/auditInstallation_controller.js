@@ -29,7 +29,7 @@ const updateAuditInstallation = async(request, response) => {
                                                   detail: 'id not found'})
         }
 
-        if(comment !== null && coment !== undefined && comment.length < 1)
+        if(comment !== null && comment !== undefined && comment.length < 1)
             errors.push({code: 400, 
                          msg: 'invalid comment',
                          detail: `${comment} is not valid comment format.`
