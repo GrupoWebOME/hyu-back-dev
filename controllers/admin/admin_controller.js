@@ -373,7 +373,7 @@ const updateAdmin = async(request, response) => {
                 for(let j=0; j < audits[i].dealerships.length; j++){
                     for(let k=0; k < audits[i].dealerships[j].installations.length; k++){
                         const auditInstFind = await AuditInstallation.findOne({installation_id: audits[i].dealerships[j].installations[k], audit_id: audits[i].audit})
-                        const existAuditor = auditInstFind.auditor_id.includes(id)
+                        const existAuditor = auditInstFind?.auditor_id?.includes(id)
                         if(auditInstFind && !existAuditor){
                             await AuditInstallation.findByIdAndUpdate(auditInstFind._id, {$push: {auditor_id: id}})
                         }
