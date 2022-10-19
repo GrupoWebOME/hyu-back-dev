@@ -3148,6 +3148,7 @@ const getDataForAudit = async(request, response) => {
 
         if(audit_id === "last"){
             const audit = await Audit.findOne().sort({$natural:-1}).limit(1)
+            console.log('audit: ', audit._id)
             if(audit){
                 audit_id = audit._id
             }
