@@ -3147,7 +3147,6 @@ const getDataForAudit = async(request, response) => {
 
         if(audit_id === "last"){
             const audit = await Audit.findOne().sort({$natural:-1}).limit(1)
-            console.log('audit: ', audit._id)
             if(audit){
                 audit_id = audit._id
             }
@@ -3177,13 +3176,13 @@ const getDataForAudit = async(request, response) => {
         }
 
         let filter = {audit_id: audit_id}
-        if(dealership_id !== null && dealership_id !== undefined){
+        if(dealership_id !== null && dealership_id !== undefined && dealership_id !== false){
             filter['dealership_id'] = dealership_id
         }
-
+        
         let auditAgencies = await AuditAgency.find(filter)
 
-        auditsResults = await AuditResults.find(filter)
+        auditsResults = await AuditResults.find(filter) //TODO: no esta filtrando por dealership, lo estamos haciendo en la linea 3197, por ahora funciona asi.
                                                 .populate({path: 'installation_id', select: '_id active name installation_type dealership', 
                                                             populate: {path: 'installation_type dealership', select: '_id code active'}})
                                                 .populate({ path: 'criterions.criterion_id', 
@@ -3193,11 +3192,11 @@ const getDataForAudit = async(request, response) => {
                                                     },
                                                 }) 
 
-        const AOH = "6226310514861f56d3c64266"
-
+        const AOH = "6226310514861f56d3c64266" //AOH es agency, este id es el tipo de instalacion
         let auditResultsWithoutInactiveInst = []
-
-        auditsResults.forEach((element) => {
+        const auditResultsDealership = dealership_id ? auditsResults.filter((ard) => ard.installation_id.dealership._id.toString() === dealership_id) : auditsResults
+  
+        auditResultsDealership.forEach((element) => {
             if(element.installation_id.active && element.installation_id.dealership.active){
                 auditResultsWithoutInactiveInst = [...auditResultsWithoutInactiveInst, element]
             }
@@ -3346,13 +3345,13 @@ const getDataForAudit = async(request, response) => {
         let dealerTotal = 0
         let instTotal = 0
         
-        if(hmes_dealership!==null)
+        if(hmes_dealership!==null && !dealership_id)
             dealerTotal+= 1
         if(img_dealership!==null)
             dealerTotal+= 1
         if(electric_dealership!==null)
             dealerTotal+= 1
-        if(hmes_inst!==null)
+        if(hmes_inst!==null  && !dealership_id)
             instTotal+= 1
         if(img_inst!==null)
             instTotal+= 1
@@ -3368,7 +3367,9 @@ const getDataForAudit = async(request, response) => {
                 }]
             })
         })
-
+        //si hay dealership_id no tenemos en cuenta los valores HME)
+        const totalDealership =  (!dealership_id? (hmes_dealership + img_dealership + electric_dealership)/dealerTotal : (img_dealership + electric_dealership)/dealerTotal) 
+        const totalInst =  (!dealership_id? (hmes_inst + img_inst + electric_inst)/instTotal : ( img_inst + electric_inst)/instTotal )
         const data = {
             hmes_dealership: hmes_dealership,
             img_dealership: img_dealership,
@@ -3376,9 +3377,9 @@ const getDataForAudit = async(request, response) => {
             hmes_inst: hmes_inst,
             img_inst: img_inst,
             electric_inst: electric_inst,
-            total_dealership: (hmes_dealership + img_dealership + electric_dealership)/dealerTotal,
-            total_inst: (hmes_inst + img_inst + electric_inst)/instTotal,
-            total: (((hmes_dealership + img_dealership + electric_dealership)/dealerTotal) + ( (hmes_inst + img_inst + electric_inst)/instTotal))/2,
+            total_dealership:totalDealership ,
+            total_inst: totalInst,
+            total: (totalDealership +totalInst )/2,
             instalations_detail: instalations_detail
         }
 
