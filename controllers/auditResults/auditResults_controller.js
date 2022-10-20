@@ -1738,11 +1738,13 @@ const createAuditResultsTest = async(request, response) => {
                                 })}
                 else{
                     dealershipByID = await Dealership.findById(existInstallation.dealership)
-                    dealershipByID.installations.map((installation) => {
-                        if(installation.toString() !== installation_id){
-                            arrayInstallations = [...arrayInstallations, installation]
+                    
+                    for(let i = 0; i < dealershipByID.installations.length; i++){
+                        const inst = await Installation.findById(dealershipByID.installations[i])
+                        if(dealershipByID.installations[i].toString() !== installation_id && inst.active){
+                            arrayInstallations = [...arrayInstallations, dealershipByID.installations[i]]
                         }
-                    })
+                    }
                 }
             }
         }
@@ -2285,7 +2287,7 @@ const createAuditResultsTest = async(request, response) => {
             audit_id,
             installation_id,
             criterions,
-            instalations_audit_details: array_instalations_audit_details,
+            instalations_audit_details: instalations_audit_details,
             state: 'created'
         })
 
@@ -2404,11 +2406,12 @@ const updateTest = async(request, response) => {
                                 })}
                 else{
                     dealershipByID = await Dealership.findById(existInstallation.dealership)
-                    dealershipByID.installations.map((installation) => {
-                        if(installation.toString() !== installation_id){
-                            arrayInstallations = [...arrayInstallations, installation]
+                    for(let i = 0; i < dealershipByID.installations.length; i++){
+                        const inst = await Installation.findById(dealershipByID.installations[i])
+                        if(dealershipByID.installations[i].toString() !== installation_id && inst.active){
+                            arrayInstallations = [...arrayInstallations, dealershipByID.installations[i]]
                         }
-                    })
+                    }
                 }
             }
         }
