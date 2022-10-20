@@ -3369,7 +3369,7 @@ const getDataForAudit = async(request, response) => {
         })
         //si hay dealership_id no tenemos en cuenta los valores HME)
         const totalDealership =  (!dealership_id? (hmes_dealership + img_dealership + electric_dealership)/dealerTotal : (img_dealership + electric_dealership)/dealerTotal) 
-        const totalInst =  (!dealership_id? (hmes_inst + img_inst + electric_inst)/instTotal : ( img_inst + electric_inst)/instTotal )
+        const totalInst = (!dealership_id ? (hmes_inst + img_inst + electric_inst) / instTotal : (img_inst + electric_inst) / instTotal)
         const data = {
             hmes_dealership: hmes_dealership,
             img_dealership: img_dealership,
@@ -3379,7 +3379,7 @@ const getDataForAudit = async(request, response) => {
             electric_inst: electric_inst,
             total_dealership:totalDealership ,
             total_inst: totalInst,
-            total: (totalDealership +totalInst )/2,
+            total: ((dealerTotal ? totalDealership : 0)+ (instTotal ? totalInst : 0) )/ (dealerTotal && instTotal ? 2 : 1),
             instalations_detail: instalations_detail
         }
 
