@@ -1,6 +1,7 @@
 const express = require('express')
 const api = express.Router()
 const Audit = require('../../controllers/audit/audit_controller')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -81,7 +82,7 @@ const Audit = require('../../controllers/audit/audit_controller')
   *   description: Rutas de Auditorías
   */
 
-api.post('/all', Audit.getAllAudit)
+api.post('/all', authenticationAdmin.validate, Audit.getAllAudit)
 
 /**
  * @swagger
