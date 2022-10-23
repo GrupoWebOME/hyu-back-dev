@@ -423,9 +423,11 @@ const deleteAudit = async(request, response) => {
 const getAllAudit= async(request, response) => {
     try{
         const { name, installation_type, start_date, end_date, pageReq} = request.body
+        const {role, dealership} = request.jwt.admin
         const page = !pageReq ? 0 : pageReq
         let skip = (page - 1) * 10
         const filter = {}
+
         if(installation_type && !ObjectId.isValid(installation_type)){
             return response.status(400).json({code: 400, 
                                               msg: 'invalid installation_type',
@@ -440,11 +442,38 @@ const getAllAudit= async(request, response) => {
             filter['start_date'] = {$gt : start_date}
             filter['end_date'] = {$lt : end_date}
         }
+        if(role === 'dealership'){
+            const installationsForDealerships = await Installation.find({dealership: dealership})
+            let arrayInst = []
+            let arrayAuditInstPass = []
+            installationsForDealerships.forEach((inst) => {
+                arrayInst.push(inst._id)
+            })
+            const auditInstallationForDealerships = await AuditInstallation.find({installation_id: {$in: arrayInst}})
+
+            auditInstallationForDealerships.forEach((auditInst) => {
+                if(!arrayAuditInstPass.includes(auditInst.audit_id.toString())){
+                    arrayAuditInstPass.push(auditInst.audit_id.toString())
+                }
+            })
+
+            auditInstallationForDealerships.forEach((audtInst) => {
+                if(audtInst.audit_status !== 'closed'){
+                    const index = arrayAuditInstPass.indexOf(audtInst.audit_id.toString())
+                    if(index > -1){
+                        arrayAuditInstPass.splice(index, 1)
+                    }
+                }
+            })
+
+            filter['_id'] = {$in: arrayAuditInstPass}
+        }
         if(page === 0){
             const audits = await Audit.find(filter).populate("installation_type criterions.criterion")
                                              .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                              })
+
             const data = {audits: audits, 
                           totalPages: 1}
 
