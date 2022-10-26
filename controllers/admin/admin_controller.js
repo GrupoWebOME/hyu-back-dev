@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const Admin = require('../../models/admin_model')
 const Dealership = require('../../models/dealership_model')
+const AuditInstallation = require('../../models/audit_installation_model')
 var ObjectId = require('mongodb').ObjectId
 
 const createAdmin = async(request, response) => {
