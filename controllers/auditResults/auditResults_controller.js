@@ -4054,4 +4054,3 @@ const getDataForAudit = async(request, response) => {
 }
 
 module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables, getAuditResByAuditIDAndInstallationID, getAuditResByAuditID, getDataForAudit, getDataForFullAudit, updateTest, getDataForFullAuditTest, createAuditResultsTest, tablesTest}
-
