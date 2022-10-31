@@ -6,6 +6,7 @@ const Installation = require('../../models/installation_schema')
 const AuditAgency = require('../../models/audit_agency_model')
 const Admin = require('../../models/admin_model')
 const ObjectId = require('mongodb').ObjectId
+const AuditInstallation = require('../../models/audit_installation_model')
 
 const createAuditResults = async(request, response) => {
     try{
@@ -3149,7 +3150,52 @@ const getDataForAudit = async(request, response) => {
         let existAudit = null
 
         if(audit_id === "last"){
-            const audit = await Audit.findOne().sort({$natural:-1}).limit(1)
+
+            let audit = null
+
+            if(dealership_id && ObjectId.isValid(dealership_id)){
+                const auditsInstallations = await AuditInstallation.find({dealership_id: dealership_id})
+                let audit_ids = []
+                if(auditsInstallations){
+                    let auditsForDealership = []
+                    auditsInstallations.forEach((auditInst) => {
+                        const existAudit = auditsForDealership.findIndex(el => {
+                            return el?.audit_id?.toString() === auditInst?.audit_id?.toString()
+                        })
+                        if(existAudit > -1){
+                            auditsForDealership[existAudit].audit_status.push(auditInst.audit_status)
+                        } else{
+                            const element = {
+                                audit_id: auditInst.audit_id,
+                                audit_status: [auditInst.audit_status]
+                            }
+
+                            auditsForDealership = [...auditsForDealership, element]
+                        }
+                    })
+
+                    auditsForDealership.forEach((audit) => {
+                        if(!audit.audit_status.find(el => el !== 'closed')){
+                            audit_ids = [...audit_ids, audit.audit_id]
+                        }
+                    })
+
+                    const auditsFiltereds = await Audit.find({_id: {$in: audit_ids}})
+                    
+                    auditsFiltereds.sort((a, b) => {
+                        return b.createdAt - a.createdAt
+                    })
+
+                    if(auditsFiltereds.length > 0){
+                        audit_id = auditsFiltereds[0]?._id
+                        audit = auditsFiltereds[0]
+                    }
+                }
+                
+            } else{
+                audit = await Audit.findOne().sort({$natural:-1}).limit(1)
+            }
+
             if(audit){
                 audit_id = audit._id
             }
