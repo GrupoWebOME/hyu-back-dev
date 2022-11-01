@@ -151,7 +151,18 @@ const loginAdmin = async(request, response) => {
         if (!correctCred) 
             return response.status(401).json({errors: [{code: 401, msg: 'unauthorized access', detail: 'invalid credentials'}]})
 
-        const token = await jwt.sign({admin},
+        let adminAux = {
+            _id: admin._id,
+            names: admin.names,
+            surnames: admin.surnames,
+            emailAddress: admin.emailAddress,
+            userName: admin.userName,
+            role: admin.role,
+            dealership: admin.dealership,
+            isMain: admin.isMain
+        }
+
+        const token = await jwt.sign({adminAux},
                                      process.env.SECRET,
                                      {
                                         expiresIn: 60 * 60 * 24
@@ -165,7 +176,6 @@ const loginAdmin = async(request, response) => {
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
     }     
-
 }
 
 const updateAdmin = async(request, response) => {
