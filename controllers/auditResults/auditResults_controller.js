@@ -3145,6 +3145,8 @@ const getDataForAudit = async(request, response) => {
     let {audit_id} = request.params
     let auditsResults = null
     let { dealership_id } = request.body
+    const AOH = '6226310514861f56d3c64266'
+    let isNotAOHDealership = false
 
     try{
         let existAudit = null
@@ -3237,7 +3239,14 @@ const getDataForAudit = async(request, response) => {
                                detail: `${dealership_id} is not an ObjectId`}]})
             }
             const dealershipByID = await Dealership.findById(dealership_id)
-    
+            const inst_for_dealership = await Installation.find({dealership_id: dealership_id})
+
+            inst_for_dealership.forEach((inst) => {
+                if(inst.installation_type.toString() === AOH){
+                    isNotAOHDealership = true
+                }
+            })
+
             if(!dealershipByID)
                 return response.status(400).json({code: 404, 
                                                   msg: 'invalid dealership_id',
@@ -3783,8 +3792,6 @@ const getDataForAudit = async(request, response) => {
                 agency_by_types: agency_by_types
             }
 
-            const AOH = '6226310514861f56d3c64266'
-
             let electric_dealership = []
             let electric_inst = []
             let img_dealership = []
@@ -3871,6 +3878,10 @@ const getDataForAudit = async(request, response) => {
                 total_inst = total / total_inst.length
             } else{
                 total_inst = null
+            }
+
+            if(!isNotAOHDealership){
+                total = total_inst
             }
 
             const dealership_data = {
