@@ -162,7 +162,7 @@ const loginAdmin = async(request, response) => {
             isMain: admin.isMain
         }
 
-        const token = await jwt.sign({adminAux},
+        const token = await jwt.sign({admin: adminAux},
                                      process.env.SECRET,
                                      {
                                         expiresIn: 60 * 60 * 24
