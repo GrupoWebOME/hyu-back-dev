@@ -3239,13 +3239,6 @@ const getDataForAudit = async(request, response) => {
                                detail: `${dealership_id} is not an ObjectId`}]})
             }
             const dealershipByID = await Dealership.findById(dealership_id)
-            const inst_for_dealership = await Installation.find({dealership_id: dealership_id})
-
-            inst_for_dealership.forEach((inst) => {
-                if(inst.installation_type.toString() === AOH){
-                    isNotAOHDealership = true
-                }
-            })
 
             if(!dealershipByID)
                 return response.status(400).json({code: 404, 
@@ -3879,6 +3872,19 @@ const getDataForAudit = async(request, response) => {
             } else{
                 total_inst = null
             }
+
+
+            const id_inst_detail = instalations_detail.map((inst) => {
+                return inst.installation_id
+            })
+
+            const inst_for_dealership = await Installation.find({_id: {$in: id_inst_detail}})
+
+            inst_for_dealership.forEach((inst) => {
+                if(inst.installation_type.toString() === AOH){
+                    isNotAOHDealership = true
+                }
+            })
 
             if(!isNotAOHDealership){
                 total = total_inst
