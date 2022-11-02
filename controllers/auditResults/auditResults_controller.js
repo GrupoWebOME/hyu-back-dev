@@ -3887,7 +3887,7 @@ const getDataForAudit = async(request, response) => {
             })
 
             if(!isNotAOHDealership){
-                total = total_inst
+                total_inst = total
             }
 
             const dealership_data = {
