@@ -1742,7 +1742,7 @@ const createAuditResultsTest = async(request, response) => {
                     
                     for(let i = 0; i < dealershipByID.installations.length; i++){
                         const inst = await Installation.findById(dealershipByID.installations[i])
-                        if(dealershipByID.installations[i].toString() !== installation_id && inst.active){
+                        if(dealershipByID.installations[i].toString() !== installation_id && inst?.active){
                             arrayInstallations = [...arrayInstallations, dealershipByID.installations[i]]
                         }
                     }
@@ -2409,7 +2409,7 @@ const updateTest = async(request, response) => {
                     dealershipByID = await Dealership.findById(existInstallation.dealership)
                     for(let i = 0; i < dealershipByID.installations.length; i++){
                         const inst = await Installation.findById(dealershipByID.installations[i])
-                        if(dealershipByID.installations[i].toString() !== installation_id && inst.active){
+                        if(dealershipByID.installations[i].toString() !== installation_id && inst?.active){
                             arrayInstallations = [...arrayInstallations, dealershipByID.installations[i]]
                         }
                     }
