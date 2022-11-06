@@ -15,6 +15,12 @@ const auditResultsSchema = new Schema({
             type: String,
             default: null
         }],
+        discussion: [{
+            text: { type: String },
+            date: { type: Date, default: Date.now },
+            user: { type: Schema.Types.ObjectId, ref: 'Admin'},
+            images: [{ type: String }]
+        }]
     }],
     state: {
         type: String,
