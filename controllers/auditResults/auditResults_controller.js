@@ -2442,8 +2442,32 @@ const updateTest = async(request, response) => {
                                     detail: `${element.criterion_id} not found`
                                     })        
                 }
+                if(element.discussion && Array.isArray(element.discussion)){
+                    element.discussion.forEach(async(discussion) => {
+                        if(!discussion.hasOwnProperty("text") || !discussion.hasOwnProperty("user")){
+                            errors.push({code: 400, 
+                                msg: 'invalid discussion',
+                                detail: `discussion should be contains text and user fields`
+                            })
+                        }
+                        else if(!ObjectId.isValid(discussion.user)){
+                            errors.push({code: 400, 
+                                msg: 'invalid user',
+                                detail: `${discussion.user} is not an ObjectId`
+                            })  
+                        }
+                        else{                
+                            const existAdmin = await Admin.exists({_id: discussion.user})
+                            if(!existAdmin)
+                                errors.push({code: 400, 
+                                            msg: 'invalid user',
+                                            detail: `${discussion.user} not found`
+                                            })        
+                        }
+                    })
+                }
             })
-        }
+        } 
 
         if(dateForAudit){
             const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
