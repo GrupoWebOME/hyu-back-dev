@@ -114,6 +114,9 @@ const createAuditResults = async(request, response) => {
                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                         })
 
+        await AuditInstallation.findByIdAndUpdate({installation_id: installation_id}, {audit_status: 'in_process'})
+                               .catch( error => {return response.status(500).json({code: 500, msg: 'update auditInst error', detail: error.message})})
+        
         response.status(201).json({code: 201,
                                     msg: 'the auditResults has been created successfully',
                                     data: newAuditResults })
