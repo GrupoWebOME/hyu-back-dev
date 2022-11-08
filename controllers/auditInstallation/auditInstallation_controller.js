@@ -42,10 +42,10 @@ const updateAuditInstallation = async(request, response) => {
                         })
 
         if(audit_status !== null && audit_status !== undefined && audit_status !== 'created' && audit_status !== 'canceled' && audit_status !== 'planned' &&
-            audit_status !== 'in_process' && audit_status !== 'auditor_signed' && audit_status !== 'auditor_end' && audit_status !== 'closed' ){
+            audit_status !== 'in_process' && audit_status !== 'auditor_signed' && audit_status !== 'auditor_end' && audit_status !== 'closed' && audit_status !== 'review' ){
                 errors.push({code: 400, 
                                 msg: 'invalid audit_status',
-                                detail: `audit_status should be created, canceled, planned, in_process, auditor_signed, auditor_end, or closed`
+                                detail: `audit_status should be created, canceled, planned, in_process, auditor_signed, auditor_end, review or closed`
                             })  
         }
 
