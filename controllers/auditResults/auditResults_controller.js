@@ -1440,7 +1440,7 @@ const getAuditResByAuditIDAndInstallationID = async(request, response) => {
                                             msg: 'invalid installationid',
                                             detail: 'installationid should be an objectId'})
     
-        let auditRes = await AuditResults.findOne({audit_id: auditid, installation_id: {$in: [installationid]}})
+        let auditRes = await AuditResults.findOne({audit_id: auditid, installation_id: {$in: [installationid]}}).populate({path: 'criterions.discussion.user', select: '_id names surnames emailAddress role'})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                         })
