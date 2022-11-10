@@ -3094,6 +3094,7 @@ const getDataForFullAuditTest = async(request, response) => {
             let data = {
                 code: element.code,
                 name: element.name,
+                dealership_id: element.dealership_id,
                 ionic5_quaterly_billing: element.ionic5_quaterly_billing,
                 vn_quaterly_billing: element.vn_quaterly_billing,
                 electric_quaterly_billing: element.dealership_details.electric_quaterly_billing, // NEMO, esto lo emparche asi, despues miralo
