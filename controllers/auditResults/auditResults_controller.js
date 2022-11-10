@@ -3026,7 +3026,7 @@ const updateTest = async(request, response) => {
         updatedFields['updatedAt'] = Date.now()
         updatedFields['instalations_audit_details'] = instalations_audit_details
 
-        const updatedAuditResults = await AuditResults.findByIdAndUpdate(id, updatedFields, {new: true})
+        const updatedAuditResults = await AuditResults.findByIdAndUpdate(id, updatedFields, {new: true}).populate({path: 'criterions.discussion.user', select: '_id names surnames emailAddress role'})
                             .catch(error => {        
                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                             })
