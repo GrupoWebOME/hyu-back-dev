@@ -527,7 +527,7 @@ const getAllAudit= async(request, response) => {
                 arrayAuditInstPass = [...arrayAuditInstPass, audit.audit.toString()]
             })
 
-            let auditInstallationForDealerships = await AuditInstallation.find({audit_id: {$in: arrayAuditInstPass}})
+            let auditInstallationForDealerships = await AuditInstallation.find({audit_id: {$in: arrayAuditInstPass}, audit_status: {$in: ['planned', 'in_process', 'auditor_signed']}})
 
             // Del array de auditorias obtenido, elimino aquellas cuyo estado no sea closed
             auditInstallationForDealerships.forEach((audtInst) => {
