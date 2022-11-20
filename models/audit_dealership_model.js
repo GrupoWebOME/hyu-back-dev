@@ -4,8 +4,6 @@ const uniqueValidator = require('mongoose-unique-validator')
 const auditDealershipSchema = new Schema({
     audit_id: {type: Schema.Types.ObjectId, ref: 'Audit'},
     dealership_id: {type: Schema.Types.ObjectId, ref: 'Dealership'},
-    code: {type: String, required: true},
-    name: {type: String, required: true},
     ionic5_quaterly_billing: {type: Number, default: 0},
     vn_quaterly_billing: {type: Number, default: 0},
     electric_quaterly_billing: {type: Number, default: 0},
