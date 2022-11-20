@@ -19,6 +19,7 @@ const apiSizingTable = require('./sizingTable/sizingtable_routes')
 const apiAuditResults = require('./auditResults/auditResults_routes')
 const apiAuditInstallation = require('./auditInstallation/auditInstallation_routes')
 const apiAuditDealership = require('./auditDealership/audit_dealership_routes')
+const apiAuditEconomic = require('./auditEconomic/audit_economic_routes')
 const apiSwagger = require('./doc/doc_routes')
 
 api.get('/', (request, response) => {
@@ -44,6 +45,7 @@ api.use('/sizingTable', apiSizingTable)
 api.use('/auditResults', apiAuditResults)
 api.use('/auditInstallation', apiAuditInstallation)
 api.use('/auditDealership', apiAuditDealership)
+api.use('/auditEconomic', apiAuditEconomic)
 api.use('/doc', apiSwagger)
 
 module.exports = api
