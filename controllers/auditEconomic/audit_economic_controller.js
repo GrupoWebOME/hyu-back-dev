@@ -7,7 +7,8 @@ const createAuditEconomic = async(request, response) => {
     try{
         let { electric_quaterly_billing, ionic5_quaterly_billing, vn_quaterly_billing, audit_id, dealership_id, aCobrarVN, perdidoVN, retenidoVN,
             aCobrarVE, perdidoVE, retenidoVE, variableVNaCobrar, variableVNperdido, variableVNretenido, variableElectricoACobrar, variableElectricoPerdido,
-            variableElectricoRetenido, variableIonic5Acobrar, smartDealerPolicy, variableTotalAcobrar, aCobrarIoniq5 } = request.body
+            variableElectricoRetenido, variableIonic5Acobrar, smartDealerPolicy, variableTotalAcobrar, aCobrarIoniq5, percentageTotal, percentageElectric, 
+            importeRetenidoAnteriores } = request.body
         let errors = []
 
         if(audit_id && ObjectId.isValid(audit_id)){
@@ -88,7 +89,10 @@ const createAuditEconomic = async(request, response) => {
             variableIonic5Acobrar, 
             smartDealerPolicy, 
             variableTotalAcobrar, 
-            aCobrarIoniq5
+            aCobrarIoniq5,
+            percentageTotal,
+            percentageElectric,
+            importeRetenidoAnteriores
         })
     
         await newAuditEconomic.save()
@@ -109,7 +113,8 @@ const updateAuditEconomic = async(request, response) => {
     try{
         let { electric_quaterly_billing, ionic5_quaterly_billing, vn_quaterly_billing, aCobrarVN, perdidoVN, retenidoVN,
             aCobrarVE, perdidoVE, retenidoVE, variableVNaCobrar, variableVNperdido, variableVNretenido, variableElectricoACobrar, variableElectricoPerdido,
-            variableElectricoRetenido, variableIonic5Acobrar, smartDealerPolicy, variableTotalAcobrar, aCobrarIoniq5 } = request.body
+            variableElectricoRetenido, variableIonic5Acobrar, smartDealerPolicy, variableTotalAcobrar, aCobrarIoniq5, percentageTotal, percentageElectric, 
+            importeRetenidoAnteriores } = request.body
         const {id} = request.params
 
         let auditEconomicById = null
@@ -172,6 +177,12 @@ const updateAuditEconomic = async(request, response) => {
             updatedFields['variableTotalAcobrar'] = variableTotalAcobrar
         if(aCobrarIoniq5 !== null && aCobrarIoniq5 !== undefined)
             updatedFields['aCobrarIoniq5'] = aCobrarIoniq5
+        if(percentageTotal !== null && percentageTotal !== undefined)
+            updatedFields['percentageTotal'] = percentageTotal
+        if(percentageElectric !== null && percentageElectric !== undefined)
+            updatedFields['percentageElectric'] = percentageElectric
+        if(importeRetenidoAnteriores !== null && importeRetenidoAnteriores !== undefined)
+            updatedFields['importeRetenidoAnteriores'] = importeRetenidoAnteriores
         updatedFields['updatedAt'] = Date.now()
         
         const updatedAuditEconomic = await AuditEconomic.findByIdAndUpdate(id, updatedFields, {new: true})
