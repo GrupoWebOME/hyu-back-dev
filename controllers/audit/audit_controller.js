@@ -452,7 +452,7 @@ const getAllAudit= async(request, response) => {
         
         if(role === 'dealership'){
             filterAuditInst['audit_status'] = {$in: ['closed', 'canceled', 'review', 'planned', 'review_hmes', 'in_process', 'auditor_signed', 'auditor_end', 'finished']}
-            // Traido todas las instalaciones que tiene esa agencia
+            // Traigo todas las instalaciones que tiene esa agencia
             const installationsForDealerships = await Installation.find({dealership: dealership})
             let arrayInst = []
             let arrayAuditInstPass = []
@@ -485,6 +485,16 @@ const getAllAudit= async(request, response) => {
                     }
                 }
             })
+
+            // elimino los que tengan created
+            auditInstallationForDealerships.forEach((audtInst) => {
+                if(audtInst.audit_status === 'created'){
+                    const index = arrayAuditInstNoPass.indexOf(audtInst.audit_id.toString())
+                    if(index > -1){
+                        arrayAuditInstNoPass.splice(index, 1)
+                    }
+                }
+            })
             
             filter['_id'] = {$in: arrayAuditInstPass}
             filterNo['_id'] = {$in: arrayAuditInstNoPass}
@@ -512,8 +522,6 @@ const getAllAudit= async(request, response) => {
                     }
                 }
             })
-
-            console.log('arrayAuditsOk: ', arrayAuditsOk)
 
             filter['_id'] = {$in: arrayAuditsOk}
         }
@@ -544,8 +552,9 @@ const getAllAudit= async(request, response) => {
 
             filter['_id'] = {$in: arrayAuditsOk}
         }
-        
+
         if(page === 0){
+
             const audits = await Audit.find(filter).populate("installation_type criterions.criterion")
                                              .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
