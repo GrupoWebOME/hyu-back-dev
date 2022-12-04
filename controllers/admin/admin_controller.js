@@ -373,8 +373,6 @@ const updateAdmin = async(request, response) => {
             }
         )
         
-        response.cookie('token', token, {httpOnly: true, maxAge: 24 * 60 * 60 * 1000})
-    
         response.status(200).json({code: 200,
                                    msg: 'the administrator has been updated successfully',
                                    data: {admin: newAdmin, token: token} })
