@@ -496,7 +496,7 @@ const getAllAudit= async(request, response) => {
             // filterAuditInst['audit_status'] = {$in: ['planned', 'in_process']}
 
             const auditorAdmin = await Admin.findById(_id)
-            
+                        
             let arrayAuditInstPass = []
             let arrayAuditsOk = []
 
@@ -504,23 +504,34 @@ const getAllAudit= async(request, response) => {
                 arrayAuditInstPass = [...arrayAuditInstPass, audit.audit.toString()]
             })
 
+            console.log('arrayAuditInstPass: ', arrayAuditInstPass)
+
             let auditInstallationForDealerships = await AuditInstallation.find({audit_id: {$in: arrayAuditInstPass}})
-            
+
             auditInstallationForDealerships.forEach((audtInst) => {
                 if(audtInst.audit_status === 'planned' || audtInst.audit_status === 'in_process'){
                     const index = arrayAuditsOk.indexOf(audtInst.audit_id.toString())
                     if(index < 0){
                         arrayAuditsOk = [...arrayAuditsOk, audtInst.audit_id.toString()]
                     }
-                } else {
+                }
+            })
+
+            auditInstallationForDealerships.forEach((audtInst) => {
+                if(audtInst.audit_status !== 'planned' && audtInst.audit_status !== 'in_process'){
                     const indexNo = arrayAuditInstNoPass.indexOf(audtInst.audit_id.toString())
-                    if(indexNo < 0){
+                    const index = arrayAuditsOk.indexOf(audtInst.audit_id.toString())
+                    if(indexNo < 0 && index < 0){
                         arrayAuditInstNoPass.push(audtInst.audit_id.toString())
                     }
                 }
             })
 
+            console.log('arrayAuditsOk: ', arrayAuditsOk)
+            console.log('arrayAuditInstNoPass: ', arrayAuditInstNoPass)
+
             filter['_id'] = {$in: arrayAuditsOk}
+            filterNo['_id'] = {$in: arrayAuditInstNoPass}
         }
 
         else if(role === 'superauditor'){
@@ -544,15 +555,21 @@ const getAllAudit= async(request, response) => {
                     if(index < 0){
                         arrayAuditsOk = [...arrayAuditsOk, audtInst.audit_id.toString()]
                     }
-                } else {
+                }
+            })
+
+            auditInstallationForDealerships.forEach((audtInst) => {
+                if(audtInst.audit_status !== 'planned' && audtInst.audit_status !== 'in_process'){
                     const indexNo = arrayAuditInstNoPass.indexOf(audtInst.audit_id.toString())
-                    if(indexNo < 0){
+                    const index = arrayAuditsOk.indexOf(audtInst.audit_id.toString())
+                    if(indexNo < 0 && index < 0){
                         arrayAuditInstNoPass.push(audtInst.audit_id.toString())
                     }
                 }
             })
 
             filter['_id'] = {$in: arrayAuditsOk}
+            filterNo['_id'] = {$in: arrayAuditInstNoPass}
         }
 
         if(page === 0){
