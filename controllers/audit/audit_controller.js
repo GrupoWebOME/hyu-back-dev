@@ -451,8 +451,10 @@ const getAllAudit= async(request, response) => {
         let filterAuditInst = {}
         
         if(role === 'dealership'){
-            filterAuditInst['audit_status'] = {$in: ['closed', 'canceled', 'review', 'planned', 'review_hmes', 'in_process', 'auditor_signed', 'auditor_end', 'finished']}
+            // filterAuditInst['audit_status'] = {$in: ['closed', 'canceled', 'review', 'planned', 'review_hmes', 'in_process', 'auditor_signed', 'auditor_end', 'finished']}
+          
             // Traigo todas las instalaciones que tiene esa agencia
+          
             const installationsForDealerships = await Installation.find({dealership: dealership})
             let arrayInst = []
             let arrayAuditInstPass = []
@@ -485,23 +487,13 @@ const getAllAudit= async(request, response) => {
                     }
                 }
             })
-
-            // elimino los que tengan created
-            auditInstallationForDealerships.forEach((audtInst) => {
-                if(audtInst.audit_status === 'created'){
-                    const index = arrayAuditInstNoPass.indexOf(audtInst.audit_id.toString())
-                    if(index > -1){
-                        arrayAuditInstNoPass.splice(index, 1)
-                    }
-                }
-            })
             
             filter['_id'] = {$in: arrayAuditInstPass}
             filterNo['_id'] = {$in: arrayAuditInstNoPass}
         }
 
         else if(role === 'auditor'){
-            filterAuditInst['audit_status'] = {$in: ['planned', 'in_process']}
+            // filterAuditInst['audit_status'] = {$in: ['planned', 'in_process']}
 
             const auditorAdmin = await Admin.findById(_id)
             
@@ -512,13 +504,18 @@ const getAllAudit= async(request, response) => {
                 arrayAuditInstPass = [...arrayAuditInstPass, audit.audit.toString()]
             })
 
-            let auditInstallationForDealerships = await AuditInstallation.find({audit_id: {$in: arrayAuditInstPass}, audit_status: {$in: ['planned', 'in_process']}})
+            let auditInstallationForDealerships = await AuditInstallation.find({audit_id: {$in: arrayAuditInstPass}})
             
             auditInstallationForDealerships.forEach((audtInst) => {
                 if(audtInst.audit_status === 'planned' || audtInst.audit_status === 'in_process'){
                     const index = arrayAuditsOk.indexOf(audtInst.audit_id.toString())
                     if(index < 0){
                         arrayAuditsOk = [...arrayAuditsOk, audtInst.audit_id.toString()]
+                    }
+                } else {
+                    const indexNo = arrayAuditInstNoPass.indexOf(audtInst.audit_id.toString())
+                    if(indexNo < 0){
+                        arrayAuditInstNoPass.push(audtInst.audit_id.toString())
                     }
                 }
             })
@@ -527,7 +524,7 @@ const getAllAudit= async(request, response) => {
         }
 
         else if(role === 'superauditor'){
-            filterAuditInst['audit_status'] = {$in: ['planned', 'in_process', 'auditor_signed']}
+            // filterAuditInst['audit_status'] = {$in: ['planned', 'in_process', 'auditor_signed']}
 
             const auditorAdmin = await Admin.findById(_id)
             
@@ -538,7 +535,7 @@ const getAllAudit= async(request, response) => {
                 arrayAuditInstPass = [...arrayAuditInstPass, audit.audit.toString()]
             })
 
-            let auditInstallationForDealerships = await AuditInstallation.find({audit_id: {$in: arrayAuditInstPass}, audit_status: {$in: ['planned', 'in_process', 'auditor_signed']}})
+            let auditInstallationForDealerships = await AuditInstallation.find({audit_id: {$in: arrayAuditInstPass}})
 
             // Del array de auditorias obtenido, elimino aquellas cuyo estado no sea closed
             auditInstallationForDealerships.forEach((audtInst) => {
@@ -546,6 +543,11 @@ const getAllAudit= async(request, response) => {
                     const index = arrayAuditsOk.indexOf(audtInst.audit_id.toString())
                     if(index < 0){
                         arrayAuditsOk = [...arrayAuditsOk, audtInst.audit_id.toString()]
+                    }
+                } else {
+                    const indexNo = arrayAuditInstNoPass.indexOf(audtInst.audit_id.toString())
+                    if(indexNo < 0){
+                        arrayAuditInstNoPass.push(audtInst.audit_id.toString())
                     }
                 }
             })
