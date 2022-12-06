@@ -59,6 +59,8 @@ const installationSchema = new Schema({
                         value: {type: Number, default: null}
                 }
         ],
+        num_exhibitions: {type: Number, 
+                          default: null},
         createdAt: {type: Date,
                 default: Date.now},
         updatedAt: {type: Date,
