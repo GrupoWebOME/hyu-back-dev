@@ -8,6 +8,9 @@ const Category = require('../../models/category_model')
 const CriterionType = require('../../models/criterionType_model')
 const Installation = require('../../models/installation_schema')
 const Audit = require('../../models/audit_model')
+const Dealership = require('../../models/dealership_model')
+const SizingTable = require('../../models/sizingTable_model')
+const sizingTablesValues = require('../../utils/constants')
 const ObjectId = require('mongodb').ObjectId
 var mongoose = require('mongoose')
 
@@ -827,4 +830,199 @@ const getCriterion = async(request, response) => {
     } 
 }
 
-module.exports = {createCriterion, updateCriterion, deleteCriterion, getAllCriterion, filtersCriterions, getCriterion, filtersAuditCriterions}
+const getValueFromTable = (rows, columnNumber, value) => {
+    let rowColvalue = null
+
+    rows?.forEach((row) => {
+        if(row.initialValue <= value && row.endValue >= value){
+            rowColvalue = row.values[columnNumber-1]
+        }
+    })
+
+    return rowColvalue
+}
+
+const getCalculatesCrit = async(installation_id) => {
+    const installationFind = await Installation.findById(installation_id).populate('installation_type')
+    const dealershipFind = await Dealership.findById(installationFind?.dealership)
+
+    const sizingTableFind = await SizingTable.find({_id: {$in: sizingTablesValues.ARRAY_SIZING_TABLES_VALUES}})
+
+    const sales_weight_per_installation = installationFind.sales_weight_per_installation
+    const referential_sales = dealershipFind.referential_sales
+    const code_type_inst = installationFind.installation_type.code
+    const num_exhibitions = installationFind.num_exhibitions
+    const dealer_ioniq5 = dealershipFind.dealer_ioniq5
+
+    const parking = sizingTableFind.find((sizingTable) => {
+        return sizingTable._id.toString() === sizingTablesValues.PARKING
+    })
+
+    const m2vn = sizingTableFind.find((sizingTable) => {
+        return sizingTable._id.toString() === sizingTablesValues.M2VN
+    })
+
+    const vehicExpVn = sizingTableFind.find((sizingTable) => {
+        return sizingTable._id.toString() === sizingTablesValues.VEHICEXPOVN
+    })
+
+    const m2pv = sizingTableFind.find((sizingTable) => {
+        return sizingTable._id.toString() === sizingTablesValues.POSTVENTAM2
+    })
+
+    const m2pvrec = sizingTableFind.find((sizingTable) => {
+        return sizingTable._id.toString() === sizingTablesValues.POSTVENTAM2_RECAMBIOS
+    })
+
+    const sales_x_referencial = (sales_weight_per_installation/100) * referential_sales
+    const number_x_referencial = (sales_weight_per_installation/100) * referential_sales
+
+    let arrayCalcCrit = []
+
+    //VN.1.2.1.3
+    const vn_1_2_1_3 = {_id: '624310a2dc9b3d6366d773d8', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(parking.rows, 1, sales_x_referencial): null}
+    arrayCalcCrit = [...arrayCalcCrit, vn_1_2_1_3]
+    //VN.1.2.3.2
+    const vn_1_2_3_2 = {_id: '62431b00dc9b3d6366d7756f', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? 1: null}
+    arrayCalcCrit = [...arrayCalcCrit, vn_1_2_3_2]
+
+    //VN.1.2.4.1
+    const vn_1_2_4_1 = {_id: '62431dc3dc9b3d6366d775f4', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? 1: null}
+    arrayCalcCrit = [...arrayCalcCrit, vn_1_2_4_1]
+
+    //VN.1.3.1.1
+    let vn_1_3_1_1 = null
+
+    if(code_type_inst === 'IP'){
+        vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: getValueFromTable(m2vn.rows, 2, sales_x_referencial)}
+    } else if(code_type_inst === 'IS'){
+        vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: getValueFromTable(m2vn.rows, 3, sales_x_referencial)}
+    } else if(code_type_inst === 'ECO'){
+        vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: getValueFromTable(m2vn.rows, 4, sales_x_referencial)}
+    }  else if(code_type_inst === 'AOH'){
+        vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: getValueFromTable(m2vn.rows, 6, sales_x_referencial)}
+    }
+    arrayCalcCrit = [...arrayCalcCrit, vn_1_3_1_1]
+
+    //VN.1.3.6.1
+    let vn_1_3_6_1 = null
+
+    if(code_type_inst === 'IP'){
+        vn_1_3_6_1 = {_id: '624332a4dc9b3d6366d7791d', value: getValueFromTable(vehicExpVn.rows, 1, sales_x_referencial)}
+    } else if(code_type_inst === 'IS'){
+        vn_1_3_6_1 = {_id: '624332a4dc9b3d6366d7791d', value: getValueFromTable(vehicExpVn.rows, 2, sales_x_referencial)}
+    } else if(code_type_inst === 'ECO'){
+        vn_1_3_6_1 = {_id: '624332a4dc9b3d6366d7791d', value: getValueFromTable(vehicExpVn.rows, 3, sales_x_referencial)}
+    }  else if(code_type_inst === 'AOH'){
+        vn_1_3_6_1 = {_id: '624332a4dc9b3d6366d7791d', value: getValueFromTable(vehicExpVn.rows, 4, sales_x_referencial)}
+    } 
+    arrayCalcCrit = [...arrayCalcCrit, vn_1_3_6_1]
+
+    //VN.1.3.10.1
+    const vn_1_3_10_1 = {_id: '62440b21e89ecf0ca318637f', value: (code_type_inst === 'IP')? num_exhibitions: null}
+    arrayCalcCrit = [...arrayCalcCrit, vn_1_3_10_1]
+
+    //VN.1.3.10.3
+    const vn_1_3_10_3 = {_id: '62440c48e89ecf0ca31863c8', value: (code_type_inst === 'IP')? dealer_ioniq5: null}
+    arrayCalcCrit = [...arrayCalcCrit, vn_1_3_10_3]
+
+    //PV.1.1.3.2
+    const pv_1_1_3_2 = {_id: '62458de254abde8cda6387bb', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(parking.rows, 8, number_x_referencial): null}
+    arrayCalcCrit = [...arrayCalcCrit, pv_1_1_3_2]
+
+    //PV.1.2.4.1
+    const pv_1_2_4_1 = {_id: '624598f054abde8cda638b53', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pv.rows, 8, number_x_referencial): null}
+    arrayCalcCrit = [...arrayCalcCrit, pv_1_2_4_1]
+
+    //PV.1.2.6.1
+    const pv_1_2_6_1 = {_id: '6245a3bc54abde8cda638cc1', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pv.rows, 12, number_x_referencial): null}
+    arrayCalcCrit = [...arrayCalcCrit, pv_1_2_6_1]
+
+    //PV.1.2.7.1
+    const pv_1_2_7_1 = {_id: '6245a57454abde8cda638d4b', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pv.rows, 13, number_x_referencial): null}
+    arrayCalcCrit = [...arrayCalcCrit, pv_1_2_7_1]
+
+    //PV.1.3.1.1
+    const pv_1_3_1_1 = {_id: '6245b54454abde8cda6390a3', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pv.rows, 2, number_x_referencial): null}
+    arrayCalcCrit = [...arrayCalcCrit, pv_1_3_1_1]
+
+    //PV.1.3.1.2
+    const pv_1_3_1_2 = {_id: '6245b5d454abde8cda6390bc', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pv.rows, 1, number_x_referencial): null}
+    arrayCalcCrit = [...arrayCalcCrit, pv_1_3_1_2]
+
+    //PV.1.3.2.1
+    const pv_1_3_2_1 = {_id: '6245d8c39b3a6e9ce050e442', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pv.rows, 4, number_x_referencial): null}
+    arrayCalcCrit = [...arrayCalcCrit, pv_1_3_2_1]
+
+    //PV.1.3.3.1
+    const pv_1_3_3_1 = {_id: '624ab5a9d8315aa32ea9daf5', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pv.rows, 5, number_x_referencial): null}
+    arrayCalcCrit = [...arrayCalcCrit, pv_1_3_3_1]
+
+    //PV.1.3.7.1
+    const pv_1_3_7_1 = {_id: '624ac8f0d8315aa32ea9dd76', value: (code_type_inst === 'IP' || code_type_inst === 'IS')? getValueFromTable(m2pv.rows, 6, number_x_referencial): null}
+    arrayCalcCrit = [...arrayCalcCrit, pv_1_3_7_1]
+
+    //PV.1.4.2.1
+    const pv_1_4_2_1 = {_id: '624acbf1d8315aa32ea9de68', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pvrec.rows, 1, number_x_referencial): null}
+    arrayCalcCrit = [...arrayCalcCrit, pv_1_4_2_1]
+
+    return arrayCalcCrit
+}
+
+const calculates = async(request, response) => {
+    try{
+        const {installation_id, audit_id} = request.body
+
+        if(installation_id && !ObjectId.isValid(installation_id)){
+            return response.status(400).json({code: 400, 
+                msg: 'invalid installation_id',
+                detail: `format should be a ObjectId`
+                })  
+        }
+        if(audit_id && !ObjectId.isValid(audit_id)){
+            return response.status(400).json({code: 400, 
+                msg: 'invalid audit_id',
+                detail: `format should be a ObjectId`
+                })  
+        }
+
+        let id_inst = mongoose.Types.ObjectId(installation_id)
+        const audit = await Audit.findById(audit_id).select('criterions installation_exceptions').populate('criterions.criterion')
+                                            .catch(error => {        
+                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+                                            })
+                        
+        const calculables = await getCalculatesCrit(installation_id)
+
+        let criterionsFilter = []
+        if(audit?.criterions && audit.criterions.length > 0){
+            if(!audit.installation_exceptions.includes(id_inst)){
+                criterionsFilter = audit.criterions.map((element) => {
+                    const existCalc = calculables.find((calc) => calc._id.toString() === element.criterion._id.toString())
+                    if(!element.criterion.exceptions.includes(id_inst) && !element.exceptions.includes(id_inst)){
+                        const crit = {
+                            criterion: element.criterion,
+                            exceptions: element.exceptions,
+                            _id: element._id,
+                            isCalc: existCalc? true: false,
+                            value: existCalc? existCalc.value: null
+                        }
+                        return crit
+                    }
+                })
+            }
+        }
+
+        const data = {criterions: criterionsFilter, 
+                        totalPages: 1}
+
+        return response.status(200).json({code: 200,
+                                            msg: 'success',
+                                            data: data })
+    }
+   catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+    }  
+}
+
+module.exports = {createCriterion, updateCriterion, deleteCriterion, getAllCriterion, filtersCriterions, getCriterion, filtersAuditCriterions, calculates}
