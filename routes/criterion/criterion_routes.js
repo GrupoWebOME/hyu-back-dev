@@ -156,9 +156,9 @@ api.post('/all', Criterion.getAllCriterion)
 
 api.post('/filter', Criterion.filtersCriterions)
 
-api.post('/filterByAudit', Criterion.filtersAuditCriterions)
-
 api.post('/calculates', Criterion.calculates)
+
+api.post('/filterByAudit', Criterion.filtersAuditCriterions)
 
 /**
  * @swagger
