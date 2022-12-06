@@ -53,7 +53,7 @@ const getAllDealership= async(request, response) => {
 const createDealership = async(request, response) => {
     try{
         const {name, cif, code, address, location, province, postal_code, autonomous_community, phone, email, name_surname_manager, previous_year_sales, referential_sales, 
-            post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income} = request.body
+            post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income, dealer_ioniq5} = request.body
         let errors = []
         if(!name || name.length < 1)
             errors.push({code: 400, 
@@ -185,7 +185,8 @@ const createDealership = async(request, response) => {
             vn_quaterly_billing, 
             electric_quaterly_billing, 
             ionic5_quaterly_billing, 
-            post_sale_daily_income
+            post_sale_daily_income,
+            dealer_ioniq5: dealer_ioniq5? dealer_ioniq5: null
         })
         await newDealership.save()
                         .catch(error => {        
@@ -203,7 +204,7 @@ const createDealership = async(request, response) => {
 const updateDealership = async(request, response) => {
     try{
         const {name, cif, code, address, autonomous_community, location, province, postal_code, phone, email, name_surname_manager, previous_year_sales, referential_sales, active, 
-            post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income} = request.body
+            post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income, dealer_ioniq5} = request.body
         const {id} = request.params
         let errors = []
         let dealerById = null
@@ -338,7 +339,12 @@ const updateDealership = async(request, response) => {
             errors.push({code: 400, 
                             msg: 'invalid electric_quaterly_billing',
                             detail: `electric_quaterly_billing should be a number value`
-                        })           
+                        })   
+        if(dealer_ioniq5 && typeof dealer_ioniq5 !== 'number')
+            errors.push({code: 400, 
+                            msg: 'invalid dealer_ioniq5',
+                            detail: `dealer_ioniq5 should be a number value`
+                        }) 
         if(ionic5_quaterly_billing && typeof ionic5_quaterly_billing !== 'number')
             errors.push({code: 400, 
                             msg: 'invalid ionic5_quaterly_billing',
@@ -371,6 +377,8 @@ const updateDealership = async(request, response) => {
             updatedFields['email'] = email
         if(name_surname_manager)
             updatedFields['name_surname_manager'] = name_surname_manager
+        if(dealer_ioniq5)
+            updatedFields['dealer_ioniq5'] = dealer_ioniq5
         if(previous_year_sales !== null && previous_year_sales !== undefined)
             updatedFields['previous_year_sales'] = previous_year_sales
         if(referential_sales !== null && referential_sales !== undefined)
