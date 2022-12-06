@@ -63,7 +63,7 @@ const getAllInstallation = async(request, response) => {
 const createInstallation = async(request, response) => {
     try{
         const {name, autonomous_community, code, address, dealership, installation_type, population, postal_code, phone, active, province, email, refer_value,
-               latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, contacts, sales_weight_per_installation, post_sale_weight_per_installation } = request.body
+               latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, contacts, sales_weight_per_installation, post_sale_weight_per_installation, num_exhibitions } = request.body
         let errors = []
         if(contacts && Array.isArray(contacts)){
             for(let i = 0; i<contacts.length; i++){
@@ -260,7 +260,8 @@ const createInstallation = async(request, response) => {
             m2PostSale, 
             m2Rec,
             contacts,
-            refer_value
+            refer_value,
+            num_exhibitions: num_exhibitions? num_exhibitions : null
         })
         await newInstallation.save()
                         .catch(error => {        
@@ -310,7 +311,7 @@ const getInstallation = async(request, response) => {
 const updateInstallation = async(request, response) => {
     try{
         const {name, autonomous_community, code, address, dealership, installation_type, population, postal_code, phone, active, province, email, refer_value,
-               latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, sales_weight_per_installation, post_sale_weight_per_installation, contacts } = request.body
+               latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, sales_weight_per_installation, post_sale_weight_per_installation, contacts, num_exhibitions } = request.body
         const {id} = request.params
         let errors = []
         let installation = null
@@ -504,6 +505,11 @@ const updateInstallation = async(request, response) => {
                 })
             }
         }
+        if(num_exhibitions && typeof num_exhibitions !== 'number')
+            errors.push({code: 400, 
+                            msg: 'invalid num_exhibitions',
+                            detail: `num_exhibitions should be a number value`
+                        })  
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
         const updatedFields = {}
@@ -513,6 +519,8 @@ const updateInstallation = async(request, response) => {
             updatedFields['autonomous_community'] = autonomous_community
         if(code)
             updatedFields['code'] = code
+        if(num_exhibitions)
+            updatedFields['num_exhibitions'] = num_exhibitions
         if(dealership){
             await Dealership.findOneAndUpdate({installations: {$in: [id]}}, {$pull: { installations: id }})
                         .catch(error => {        
