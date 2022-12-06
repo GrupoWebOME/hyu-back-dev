@@ -47,6 +47,8 @@ const dealershipSchema = new Schema({
                                     default: 0},
         ionic5_quaterly_billing: {type: Number, 
                                   default: 0},
+        dealer_ioniq5: {type: Number,
+                        default: null},
         createdAt: {type: Date,
                         default: Date.now},
         updatedAt: {type: Date,
