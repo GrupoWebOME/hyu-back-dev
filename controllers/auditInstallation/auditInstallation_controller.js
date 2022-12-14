@@ -110,6 +110,7 @@ const getAllAuditInstallation = async(request, response) => {
         if(audit_id)
             filter['audit_id'] = audit_id
 
+        /*
         if(admin?.admin?.role === 'auditor')
             filter['audit_status'] = {$in: ['planned', 'in_process']}
 
@@ -118,7 +119,8 @@ const getAllAuditInstallation = async(request, response) => {
 
         if(admin?.admin?.role === 'dealership')
             filter['audit_status'] = {$in: ['closed', 'canceled', 'review', 'planned', 'review_hmes', 'in_process', 'auditor_signed', 'auditor_end', 'finished']}
-
+        */
+        
         if(page === 0){
             let auditInstallations = await AuditInstallation.find(filter).populate('installation_id auditor_id')
 
