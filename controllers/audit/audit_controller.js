@@ -422,7 +422,6 @@ const deleteAudit = async(request, response) => {
 }
 
 const getAllAudit= async(request, response) => {
-
     try{
         const { name, installation_type, start_date, end_date, pageReq} = request.body
         const {role, dealership, _id} = request.jwt.admin
@@ -430,6 +429,7 @@ const getAllAudit= async(request, response) => {
         let skip = (page - 1) * 10
         const filter = {}
         let filterNo = {}
+        let filterClosed = {}
         let countDocsNo = 0
         let arrayAuditInstNoPass = []
         let arrayAuditsNotClosed = []
@@ -469,9 +469,6 @@ const getAllAudit= async(request, response) => {
 
             // Armo un array de las auditorias que afectan a las instalaciones de la agencia
             auditInstallationForDealerships.forEach((auditInst) => {
-                if(auditInst.audit_status !== 'closed' && !arrayAuditsNotClosed.includes(auditInst.audit_id.toString())){
-                    arrayAuditsNotClosed = [...arrayAuditsNotClosed, auditInst.audit_id.toString()]
-                }
                 if(!arrayAuditInstPass.includes(auditInst.audit_id.toString())){
                     arrayAuditInstPass.push(auditInst.audit_id.toString())
                 }
@@ -491,6 +488,9 @@ const getAllAudit= async(request, response) => {
                 }
             })
             
+            filterClosed['audit_id'] = {$in: arrayAuditInstPass.concat(arrayAuditInstNoPass)}
+            filterClosed['audit_status'] = {$ne: 'closed'}
+
             filter['_id'] = {$in: arrayAuditInstPass}
             filterNo['_id'] = {$in: arrayAuditInstNoPass}
         }
@@ -570,8 +570,18 @@ const getAllAudit= async(request, response) => {
             filterNo['_id'] = {$in: arrayAuditInstNoPass}
         }
 
-        if(page === 0){
+        let auditsInst = await AuditInstallation.find(filterClosed)
+        .catch(error => {        
+           return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+        })
 
+        auditsInst.forEach((auditIns) => {
+            if(!arrayAuditsNotClosed.includes(auditIns.audit_id.toString())){
+                arrayAuditsNotClosed = [...arrayAuditsNotClosed, auditIns.audit_id.toString()]
+            }
+        })
+
+        if(page === 0){
             let audits = await Audit.find(filter).populate("installation_type criterions.criterion")
                                              .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
