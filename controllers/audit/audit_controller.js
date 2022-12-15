@@ -432,7 +432,7 @@ const getAllAudit= async(request, response) => {
         let filterNo = {}
         let countDocsNo = 0
         let arrayAuditInstNoPass = []
-        let closed = null
+        let arrayAuditsNotClosed = []
 
         if(installation_type && !ObjectId.isValid(installation_type)){
             return response.status(400).json({code: 400, 
@@ -455,8 +455,6 @@ const getAllAudit= async(request, response) => {
             // filterAuditInst['audit_status'] = {$in: ['closed', 'canceled', 'review', 'planned', 'review_hmes', 'in_process', 'auditor_signed', 'auditor_end', 'finished']}
           
             // Traigo todas las instalaciones que tiene esa agencia
-            closed = true
-
             const installationsForDealerships = await Installation.find({dealership: dealership})
             let arrayInst = []
             let arrayAuditInstPass = []
@@ -471,8 +469,8 @@ const getAllAudit= async(request, response) => {
 
             // Armo un array de las auditorias que afectan a las instalaciones de la agencia
             auditInstallationForDealerships.forEach((auditInst) => {
-                if(auditInst.audit_status !== 'closed'){
-                    closed = false
+                if(auditInst.audit_status !== 'closed' && !arrayAuditsNotClosed.includes(auditInst.audit_id.toString())){
+                    arrayAuditsNotClosed = [...arrayAuditsNotClosed, auditInst.audit_id.toString()]
                 }
                 if(!arrayAuditInstPass.includes(auditInst.audit_id.toString())){
                     arrayAuditInstPass.push(auditInst.audit_id.toString())
@@ -580,7 +578,8 @@ const getAllAudit= async(request, response) => {
                                              })
 
             audits = audits?.map((audit) => {
-                return {...audit._doc, visible: true}
+                const closed = !arrayAuditsNotClosed.includes(audit._id.toString())
+                return {...audit._doc, visible: true, closed}
             })
 
             let auditsNo = []
@@ -593,11 +592,11 @@ const getAllAudit= async(request, response) => {
             }
 
             auditsNo = auditsNo?.map((audit) => {
-                return {...audit._doc, visible: false}
+                const closed = !arrayAuditsNotClosed.includes(audit._id.toString())
+                return {...audit._doc, visible: false, closed}
             })
 
             const data = {audits: audits.concat(auditsNo), 
-                          closed,
                           totalPages: 1}
 
             return response.status(200).json({code: 200,
@@ -630,7 +629,8 @@ const getAllAudit= async(request, response) => {
                                         })
 
         audits = audits?.map((audit) => {
-                    return {...audit._doc, visible: true}
+                    const closed = !arrayAuditsNotClosed.includes(audit._id.toString()) 
+                    return {...audit._doc, visible: true, closed}
                 })
 
         let auditsNo = []
@@ -643,11 +643,11 @@ const getAllAudit= async(request, response) => {
         }
 
         auditsNo = auditsNo?.map((audit) => {
-            return {...audit._doc, visible: false}
+            const closed = !arrayAuditsNotClosed.includes(audit._id.toString())
+            return {...audit._doc, visible: false, closed}
         })
 
         const data = {audits: audits.concat(auditsNo), 
-                      closed,
                       totalPages: countPage}
 
         return response.status(200).json({code: 200,
