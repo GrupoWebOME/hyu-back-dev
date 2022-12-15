@@ -432,6 +432,7 @@ const getAllAudit= async(request, response) => {
         let filterNo = {}
         let countDocsNo = 0
         let arrayAuditInstNoPass = []
+        let closed = null
 
         if(installation_type && !ObjectId.isValid(installation_type)){
             return response.status(400).json({code: 400, 
@@ -454,7 +455,8 @@ const getAllAudit= async(request, response) => {
             // filterAuditInst['audit_status'] = {$in: ['closed', 'canceled', 'review', 'planned', 'review_hmes', 'in_process', 'auditor_signed', 'auditor_end', 'finished']}
           
             // Traigo todas las instalaciones que tiene esa agencia
-          
+            closed = true
+
             const installationsForDealerships = await Installation.find({dealership: dealership})
             let arrayInst = []
             let arrayAuditInstPass = []
@@ -469,6 +471,9 @@ const getAllAudit= async(request, response) => {
 
             // Armo un array de las auditorias que afectan a las instalaciones de la agencia
             auditInstallationForDealerships.forEach((auditInst) => {
+                if(auditInst.audit_status !== 'closed'){
+                    closed = false
+                }
                 if(!arrayAuditInstPass.includes(auditInst.audit_id.toString())){
                     arrayAuditInstPass.push(auditInst.audit_id.toString())
                 }
@@ -504,8 +509,6 @@ const getAllAudit= async(request, response) => {
                 arrayAuditInstPass = [...arrayAuditInstPass, audit.audit.toString()]
             })
 
-            console.log('arrayAuditInstPass: ', arrayAuditInstPass)
-
             let auditInstallationForDealerships = await AuditInstallation.find({audit_id: {$in: arrayAuditInstPass}})
 
             auditInstallationForDealerships.forEach((audtInst) => {
@@ -526,9 +529,6 @@ const getAllAudit= async(request, response) => {
                     }
                 }
             })
-
-            console.log('arrayAuditsOk: ', arrayAuditsOk)
-            console.log('arrayAuditInstNoPass: ', arrayAuditInstNoPass)
 
             filter['_id'] = {$in: arrayAuditsOk}
             filterNo['_id'] = {$in: arrayAuditInstNoPass}
@@ -597,6 +597,7 @@ const getAllAudit= async(request, response) => {
             })
 
             const data = {audits: audits.concat(auditsNo), 
+                          closed,
                           totalPages: 1}
 
             return response.status(200).json({code: 200,
@@ -646,6 +647,7 @@ const getAllAudit= async(request, response) => {
         })
 
         const data = {audits: audits.concat(auditsNo), 
+                      closed,
                       totalPages: countPage}
 
         return response.status(200).json({code: 200,
