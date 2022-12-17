@@ -3175,12 +3175,12 @@ const getDataForAudit = async(request, response) => {
     let { dealership_id } = request.body
     const AOH = '6226310514861f56d3c64266'
     let isNotAOHDealership = false
+    let isClosed = null
 
     try{
         let existAudit = null
 
         if(audit_id === "last"){
-
             let audit = null
 
             if(dealership_id && ObjectId.isValid(dealership_id)){
@@ -3228,11 +3228,21 @@ const getDataForAudit = async(request, response) => {
 
             if(audit){
                 audit_id = audit._id
-            }
-            else{
+            } else{
                 return response.status(404).json({errors: [{code: 404, msg: 'not found', detail: "No audits in ddbb"}]})
             }
+
+            if(dealership_id){
+                const isAuditClosed = await AuditInstallation.find({dealership_id, audit_status: {$ne: "closed"}})
+
+                if(isAuditClosed?.length > 0){
+                    isClosed = false
+                } else {
+                    isClosed = true
+                }
+            }
         }
+
         if(!ObjectId.isValid(audit_id)){
             return response.status(400).json(
                 {errors: [{code: 400, 
@@ -3926,7 +3936,8 @@ const getDataForAudit = async(request, response) => {
                 instalations_detail,
                 total,
                 total_dealership,
-                total_inst
+                total_inst,
+                isClosed,
             }
 
             return response.status(200).json({data: dealership_data})
@@ -4133,7 +4144,8 @@ const getDataForAudit = async(request, response) => {
                 total_dealership:totalDealership ,
                 total_inst: totalInst,
                 total: ((dealerTotal ? totalDealership : 0)+ (instTotal ? totalInst : 0) )/ (dealerTotal && instTotal ? 2 : 1),
-                instalations_detail: instalations_detail
+                instalations_detail: instalations_detail,
+                isClosed
             }
     
             return response.status(200).json({data: data})
