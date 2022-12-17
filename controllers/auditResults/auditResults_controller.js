@@ -3233,7 +3233,7 @@ const getDataForAudit = async(request, response) => {
             }
 
             if(dealership_id){
-                const isAuditClosed = await AuditInstallation.find({dealership_id, audit_status: {$ne: "closed"}})
+                const isAuditClosed = await AuditInstallation.find({audit_id: audit._id, audit_status: {$ne: "closed"}})
 
                 if(isAuditClosed?.length > 0){
                     isClosed = false
