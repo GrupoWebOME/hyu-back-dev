@@ -3937,7 +3937,7 @@ const getDataForAudit = async(request, response) => {
                 total,
                 total_dealership,
                 total_inst,
-                isClosed,
+                closed: isClosed,
             }
 
             return response.status(200).json({data: dealership_data})
@@ -4145,7 +4145,7 @@ const getDataForAudit = async(request, response) => {
                 total_inst: totalInst,
                 total: ((dealerTotal ? totalDealership : 0)+ (instTotal ? totalInst : 0) )/ (dealerTotal && instTotal ? 2 : 1),
                 instalations_detail: instalations_detail,
-                isClosed
+                closed: isClosed,
             }
     
             return response.status(200).json({data: data})
