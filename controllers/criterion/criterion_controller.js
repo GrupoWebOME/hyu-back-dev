@@ -847,6 +847,7 @@ const getCalculatesCrit = async(installation_id) => {
     const dealershipFind = await Dealership.findById(installationFind?.dealership)
     const sizingTableFind = await SizingTable.find({_id: {$in: sizingTablesValues.ARRAY_SIZING_TABLES_VALUES}})
 
+    const post_sale_spare_parts_previous_year = dealershipFind.post_sale_spare_parts_previous_year
     const sales_weight_per_installation = installationFind.sales_weight_per_installation/100
     const sales_weight_per_installation_number = dealershipFind.post_sale_daily_income * installationFind.sales_weight_per_installation/100 // revisar número demasiado grande
     const referential_sales = dealershipFind.referential_sales
@@ -877,6 +878,7 @@ const getCalculatesCrit = async(installation_id) => {
 
     const sales_x_referencial = (sales_weight_per_installation) * referential_sales
     const number_x_referencial = (sales_weight_per_installation_number) * referential_sales
+    const fact_x_referencial = (post_sale_spare_parts_previous_year) * referential_sales
 
     let arrayCalcCrit = []
 
@@ -964,8 +966,8 @@ const getCalculatesCrit = async(installation_id) => {
     arrayCalcCrit = [...arrayCalcCrit, pv_1_3_7_1]
 
     //PV.1.4.2.1
-    const pv_1_4_2_1 = {_id: '624acbf1d8315aa32ea9de68', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pvrec.rows, 1, number_x_referencial): null}
-    arrayCalcCrit = [...arrayCalcCrit, pv_1_4_2_1]
+    const pv_1_4_2_1 = {_id: '624acbf1d8315aa32ea9de68', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pvrec.rows, 1, fact_x_referencial): null}
+    arrayCalcCrit = [...arrayCalcCrit, pv_1_4_2_1]//modificar
 
     return arrayCalcCrit
 }
