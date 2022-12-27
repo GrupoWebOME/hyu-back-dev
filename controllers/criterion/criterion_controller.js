@@ -845,11 +845,12 @@ const getValueFromTable = (rows, columnNumber, value) => {
 const getCalculatesCrit = async(installation_id) => {
     const installationFind = await Installation.findById(installation_id).populate('installation_type')
     const dealershipFind = await Dealership.findById(installationFind?.dealership)
-
     const sizingTableFind = await SizingTable.find({_id: {$in: sizingTablesValues.ARRAY_SIZING_TABLES_VALUES}})
 
-    const sales_weight_per_installation = installationFind.sales_weight_per_installation
+    const sales_weight_per_installation = installationFind.sales_weight_per_installation/100
+    const sales_weight_per_installation_number = dealershipFind.post_sale_daily_income * installationFind.sales_weight_per_installation/100 // revisar número demasiado grande
     const referential_sales = dealershipFind.referential_sales
+
     const code_type_inst = installationFind.installation_type.code
     const num_exhibitions = installationFind.num_exhibitions
     const dealer_ioniq5 = dealershipFind.dealer_ioniq5
@@ -874,8 +875,8 @@ const getCalculatesCrit = async(installation_id) => {
         return sizingTable._id.toString() === sizingTablesValues.POSTVENTAM2_RECAMBIOS
     })
 
-    const sales_x_referencial = (sales_weight_per_installation/100) * referential_sales
-    const number_x_referencial = (sales_weight_per_installation/100) * referential_sales
+    const sales_x_referencial = (sales_weight_per_installation) * referential_sales
+    const number_x_referencial = (sales_weight_per_installation_number) * referential_sales
 
     let arrayCalcCrit = []
 
