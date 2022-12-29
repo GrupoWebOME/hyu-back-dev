@@ -847,7 +847,7 @@ const getCalculatesCrit = async(installation_id) => {
     const dealershipFind = await Dealership.findById(installationFind?.dealership)
     const sizingTableFind = await SizingTable.find({_id: {$in: sizingTablesValues.ARRAY_SIZING_TABLES_VALUES}})
 
-    const post_sale_spare_parts_previous_year = dealershipFind.post_sale_spare_parts_previous_year
+    const post_sale_spare_parts_previous_year = dealershipFind?.post_sale_spare_parts_previous_year
     const sales_weight_per_installation = installationFind.sales_weight_per_installation/100
     const sales_weight_per_installation_number = dealershipFind.post_sale_daily_income * installationFind.sales_weight_per_installation/100 // revisar número demasiado grande
     const referential_sales = dealershipFind.referential_sales
@@ -894,7 +894,7 @@ const getCalculatesCrit = async(installation_id) => {
     arrayCalcCrit = [...arrayCalcCrit, vn_1_2_4_1]
 
     //VN.1.3.1.1
-    let vn_1_3_1_1 = null
+    let vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: null}
 
     if(code_type_inst === 'IP'){
         vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: getValueFromTable(m2vn.rows, 2, sales_x_referencial)}
@@ -908,7 +908,7 @@ const getCalculatesCrit = async(installation_id) => {
     arrayCalcCrit = [...arrayCalcCrit, vn_1_3_1_1]
 
     //VN.1.3.6.1
-    let vn_1_3_6_1 = null
+    let vn_1_3_6_1 = {_id: '624332a4dc9b3d6366d7791d', value: null}
 
     if(code_type_inst === 'IP'){
         vn_1_3_6_1 = {_id: '624332a4dc9b3d6366d7791d', value: getValueFromTable(vehicExpVn.rows, 1, sales_x_referencial)}
@@ -1001,12 +1001,12 @@ const calculates = async(request, response) => {
         if(audit?.criterions && audit.criterions.length > 0){
             if(!audit.installation_exceptions.includes(id_inst)){
                 criterionsFilter = audit.criterions.map((element) => {
-                    const existCalc = calculables.find((calc) => calc._id.toString() === element.criterion._id.toString())
+                    const existCalc = calculables.find((calc) => calc?._id.toString() === element?.criterion?._id.toString())
                     if(!element.criterion.exceptions.includes(id_inst) && !element.exceptions.includes(id_inst)){
                         const crit = {
-                            criterion: element.criterion,
-                            exceptions: element.exceptions,
-                            _id: element._id,
+                            criterion: element?.criterion,
+                            exceptions: element?.exceptions,
+                            _id: element?._id,
                             isCalc: existCalc? true: false,
                             refValue: existCalc? existCalc.value: null
                         }
@@ -1027,5 +1027,6 @@ const calculates = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
     }  
 }
+
 
 module.exports = {createCriterion, updateCriterion, deleteCriterion, getAllCriterion, filtersCriterions, getCriterion, filtersAuditCriterions, calculates}
