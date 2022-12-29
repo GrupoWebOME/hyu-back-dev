@@ -195,7 +195,7 @@ const createAudit = async(request, response) => {
 
 const updateAudit = async(request, response) => {
     try{
-        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions, auditMVE, auditElectrics, auditIonic5, isCustomAudit, audits} = request.body
+        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions, auditMVE, auditElectrics, auditIonic5, isCustomAudit, audits, mistery} = request.body
         const {id} = request.params
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
@@ -289,6 +289,11 @@ const updateAudit = async(request, response) => {
                         msg: 'invalid isCustomAudit',
                         detail: `isCustomAudit should be a boolean type`
                         }) 
+        if(mistery!==null && mistery!==undefined && typeof mistery !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid mistery',
+                        detail: `mistery should be a boolean type`
+                        }) 
         if(auditIonic5!==null && auditIonic5!==undefined && typeof auditIonic5 !== 'boolean')
             errors.push({code: 400, 
                         msg: 'invalid auditIonic5',
@@ -359,6 +364,8 @@ const updateAudit = async(request, response) => {
             updatedFields['criterions'] = criterions
         if(isAgency !== null && isAgency !== undefined)
             updatedFields['isAgency'] = isAgency
+        if(mistery !== null && mistery !== undefined)
+            updatedFields['mistery'] = mistery
         if(auditIonic5 !== null && auditIonic5 !== undefined)
             updatedFields['auditIonic5'] = auditIonic5
         if(auditElectrics !== null && auditElectrics !== undefined)
