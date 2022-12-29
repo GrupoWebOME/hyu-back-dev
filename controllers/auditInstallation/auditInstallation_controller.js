@@ -4,7 +4,7 @@ var ObjectId = require('mongodb').ObjectId
 const updateAuditInstallation = async(request, response) => {
     try{
         const {id} = request.params
-        const {comment, audit_status, audit_date, photo} = request.body
+        const {comment, audit_status, audit_date, photo, audited} = request.body
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
 
         let errors = []
@@ -57,6 +57,12 @@ const updateAuditInstallation = async(request, response) => {
             })
         }
 
+        if(mistery!==null && mistery!==undefined && typeof mistery !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid mistery',
+                        detail: `mistery should be a boolean type`
+                        }) 
+
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
     
@@ -75,6 +81,9 @@ const updateAuditInstallation = async(request, response) => {
             editAuditInst['audit_date'] = audit_date
             editAuditInst['audit_status'] = 'planned'
         }
+
+        if(mistery !== null && mistery !== undefined)
+            updatedFields['mistery'] = mistery
 
         editAuditInst['updatedAt'] = Date.now()
 
