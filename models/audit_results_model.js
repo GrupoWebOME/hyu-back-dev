@@ -20,7 +20,11 @@ const auditResultsSchema = new Schema({
             date: { type: Date, default: Date.now },
             user: { type: Schema.Types.ObjectId, ref: 'Admin'},
             images: [{ type: String }]
-        }]
+        }],
+        audited: {
+            type: Boolean,
+            default: false
+        },
     }],
     state: {
         type: String,
