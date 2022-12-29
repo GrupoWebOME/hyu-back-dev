@@ -37,10 +37,6 @@ const auditInstallationSchema = new Schema({
               type: Date,
               default: null
        },
-       audited: {
-              type: Boolean,
-              default: false
-       },
        createdAt: {
               type: Date,
               default: Date.now
