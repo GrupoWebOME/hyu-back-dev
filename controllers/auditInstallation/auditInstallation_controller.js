@@ -57,7 +57,7 @@ const updateAuditInstallation = async(request, response) => {
             })
         }
 
-        if(mistery!==null && mistery!==undefined && typeof mistery !== 'boolean')
+        if(audited!==null && audited!==undefined && typeof audited !== 'boolean')
             errors.push({code: 400, 
                         msg: 'invalid mistery',
                         detail: `mistery should be a boolean type`
@@ -82,8 +82,8 @@ const updateAuditInstallation = async(request, response) => {
             editAuditInst['audit_status'] = 'planned'
         }
 
-        if(mistery !== null && mistery !== undefined)
-            updatedFields['mistery'] = mistery
+        if(audited !== null && audited !== undefined)
+            updatedFields['audited'] = audited
 
         editAuditInst['updatedAt'] = Date.now()
 
