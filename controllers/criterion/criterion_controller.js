@@ -1008,7 +1008,7 @@ const calculates = async(request, response) => {
                             exceptions: element.exceptions,
                             _id: element._id,
                             isCalc: existCalc? true: false,
-                            value: existCalc? existCalc.value: null
+                            refValue: existCalc? existCalc.value: null
                         }
                         return crit
                     }
