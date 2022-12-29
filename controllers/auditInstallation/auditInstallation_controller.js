@@ -59,8 +59,8 @@ const updateAuditInstallation = async(request, response) => {
 
         if(audited!==null && audited!==undefined && typeof audited !== 'boolean')
             errors.push({code: 400, 
-                        msg: 'invalid mistery',
-                        detail: `mistery should be a boolean type`
+                        msg: 'invalid audited',
+                        detail: `audited should be a boolean type`
                         }) 
 
         if(errors.length > 0)
