@@ -7,7 +7,7 @@ const ObjectId = require('mongodb').ObjectId
 
 const createAudit = async(request, response) => {
     try{
-        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions, auditMVE, auditElectrics, auditIonic5, isCustomAudit} = request.body
+        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions, auditMVE, auditElectrics, auditIonic5, isCustomAudit, mistery} = request.body
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
         if(!name)
@@ -147,6 +147,12 @@ const createAudit = async(request, response) => {
                         msg: 'invalid auditMVE',
                         detail: `auditMVE should be a boolean type`
                         }) 
+        if(mistery!==null && mistery!==undefined && typeof mistery !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid mistery',
+                        detail: `mistery should be a boolean type`
+                        }) 
+
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
 
@@ -161,7 +167,8 @@ const createAudit = async(request, response) => {
             auditIonic5: (auditIonic5 !== null && auditIonic5 !== undefined  && auditIonic5 === false)? false : true,
             auditElectrics: (auditElectrics !== null && auditElectrics !== undefined && auditElectrics === false)? false : true,
             auditMVE: (auditMVE !== null && auditMVE !== undefined  && auditMVE === false)? false : true,
-            installation_exceptions: installation_exceptions? installation_exceptions : []
+            installation_exceptions: installation_exceptions? installation_exceptions : [],
+            mistery: mistery
         })
 
         await newAudit.save()
