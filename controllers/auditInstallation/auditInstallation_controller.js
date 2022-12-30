@@ -1,5 +1,78 @@
 const AuditInstallation = require('../../models/audit_installation_model')
 var ObjectId = require('mongodb').ObjectId
+const nodemailer = require('nodemailer')
+
+const plannedMailContent = (installation) => { return `
+    <p>
+        Estimado concesionario,
+    </p> 
+    <p>
+        Paso a comunicarte que la auditoría de este trimestre para la instalación <b>${installation}</b> ya se encuentra con fecha asignada para auditar 
+    </p> 
+    <p>
+        Esta informacion se encuentra accesible a través de la aplicación de Estándares HMES. Para cualquier duda contactar con Elena Drandar: 
+        <span>estandares@redhyundai.com</span>.
+    </p> 
+    <p>
+        Recibe un cordial saludo,
+    </p>
+`}
+
+const reviewMailContent = (installation) => { return `
+    <p>
+        Estimado concesionario,
+    </p> 
+    <p>
+        Paso a comunicarte que la auditoría de este trimestre para la instalación <b>${installation}</b> está finalizada por parte del auditor y se encuentra en Pendiente revisar concesión. 
+    </p> 
+    <p>
+        Antes de publicar los resultados definitivos, queremos ofrecerte la posibilidad de revisar
+        aquellos incumplimientos que consideres puedan ser susceptibles de emitir alegaciones para
+        ser revisadas por HMES. En caso de que compruebes, que efectivamente, existe una
+        justificación razonable para alegar un incumplimiento, podrás realizar la alegación incluyendo
+        toda aquella información que consideréis necesaria, fotos y/o comentarios.
+    </p> 
+    <p>
+        El plazo de alegaciones será de <b>una semana</b> contando a partir del día de hoy.
+    </p>
+    <p>
+        Esta informacion se encuentra accesible a través de la aplicación de Estándares HMES. Para
+        cualquier duda contactar con Elena Drandar: estandares@redhyundai.com.
+    </p>
+    <p>
+        Recibe un cordial saludo,
+    </p>
+`}
+
+const closedMailContent = (installation) => { return `
+    <p>
+        Estimado concesionario,
+    </p> 
+    <p>
+        Paso a comunicarte que la auditoría de este trimestre para la instalación: <b>${installation}</b> se encuentra <b>cerrada</b> desde este momento puedes acceder para consultar los resultados. 
+    </p> 
+    <p>
+        Antes de publicar los resultados definitivos, queremos ofrecerte la posibilidad de revisar
+        aquellos incumplimientos que consideres puedan ser susceptibles de emitir alegaciones para
+        ser revisadas por HMES. En caso de que compruebes, que efectivamente, existe una
+        justificación razonable para alegar un incumplimiento, podrás realizar la alegación incluyendo
+        toda aquella información que consideréis necesaria, fotos y/o comentarios.
+    </p> 
+    <p>
+        El plazo de alegaciones será de <b>una semana</b> contando a partir del día de hoy.
+    </p>
+    <p>
+        Esta informacion se encuentra accesible a través de la aplicación de Estándares HMES. Para
+        cualquier duda contactar con Elena Drandar: estandares@redhyundai.com.
+    </p>
+    <p>
+        Recibe un cordial saludo,
+    </p>
+`}
+
+const plannedMailsubject = 'Notificación Auditoría planificada'
+const reviewMailsubject = 'Notificación Auditoría en Pendiente revisar concesión - Alegaciones'
+const closedMailSubject = 'Notificación Auditoría Cerrada'
 
 const updateAuditInstallation = async(request, response) => {
     try{
@@ -22,7 +95,7 @@ const updateAuditInstallation = async(request, response) => {
         let auditInstallation = null
         
         if(id){
-            auditInstallation = await AuditInstallation.findById(id)
+            auditInstallation = await AuditInstallation.findById(id).populate('installation_id')
             if (!auditInstallation)
                 return response.status(404).json({code: 404,
                                                   msg: 'invalid id',
@@ -81,6 +154,14 @@ const updateAuditInstallation = async(request, response) => {
         const auditInst = await AuditInstallation.findByIdAndUpdate(id, editAuditInst, {new: true})
                                         .catch( error => {return response.status(500).json({code: 500, msg: 'created error', detail: error.message})})
         
+        if(audit_status === 'planned'){
+            await sendMail(plannedMailsubject, plannedMailContent(auditInstallation.installation_id.name))
+        } else if(audit_status === 'review'){
+            await sendMail(reviewMailsubject, reviewMailContent(auditInstallation.installation_id.name))
+        } else if(audit_status === 'closed'){
+            await sendMail(closedMailSubject, closedMailContent(auditInstallation.installation_id.name))
+        }
+
         response.status(200).json({code: 200,
                                    msg: 'the AuditInstallation has been updated successfully',
                                    data: auditInst })
@@ -89,6 +170,7 @@ const updateAuditInstallation = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
     }          
 }
+
 
 const getAllAuditInstallation = async(request, response) => {
     try{
@@ -153,6 +235,38 @@ const getAllAuditInstallation = async(request, response) => {
    catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
     }  
+}
+
+const sendMail = async(subject, content) => {    
+    try{
+        var transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: process.env.EMAIL_SENDER,
+              pass: process.env.EMAIL_PASSWORD,
+            }
+          });
+          
+          var mailOptions = {
+            from: process.env.EMAIL_SENDER,
+            to: process.env.EMAIL_SENDER,
+            subject: subject,
+            html: content
+          };
+          
+          transporter.sendMail(mailOptions, function(error, info){
+            if (error) {
+              console.log('error: ', error);
+            } else {
+              console.log('Email sent: ' + info.response);
+            }
+          });
+
+          return
+    }
+    catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
+    }
 }
 
 module.exports = {updateAuditInstallation, getAllAuditInstallation}
