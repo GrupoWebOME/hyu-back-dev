@@ -990,10 +990,18 @@ const calculates = async(request, response) => {
         }
 
         let id_inst = mongoose.Types.ObjectId(installation_id)
-        const audit = await Audit.findById(audit_id).select('criterions installation_exceptions').populate('criterions.criterion')
-                                            .catch(error => {        
-                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-                                            })
+        const audit = await Audit.findById(audit_id).select('criterions installation_exceptions').populate({
+            path : 'criterions',
+            populate : {
+              path : 'criterion',
+              populate: {
+                path: 'category block standard area criterionType installationType auditResponsable'
+              }
+            }
+          })
+            .catch(error => {        
+                return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+            })
                         
         const calculables = await getCalculatesCrit(installation_id)
 
@@ -1027,6 +1035,5 @@ const calculates = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
     }  
 }
-
 
 module.exports = {createCriterion, updateCriterion, deleteCriterion, getAllCriterion, filtersCriterions, getCriterion, filtersAuditCriterions, calculates}
