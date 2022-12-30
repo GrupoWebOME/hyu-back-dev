@@ -95,7 +95,7 @@ const updateAuditInstallation = async(request, response) => {
         let auditInstallation = null
         
         if(id){
-            auditInstallation = await AuditInstallation.findById(id).populate('installation_id')
+            auditInstallation = await AuditInstallation.findById(id).populate('installation_id audit_id')
             if (!auditInstallation)
                 return response.status(404).json({code: 404,
                                                   msg: 'invalid id',
@@ -154,7 +154,7 @@ const updateAuditInstallation = async(request, response) => {
         const auditInst = await AuditInstallation.findByIdAndUpdate(id, editAuditInst, {new: true})
                                         .catch( error => {return response.status(500).json({code: 500, msg: 'created error', detail: error.message})})
         
-        if(audit_status === 'planned'){
+        if(audit_status === 'planned' && !auditInstallation.audit_id.mistery){
             await sendMail(plannedMailsubject, plannedMailContent(auditInstallation.installation_id.name))
         } else if(audit_status === 'review'){
             await sendMail(reviewMailsubject, reviewMailContent(auditInstallation.installation_id.name))
@@ -170,7 +170,6 @@ const updateAuditInstallation = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
     }          
 }
-
 
 const getAllAuditInstallation = async(request, response) => {
     try{
