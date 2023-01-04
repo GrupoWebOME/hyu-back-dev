@@ -3,10 +3,10 @@ const Dealership = require('../../models/dealership_model')
 const AuditResults = require('../../models/audit_results_model')
 const Criterion = require('../../models/criterion_model')
 const Installation = require('../../models/installation_schema')
+const AuditInstallation = require('../../models/audit_installation_model')
 const AuditAgency = require('../../models/audit_agency_model')
 const Admin = require('../../models/admin_model')
 const ObjectId = require('mongodb').ObjectId
-const AuditInstallation = require('../../models/audit_installation_model')
 
 const createAuditResults = async(request, response) => {
     try{
@@ -115,8 +115,8 @@ const createAuditResults = async(request, response) => {
                         })
 
         await AuditInstallation.findByIdAndUpdate({installation_id: installation_id}, {audit_status: 'in_process'})
-                               .catch( error => {return response.status(500).json({code: 500, msg: 'update auditInst error', detail: error.message})})
-        
+                               .catch( error => {return response.status(500).json({code: 500, msg: 'created error', detail: error.message})})
+
         response.status(201).json({code: 201,
                                     msg: 'the auditResults has been created successfully',
                                     data: newAuditResults })
@@ -294,9 +294,9 @@ const getDataForTables = async(request, response) => {
                     }
                     if(criterion.criterion_id.isHmeAudit){
                         // Peso total de los criterios hmes que aplican
-                        totalHmeAudit+= criterion.criterion_id.value
+                        totalHmeAudit+= 1// criterion.criterion_id.value
                         if(criterion.pass)
-                            totalPassHmeAudit+= criterion.criterion_id.value
+                            totalPassHmeAudit+= 1 //criterion.criterion_id.value
                             // Peso total de los criterios hmes que aplican
                     }
                 }
@@ -377,7 +377,17 @@ const getDataForTables = async(request, response) => {
                 // Si es válido
                 else{ 
                     // Peso total de los criterios que aplican
-                    totalCriterionWeight += criterion.criterion_id.value
+
+                    //nuevo, tal vez de problemas
+
+                    if(criterion.criterion_id.isHmeAudit){
+                        totalCriterionWeight += 1
+                    } else{
+                        totalCriterionWeight += criterion.criterion_id.value
+                    }
+                    
+                    //
+
                     // Cantidad de criterios que aplican para esa instalación
                     totalCriterionsForInst += 1
                     /*
@@ -459,10 +469,18 @@ const getDataForTables = async(request, response) => {
                         totalCriterionsByCat += 1
                         if(criterion.pass){
                             //Cantidad de peso acumulado de los cumplidos
-                            accum += criterion.criterion_id.value
+                            if(criterion.criterion_id.isHmeAudit){
+                                accum += 1
+                            } else{
+                                accum += criterion.criterion_id.value
+                            }
                         }
                         //Cantidad acumulada de peso total para esa categoría
-                        totalAccum += criterion.criterion_id.value
+                        if(criterion.criterion_id.isHmeAudit){
+                            totalAccum += 1
+                        } else{
+                            totalAccum += criterion.criterion_id.value
+                        }
                         // Si la cantidad recorrida de criterios en esta instalación, es igual al total de criterios que tiene esa instalación
                         // Entonces guarda la categoría en el arreglo de categorias de esa instalación.
                         if(totalCritValid === totalCriterionsForInst){
@@ -534,9 +552,17 @@ const getDataForTables = async(request, response) => {
                         }
 
                         totalCriterionsByCat = 1
-                        totalAccum = criterion.criterion_id.value
+                        if(criterion.criterion_id.isHmeAudit){
+                            totalAccum = 1
+                        } else{
+                            totalAccum = criterion.criterion_id.value
+                        }
                         if(criterion.pass){
-                            accum = criterion.criterion_id.value
+                            if(criterion.criterion_id.isHmeAudit){
+                                accum = 1
+                            } else{
+                                accum = criterion.criterion_id.value
+                            }
                         }
                         else{
                             accum = 0
@@ -1440,10 +1466,11 @@ const getAuditResByAuditIDAndInstallationID = async(request, response) => {
                                             msg: 'invalid installationid',
                                             detail: 'installationid should be an objectId'})
     
-        let auditRes = await AuditResults.findOne({audit_id: auditid, installation_id: {$in: [installationid]}}).populate({path: 'criterions.discussion.user', select: '_id names surnames emailAddress role'})
-                                        .catch(error => {        
+        let auditRes = await AuditResults.findOne({audit_id: auditid, installation_id: {$in: [installationid]}})
+                                         .populate({path: 'criterions.discussion.user', select: '_id names surnames emailAddress role'})
+                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-                                        })
+                                         })
 
         const adminForAudit = await Admin.find({'audits.audit': auditid, 'audits.dealerships.installations': installationid}, 'names surnames emailAddress userName role dealership _id')
 
@@ -1637,6 +1664,7 @@ const updateAuditResults = async(request, response) => {
         if(state)
             updatedFields['state'] = state
         updatedFields['updatedAt'] = Date.now()
+
         const updatedAuditResults = await AuditResults.findByIdAndUpdate(id, updatedFields, {new: true})
                                         .catch(error => {        
                                             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
@@ -1734,7 +1762,7 @@ const createAuditResultsTest = async(request, response) => {
                 existInstallation = await Installation.findOne({_id: installation_id}).populate({
                     path: 'installation_type dealership', 
                     select: '_id code active'})
-                    
+
                 if(!existInstallation || !existInstallation.active){
                     errors.push({code: 400, 
                                 msg: 'invalid installation_id',
@@ -1742,7 +1770,7 @@ const createAuditResultsTest = async(request, response) => {
                                 })}
                 else{
                     dealershipByID = await Dealership.findById(existInstallation.dealership)
-                    
+
                     for(let i = 0; i < dealershipByID.installations.length; i++){
                         const inst = await Installation.findById(dealershipByID.installations[i])
                         if(dealershipByID.installations[i].toString() !== installation_id && inst?.active){
@@ -1752,7 +1780,7 @@ const createAuditResultsTest = async(request, response) => {
                 }
             }
         }
-                    
+
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
 
@@ -1845,16 +1873,32 @@ const createAuditResultsTest = async(request, response) => {
             else{ 
                 if(criterion.criterion_id.isImgAudit){
                     // Peso total de los criterios imgAudit que aplican
-                    totalImgAudit+= criterion.criterion_id.value
+                    if(criterion.criterion_id.isHmeAudit){
+                        totalImgAudit += 1
+                    } else{
+                        totalImgAudit += criterion.criterion_id.value
+                    }
                     if(criterion.pass)
-                        totalPassImgAudit+= criterion.criterion_id.value
+                        if(criterion.criterion_id.isHmeAudit){
+                            totalPassImgAudit += 1
+                        } else{
+                            totalPassImgAudit += criterion.criterion_id.value
+                        }
                         // Peso total de los criterios imgAudit que aplican
                 }
                 if(criterion.criterion_id.isHmeAudit){
                     // Peso total de los criterios hmes que aplican
-                    totalHmeAudit+= criterion.criterion_id.value
+                    if(criterion.criterion_id.isHmeAudit){
+                        totalHmeAudit += 1
+                    } else{
+                        totalHmeAudit += criterion.criterion_id.value
+                    }
                     if(criterion.pass)
-                        totalPassHmeAudit+= criterion.criterion_id.value
+                        if(criterion.criterion_id.isHmeAudit){
+                            totalPassHmeAudit += 1
+                        } else{
+                            totalPassHmeAudit += criterion.criterion_id.value
+                        }
                         // Peso total de los criterios hmes que aplican
                 }
             }
@@ -1926,7 +1970,11 @@ const createAuditResultsTest = async(request, response) => {
             // Si es válido
             else{ 
                 // Peso total de los criterios que aplican
-                totalCriterionWeight += criterion.criterion_id.value
+                if(criterion.criterion_id.isHmeAudit){
+                    totalCriterionWeight += 1
+                } else{
+                    totalCriterionWeight += criterion.criterion_id.value
+                }
                 // Cantidad de criterios que aplican para esa instalación
                 totalCriterionsForInst += 1
                 /*
@@ -1947,9 +1995,17 @@ const createAuditResultsTest = async(request, response) => {
                 else */ 
                 if(criterion.criterion_id.isElectricAudit){
                     // Peso total de los criterios Electric que aplican
-                    totalElectricAudit+= criterion.criterion_id.value
+                    if(criterion.criterion_id.isHmeAudit){
+                        totalElectricAudit += 1
+                    } else{
+                        totalElectricAudit += criterion.criterion_id.value
+                    }
                     if(criterion.pass)
-                        totalPassElectricAudit+= criterion.criterion_id.value
+                        if(criterion.criterion_id.isHmeAudit){
+                            totalPassElectricAudit += 1
+                        } else{
+                            totalPassElectricAudit += criterion.criterion_id.value
+                        }
                         // Peso total de los criterios hmes que aplican
                 }
             }
@@ -2007,10 +2063,18 @@ const createAuditResultsTest = async(request, response) => {
                     totalCriterionsByCat += 1
                     if(criterion.pass){
                         //Cantidad de peso acumulado de los cumplidos
-                        accum += criterion.criterion_id.value
+                        if(criterion.criterion_id.isHmeAudit){
+                            accum += 1
+                        } else{
+                            accum += criterion.criterion_id.value
+                        }
                     }
                     //Cantidad acumulada de peso total para esa categoría
-                    totalAccum += criterion.criterion_id.value
+                    if(criterion.criterion_id.isHmeAudit){
+                        totalAccum += 1
+                    } else{
+                        totalAccum += criterion.criterion_id.value
+                    }
                     // Si la cantidad recorrida de criterios en esta instalación, es igual al total de criterios que tiene esa instalación
                     // Entonces guarda la categoría en el arreglo de categorias de esa instalación.
                     if(totalCritValid === totalCriterionsForInst){
@@ -2080,9 +2144,17 @@ const createAuditResultsTest = async(request, response) => {
                         categories = [...categories, category]
                     }
                     totalCriterionsByCat = 1
-                    totalAccum = criterion.criterion_id.value
+                    if(criterion.criterion_id.isHmeAudit){
+                        totalAccum = 1
+                    } else{
+                        totalAccum = criterion.criterion_id.value
+                    }
                     if(criterion.pass){
-                        accum = criterion.criterion_id.value
+                        if(criterion.criterion_id.isHmeAudit){
+                            accum = 1
+                        } else{
+                            accum = criterion.criterion_id.value
+                        }
                     }
                     else{
                         accum = 0
@@ -2344,7 +2416,7 @@ const createAuditResultsTest = async(request, response) => {
 
 const updateTest = async(request, response) => {
     try{
-        const {audit_id, installation_id, criterions, state, dateForAudit} = request.body
+        const {audit_id, installation_id, criterions, state, dateForAudit, audited} = request.body
         const {id} = request.params
 
         let errors = []
@@ -2442,6 +2514,7 @@ const updateTest = async(request, response) => {
                                     detail: `${element.criterion_id} not found`
                                     })        
                 }
+
                 if(element.discussion && Array.isArray(element.discussion)){
                     element.discussion.forEach(async(discussion) => {
                         if(!discussion.hasOwnProperty("text") || !discussion.hasOwnProperty("user")){
@@ -2467,7 +2540,7 @@ const updateTest = async(request, response) => {
                     })
                 }
             })
-        } 
+        }        
 
         if(dateForAudit){
             const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
@@ -2486,7 +2559,7 @@ const updateTest = async(request, response) => {
                              detail: `status should be created, canceled, planned, in_process, auditor_signed, auditor_end, or closed`
                             })  
         }
-        
+
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
 
@@ -2579,16 +2652,32 @@ const updateTest = async(request, response) => {
             else{ 
                 if(criterion.criterion_id.isImgAudit){
                     // Peso total de los criterios imgAudit que aplican
-                    totalImgAudit+= criterion.criterion_id.value
+                    if(criterion.criterion_id.isHmeAudit){
+                        totalImgAudit += 1
+                    } else{
+                        totalImgAudit += criterion.criterion_id.value
+                    }
                     if(criterion.pass)
-                        totalPassImgAudit+= criterion.criterion_id.value
+                        if(criterion.criterion_id.isHmeAudit){
+                            totalPassImgAudit += 1
+                        } else{
+                            totalPassImgAudit += criterion.criterion_id.value
+                        }
                         // Peso total de los criterios imgAudit que aplican
                 }
                 if(criterion.criterion_id.isHmeAudit){
                     // Peso total de los criterios hmes que aplican
-                    totalHmeAudit+= criterion.criterion_id.value
+                    if(criterion.criterion_id.isHmeAudit){
+                        totalHmeAudit += 1
+                    } else{
+                        totalHmeAudit += criterion.criterion_id.value
+                    }
                     if(criterion.pass)
-                        totalPassHmeAudit+= criterion.criterion_id.value
+                        if(criterion.criterion_id.isHmeAudit){
+                            totalPassHmeAudit += 1
+                        } else{
+                            totalPassHmeAudit += criterion.criterion_id.value
+                        }
                         // Peso total de los criterios hmes que aplican
                 }
             }
@@ -2661,7 +2750,11 @@ const updateTest = async(request, response) => {
             // Si es válido
             else{ 
                 // Peso total de los criterios que aplican
-                totalCriterionWeight += criterion.criterion_id.value
+                if(criterion.criterion_id.isHmeAudit){
+                    totalCriterionWeight += 1
+                } else{
+                    totalCriterionWeight += criterion.criterion_id.value
+                }
                 // Cantidad de criterios que aplican para esa instalación
                 totalCriterionsForInst += 1
                 /*
@@ -2743,10 +2836,18 @@ const updateTest = async(request, response) => {
                     totalCriterionsByCat += 1
                     if(criterion.pass){
                         //Cantidad de peso acumulado de los cumplidos
-                        accum += criterion.criterion_id.value
+                        if(criterion.criterion_id.isHmeAudit){
+                            accum += 1
+                        } else{
+                            accum += criterion.criterion_id.value
+                        }
                     }
                     //Cantidad acumulada de peso total para esa categoría
-                    totalAccum += criterion.criterion_id.value
+                    if(criterion.criterion_id.isHmeAudit){
+                        totalAccum += 1
+                    } else{
+                        totalAccum += criterion.criterion_id.value
+                    }
                     // Si la cantidad recorrida de criterios en esta instalación, es igual al total de criterios que tiene esa instalación
                     // Entonces guarda la categoría en el arreglo de categorias de esa instalación.
                     if(totalCritValid === totalCriterionsForInst){
@@ -2820,9 +2921,18 @@ const updateTest = async(request, response) => {
                     }
 
                     totalCriterionsByCat = 1
-                    totalAccum = criterion.criterion_id.value
+                    if(criterion.criterion_id.isHmeAudit){
+                        totalAccum = 1
+                    } else{
+                        totalAccum = criterion.criterion_id.value
+                    }
                     if(criterion.pass){
                         accum = criterion.criterion_id.value
+                        if(criterion.criterion_id.isHmeAudit){
+                            accum = 1
+                        } else{
+                            accum = criterion.criterion_id.value
+                        }
                     }
                     else{
                         accum = 0
@@ -4145,7 +4255,7 @@ const getDataForAudit = async(request, response) => {
                 total_inst: totalInst,
                 total: ((dealerTotal ? totalDealership : 0)+ (instTotal ? totalInst : 0) )/ (dealerTotal && instTotal ? 2 : 1),
                 instalations_detail: instalations_detail,
-                closed: isClosed,
+                closed: isClosed
             }
     
             return response.status(200).json({data: data})
