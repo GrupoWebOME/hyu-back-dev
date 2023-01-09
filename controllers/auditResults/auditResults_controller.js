@@ -4286,4 +4286,295 @@ const getDataForAudit = async(request, response) => {
     }
 }
 
+const getDataForAuditNew = async(request, response) => {
+    let {audit_id} = request.params
+    let { dealership_id } = request.body
+    let isClosed = null
+    const AOH = "6226310514861f56d3c64266"
+
+    try{
+        let existAudit = null
+
+        if(audit_id === "last"){
+            let audit = null
+
+            if(dealership_id && ObjectId.isValid(dealership_id)){
+                const auditsInstallations = await AuditInstallation.find({dealership_id: dealership_id})
+                let audit_ids = []
+                if(auditsInstallations){
+                    let auditsForDealership = []
+                    auditsInstallations.forEach((auditInst) => {
+                        const existAudit = auditsForDealership.findIndex(el => {
+                            return el?.audit_id?.toString() === auditInst?.audit_id?.toString()
+                        })
+                        if(existAudit > -1){
+                            auditsForDealership[existAudit].audit_status.push(auditInst.audit_status)
+                        } else{
+                            const element = {
+                                audit_id: auditInst.audit_id,
+                                audit_status: [auditInst.audit_status]
+                            }
+
+                            auditsForDealership = [...auditsForDealership, element]
+                        }
+                    })
+
+                    auditsForDealership.forEach((audit) => {
+                        if(!audit.audit_status.find(el => el !== 'closed')){
+                            audit_ids = [...audit_ids, audit.audit_id]
+                        }
+                    })
+
+                    const auditsFiltereds = await Audit.find({_id: {$in: audit_ids}})
+                    
+                    auditsFiltereds.sort((a, b) => {
+                        return b.createdAt - a.createdAt
+                    })
+
+                    if(auditsFiltereds.length > 0){
+                        audit_id = auditsFiltereds[0]?._id
+                        audit = auditsFiltereds[0]
+                    }
+                }
+                
+            } else{
+                audit = await Audit.findOne().sort({$natural:-1}).limit(1)
+            }
+
+            if(audit){
+                audit_id = audit._id
+            } else{
+                return response.status(404).json({errors: [{code: 404, msg: 'not found', detail: "No audits in ddbb"}]})
+            }
+
+            if(dealership_id){
+                const isAuditClosed = await AuditInstallation.find({audit_id: audit._id, audit_status: {$ne: "closed"}})
+
+                if(isAuditClosed?.length > 0){
+                    isClosed = false
+                } else {
+                    isClosed = true
+                }
+            }
+        }
+
+        if(!ObjectId.isValid(audit_id)){
+            return response.status(400).json(
+                {errors: [{code: 400, 
+                        msg: 'invalid audit_id', 
+                        detail: `${audit_id} is not an ObjectId`}]})
+        }
+        if(dealership_id !== null && dealership_id !== undefined && !ObjectId.isValid(dealership_id)){
+            return response.status(400).json(
+                {errors: [{code: 400, 
+                        msg: 'invalid dealership_id', 
+                        detail: `${dealership_id} is not an ObjectId`}]})
+        }
+        else{
+            existAudit = await Audit.findById(audit_id)
+            if(!existAudit)
+                return response.status(400).json(
+                    {errors: [{code: 400, 
+                            msg: 'invalid audit_id', 
+                            detail: `${audit_id} not found`}]}) 
+        }
+
+        let filter = {audit_id: audit_id}
+        if(dealership_id !== null && dealership_id !== undefined && dealership_id !== false){
+            filter['dealership_id'] = dealership_id
+        }
+
+        if(dealership_id){
+            if(!ObjectId.isValid(dealership_id)){
+                return response.status(400).json(
+                    {errors: [{code: 400, 
+                               msg: 'invalid dealership_id', 
+                               detail: `${dealership_id} is not an ObjectId`}]})
+            }
+            const dealershipByID = await Dealership.findById(dealership_id)
+
+            if(!dealershipByID)
+                return response.status(400).json({code: 404, 
+                                                  msg: 'invalid dealership_id',
+                                                  detail: 'dealership_id not found'
+                                                })
+            let existAudit = null
+            if(!ObjectId.isValid(audit_id)){
+                return response.status(400).json(
+                    {errors: [{code: 400, 
+                               msg: 'invalid audit_id', 
+                               detail: `${audit_id} is not an ObjectId`}]})
+            }
+            else{
+                existAudit = await Audit.findById(audit_id)
+                if(!existAudit)
+                    return response.status(400).json(
+                        {errors: [{code: 400, 
+                                msg: 'invalid audit_id', 
+                                detail: `${audit_id} not found`}]}) 
+            }
+    
+            let auditAgencies = await AuditAgency.find(filter)
+                
+            let hmes_dealership = 0
+            let cant_hmes_dealership = 0
+            let img_dealership = 0
+            let cant_img_dealership = 0
+            let electric_dealership = 0
+            let cant_electric_dealership = 0
+            let hmes_inst = 0
+            let cant_hmes_inst = 0
+            let img_inst = 0
+            let cant_img_inst = 0
+            let electric_inst = 0
+            let cant_electric_inst = 0
+            let total_dealership = 0
+            let cant_total_dealership = 0
+            let total_inst = 0
+            let cant_total_inst = 0
+            let installation_details = []
+
+            auditAgencies.forEach((agency) => {
+                agency.instalations_audit_details.forEach((installation) => {          
+                    installation_details = [...installation_details, {
+                        installation_name: installation.installation.name,                        
+                        installation_id: installation.installation._id.toString(),
+                        perc: installation.categories[installation.categories.length - 1].auditTotalResult
+                    }]
+                    if(installation.installation.installation_type.toString() === AOH){
+                        if(installation.instalation_audit_types?.percImgAudit !== null && installation.instalation_audit_types?.percImgAudit !== undefined){
+                            cant_img_dealership += 1
+                            img_dealership += installation.instalation_audit_types.percImgAudit
+                        }
+                        if(installation.instalation_audit_types?.percHmeAudit !== null && installation.instalation_audit_types?.percHmeAudit !== undefined){
+                            cant_hmes_dealership += 1
+                            hmes_dealership += installation.instalation_audit_types.percHmeAudit
+                        }
+                        if(installation.instalation_audit_types?.percElectricAudit !== null && installation.instalation_audit_types?.percElectricAudit !== undefined){
+                            cant_electric_dealership += 1
+                            electric_dealership += installation.instalation_audit_types.percElectricAudit
+                        }
+                        total_dealership += installation.categories[installation.categories.length - 1].auditTotalResult
+                        cant_total_dealership += 1
+                    } else {
+                        if(installation.instalation_audit_types?.percImgAudit !== null && installation.instalation_audit_types?.percImgAudit !== undefined){
+                            cant_img_inst += 1
+                            img_inst += installation.instalation_audit_types.percImgAudit
+                        }
+                        if(installation.instalation_audit_types?.percHmeAudit !== null && installation.instalation_audit_types?.percHmeAudit !== undefined){
+                            cant_hmes_inst += 1
+                            hmes_inst += installation.instalation_audit_types.percHmeAudit
+                        }
+                        if(installation.instalation_audit_types?.percElectricAudit !== null && installation.instalation_audit_types?.percElectricAudit !== undefined){
+                            cant_electric_inst += 1
+                            electric_inst += installation.instalation_audit_types.percElectricAudit
+                        }
+                        total_inst += installation.categories[installation.categories.length - 1].auditTotalResult
+                        cant_total_inst += 1
+                    }
+                })
+            })
+
+            const data = {
+                hmes_dealership: (cant_hmes_dealership === 0)? null: hmes_dealership/cant_hmes_dealership,
+                img_dealership: (cant_img_dealership === 0)? null: img_dealership/cant_img_dealership,
+                electric_dealership: (cant_electric_dealership === 0)? null: electric_dealership/cant_electric_dealership,
+                hmes_inst: (cant_hmes_inst === 0)? null: hmes_inst/cant_hmes_inst,
+                img_inst: (cant_img_inst === 0)? null: img_inst/cant_img_inst,
+                electric_inst: (cant_electric_inst === 0)? null: electric_inst/cant_electric_inst,
+                total_dealership: (cant_total_dealership === 0)? null: total_dealership/cant_total_dealership ,
+                total_inst: (cant_total_inst === 0)? null: total_inst/cant_total_inst,
+                total: (total_dealership + total_inst)/(cant_total_dealership+cant_total_inst),
+                instalations_detail: installation_details,
+                closed: isClosed
+            }
+    
+            return response.status(200).json({data: data})
+
+        } else {
+
+            let auditAgencies = await AuditAgency.find(filter)
+    
+            let hmes_dealership = 0
+            let cant_hmes_dealership = 0
+            let img_dealership = 0
+            let cant_img_dealership = 0
+            let electric_dealership = 0
+            let cant_electric_dealership = 0
+            let hmes_inst = 0
+            let cant_hmes_inst = 0
+            let img_inst = 0
+            let cant_img_inst = 0
+            let electric_inst = 0
+            let cant_electric_inst = 0
+            let total_dealership = 0
+            let cant_total_dealership = 0
+            let total_inst = 0
+            let cant_total_inst = 0
+            let installation_details = []
+
+            auditAgencies.forEach((agency) => {
+                agency.instalations_audit_details.forEach((installation) => {          
+                    installation_details = [...installation_details, {
+                        installation_name: installation.installation.name,                        
+                        installation_id: installation.installation._id.toString(),
+                        perc: installation.categories[installation.categories.length - 1].auditTotalResult
+                    }]
+                    if(installation.installation.installation_type.toString() === AOH){
+                        if(installation.instalation_audit_types?.percImgAudit !== null && installation.instalation_audit_types?.percImgAudit !== undefined){
+                            cant_img_dealership += 1
+                            img_dealership += installation.instalation_audit_types.percImgAudit
+                        }
+                        if(installation.instalation_audit_types?.percHmeAudit !== null && installation.instalation_audit_types?.percHmeAudit !== undefined){
+                            cant_hmes_dealership += 1
+                            hmes_dealership += installation.instalation_audit_types.percHmeAudit
+                        }
+                        if(installation.instalation_audit_types?.percElectricAudit !== null && installation.instalation_audit_types?.percElectricAudit !== undefined){
+                            cant_electric_dealership += 1
+                            electric_dealership += installation.instalation_audit_types.percElectricAudit
+                        }
+                        total_dealership += installation.categories[installation.categories.length - 1].auditTotalResult
+                        cant_total_dealership += 1
+                    } else {
+                        if(installation.instalation_audit_types?.percImgAudit !== null && installation.instalation_audit_types?.percImgAudit !== undefined){
+                            cant_img_inst += 1
+                            img_inst += installation.instalation_audit_types.percImgAudit
+                        }
+                        if(installation.instalation_audit_types?.percHmeAudit !== null && installation.instalation_audit_types?.percHmeAudit !== undefined){
+                            cant_hmes_inst += 1
+                            hmes_inst += installation.instalation_audit_types.percHmeAudit
+                        }
+                        if(installation.instalation_audit_types?.percElectricAudit !== null && installation.instalation_audit_types?.percElectricAudit !== undefined){
+                            cant_electric_inst += 1
+                            electric_inst += installation.instalation_audit_types.percElectricAudit
+                        }
+                        total_inst += installation.categories[installation.categories.length - 1].auditTotalResult
+                        cant_total_inst += 1
+                    }
+                })
+            })
+
+            const data = {
+                hmes_dealership: (cant_hmes_dealership === 0)? null: hmes_dealership/cant_hmes_dealership,
+                img_dealership: (cant_img_dealership === 0)? null: img_dealership/cant_img_dealership,
+                electric_dealership: (cant_electric_dealership === 0)? null: electric_dealership/cant_electric_dealership,
+                hmes_inst: (cant_hmes_inst === 0)? null: hmes_inst/cant_hmes_inst,
+                img_inst: (cant_img_inst === 0)? null: img_inst/cant_img_inst,
+                electric_inst: (cant_electric_inst === 0)? null: electric_inst/cant_electric_inst,
+                total_dealership: (cant_total_dealership === 0)? null: total_dealership/cant_total_dealership ,
+                total_inst: (cant_total_inst === 0)? null: total_inst/cant_total_inst,
+                total: (total_dealership + total_inst)/(cant_total_dealership+cant_total_inst),
+                instalations_detail: installation_details,
+                closed: isClosed
+            }
+    
+            return response.status(200).json({data: data})
+        }        
+    }
+    catch(error){
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
+    }
+}
+
+
 module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables, getAuditResByAuditIDAndInstallationID, getAuditResByAuditID, getDataForAudit, getDataForFullAudit, updateTest, getDataForFullAuditTest, createAuditResultsTest, tablesTest}
