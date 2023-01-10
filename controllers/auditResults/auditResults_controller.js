@@ -3272,6 +3272,9 @@ const tablesTest = async(request, response) => {
         }
 
         const tables = await AuditAgency.findOne({audit_id: audit_id, dealership_id: dealership_id})
+        .populate({path: 'audit_criterions_details.criterions.criterion_id', 
+        populate: {path: 'standard installationType block area category auditResponsable criterionType'}})
+
         return response.status(200).json({data: tables})
     }
     catch(error){
