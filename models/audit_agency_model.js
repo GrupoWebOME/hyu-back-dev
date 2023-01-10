@@ -9,7 +9,23 @@ const auditAgencySchema = new Schema({
     ionic5_quaterly_billing: {type: String, default: null},
     vn_quaterly_billing: {type: String, default: null},
     dealership_details: {},
-    audit_criterions_details: [],
+    audit_criterions_details: [{
+        audit_id: {type: Schema.Types.ObjectId},
+        installation_id: {type: String},
+        criterions: [{
+            criterion_id: {type: Schema.Types.ObjectId, ref: 'Criterion'},
+            pass: {type: Boolean},
+            text: {type: String},
+            images: {type: String},
+            audited: {type: Boolean},
+            discussion: [],
+            _id: {type: Schema.Types.ObjectId}
+        }],
+        dateForAudit: {},
+        instalations_audit_details: {},
+        createdAt: {},
+        updatedAt: {}
+    }],
     audit_initial_date: {},
     audit_end_date: {},
     instalations_audit_details: [],
