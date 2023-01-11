@@ -752,7 +752,7 @@ const getDataForTables = async(request, response) => {
 }
 
 /*
-const getDataForAudit = async(request, response) => {
+const getDataForAuditNew = async(request, response) => {
     let {audit_id} = request.params
     let auditsResults = null
 
@@ -4297,7 +4297,7 @@ const getDataForAudit = async(request, response) => {
     }
 }
 
-const getDataForAuditNew = async(request, response) => {
+const getDataForAudit = async(request, response) => {
     let {audit_id} = request.params
     let { dealership_id } = request.body
     let isClosed = null
