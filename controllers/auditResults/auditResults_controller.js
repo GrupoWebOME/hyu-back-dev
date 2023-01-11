@@ -752,7 +752,7 @@ const getDataForTables = async(request, response) => {
 }
 
 /*
-const getDataForAuditNew = async(request, response) => {
+const getDataForAudit = async(request, response) => {
     let {audit_id} = request.params
     let auditsResults = null
 
