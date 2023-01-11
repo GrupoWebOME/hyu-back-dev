@@ -1812,6 +1812,10 @@ const createAuditResultsTest = async(request, response) => {
                                                             select: 'name code description isCore number abbreviation'
                                                         },
                                                     }) 
+                             
+        let auditsResultsWithout = await AuditResults.find({$and:[{installation_id: {$in: arrayInstallations}},{audit_id: audit_id}]})
+                                                    .populate({path: 'installation_id', select: '_id active name code installation_type dealership sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
+                                                                populate: {path: 'installation_type dealership', select: '_id code active'}})
 
         //Recorro el arreglo de resultados
         let arrayStandardsFalse = []
@@ -1927,6 +1931,7 @@ const createAuditResultsTest = async(request, response) => {
                 }
                 return 0;
         })
+
         let installationAuditData = {}
         installationAuditData['installation'] =  newAuditResults.installation_id
         let actualCategoryID = ''
@@ -2338,6 +2343,14 @@ const createAuditResultsTest = async(request, response) => {
         agency_by_types['total_agency'] = total_agency
 
         agency_audit_details = accumAgency / array_instalations_audit_details.length
+        
+        const newAuditResultsGen = new AuditResults({
+            audit_id,
+            installation_id,
+            criterions,
+            instalations_audit_details: instalations_audit_details,
+            state: 'created'
+        })
 
         const newConsetionResult = new AuditAgency({
             audit_id: audit_id,
@@ -2351,21 +2364,13 @@ const createAuditResultsTest = async(request, response) => {
             audit_end_date: existAudit.end_date,
             audit_name: existAudit.name,
             dealership_details: dealershipByID,
-            audit_criterions_details: auditsResults,
+            audit_criterions_details: newAuditResultsGen,
             instalations_audit_details: array_instalations_audit_details,
             agency_audit_details: agency_audit_details,
             agency_by_types: agency_by_types
         })
         
         const existAuditAgency = await AuditAgency.findOne({audit_id: audit_id, dealership_id: dealershipByID._id})
-
-        const newAuditResultsGen = new AuditResults({
-            audit_id,
-            installation_id,
-            criterions,
-            instalations_audit_details: instalations_audit_details,
-            state: 'created'
-        })
 
         const newAuditResultscreated = await newAuditResultsGen.save()
                         .catch(error => {        
@@ -2388,12 +2393,10 @@ const createAuditResultsTest = async(request, response) => {
                 name: dealershipByID.name,
                 ionic5_quaterly_billing: dealershipByID.ionic5_quaterly_billing,
                 vn_quaterly_billing: dealershipByID.vn_quaterly_billing,
-                electric_quaterly_billing: dealershipByID.electric_quaterly_billing,
                 audit_initial_date: existAudit.initial_date,
                 audit_end_date: existAudit.end_date,
-                audit_name: existAudit.name,
                 dealership_details: dealershipByID,
-                audit_criterions_details: auditsResults,
+                audit_criterions_details: [...auditsResultsWithout, newAuditResultsGen],
                 instalations_audit_details: array_instalations_audit_details,
                 agency_audit_details: agency_audit_details,
                 agency_by_types: agency_by_types
