@@ -38,6 +38,7 @@ const createAuditResults = async(request, response) => {
         }
 
         const auditResultsFind = await AuditResults.findOne({audit_id: audit_id, installation_id: installation_id})
+
         if(auditResultsFind)
             errors.push({code: 400, 
                 msg: 'invalid installation_id',
@@ -3290,7 +3291,7 @@ const tablesTest = async(request, response) => {
     }
 }
 
-const getDataForAudit = async(request, response) => {
+const getDataForAudit22 = async(request, response) => {
     let {audit_id} = request.params
     let auditsResults = null
     let { dealership_id } = request.body
@@ -4586,6 +4587,5 @@ const getDataForAudit = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
     }
 }
-
 
 module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables, getAuditResByAuditIDAndInstallationID, getAuditResByAuditID, getDataForAudit, getDataForFullAudit, updateTest, getDataForFullAuditTest, createAuditResultsTest, tablesTest}
