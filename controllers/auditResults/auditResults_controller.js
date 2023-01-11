@@ -2426,6 +2426,7 @@ const updateTest = async(request, response) => {
         let audiResultstById = null
         let arrayInstallations = []
         let array_instalations_audit_details = []
+        let array_audit_criterions_details = []
         let existInstallation = null
         let existAudit = null
         let dealershipByID = null
@@ -2594,6 +2595,10 @@ const updateTest = async(request, response) => {
                                                             select: 'name code description isCore number abbreviation'
                                                         },
                                                     }) 
+
+        let auditsResultsWithout = await AuditResults.find({$and:[{installation_id: {$in: arrayInstallations}},{audit_id: audit_id}]})
+                                                    .populate({path: 'installation_id', select: '_id active name code installation_type dealership sales_weight_per_installation post_sale_weight_per_installation isSale isPostSale isHP', 
+                                                                populate: {path: 'installation_type dealership', select: '_id code active'}})
 
         //Recorro el arreglo de resultados
         let arrayStandardsFalse = []
@@ -3024,9 +3029,8 @@ const updateTest = async(request, response) => {
         let agency_by_types_customs_total = []
 
         let total_values = 0
-
+        // LLEGUE
         array_instalations_audit_details.forEach((installation) => {
-            
             if(Array.isArray(installation)){
                 installation = installation[0]
             }
@@ -3139,7 +3143,8 @@ const updateTest = async(request, response) => {
         updatedFields['updatedAt'] = Date.now()
         updatedFields['instalations_audit_details'] = instalations_audit_details
 
-        const updatedAuditResults = await AuditResults.findByIdAndUpdate(id, updatedFields, {new: true}).populate({path: 'criterions.discussion.user', select: '_id names surnames emailAddress role'})
+        const updatedAuditResults = await AuditResults.findByIdAndUpdate(id, updatedFields, {new: true}).populate({
+            path: 'criterions.discussion.user', select: '_id names surnames emailAddress role'})
                             .catch(error => {        
                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                             })
@@ -3156,7 +3161,7 @@ const updateTest = async(request, response) => {
             audit_initial_date: existAudit.initial_date,
             audit_end_date: existAudit.end_date,
             dealership_details: dealershipByID,
-            audit_criterions_details: auditsResults,
+            audit_criterions_details: [...auditsResultsWithout, updatedAuditResults],
             instalations_audit_details: array_instalations_audit_details,
             agency_audit_details: agency_audit_details,
             agency_by_types: agency_by_types
