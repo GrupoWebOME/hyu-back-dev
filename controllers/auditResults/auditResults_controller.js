@@ -2314,11 +2314,12 @@ const createAuditResultsTest = async(request, response) => {
                 }
                 if(installation.instalation_audit_types.percHmeAudit !== null){
                     hme_perc+= installation.instalation_audit_types.percHmeAudit
+                    hme_perc_aux+= installation.instalation_audit_types.percHmeAuditAux
                     hme_total+= 1
                 }
             }
         })
-
+        
         let agency_by_types = {
             electric_perc: (electric_total === 0)? null: electric_perc / electric_total,
             img_perc: (img_total === 0)? null: img_perc / img_total,
@@ -3103,6 +3104,7 @@ const updateTest = async(request, response) => {
                 }
                 if(installation.instalation_audit_types.percHmeAudit !== null){
                     hme_perc+= installation.instalation_audit_types.percHmeAudit
+                    hme_perc_aux+= installation.instalation_audit_types.percHmeAuditAux
                     hme_total+= 1
                 }
             }
