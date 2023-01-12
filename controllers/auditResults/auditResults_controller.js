@@ -3040,6 +3040,7 @@ const updateTest = async(request, response) => {
         let img_perc = 0
         let hme_total = 0
         let hme_perc = 0
+        let hme_perc_aux = 0
         let agency_by_types_customs = []
         let agency_by_types_customs_total = []
 
