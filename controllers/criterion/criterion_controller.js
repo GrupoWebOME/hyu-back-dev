@@ -830,14 +830,25 @@ const getCriterion = async(request, response) => {
     } 
 }
 
-const getValueFromTable = (rows, columnNumber, value) => {
+const getValueFromTable = (rows, columnNumber, value, id = null) => {
     let rowColvalue = null
+    let rowColvalueAux = null
+    let maxEndValue = 0
 
     rows?.forEach((row) => {
+        if(maxEndValue < row.endValue){
+            maxEndValue = row.endValue
+            rowColvalueAux = row.values[columnNumber-1]
+        }
+
         if(row.initialValue <= value && row.endValue >= value){
             rowColvalue = row.values[columnNumber-1]
         }
     })
+
+    if(!rowColvalue){
+        rowColvalue = rowColvalueAux
+    }
 
     return rowColvalue
 }
