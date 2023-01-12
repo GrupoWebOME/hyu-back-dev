@@ -1857,7 +1857,9 @@ const createAuditResultsTest = async(request, response) => {
         let totalImgAudit = 0
         let totalPassImgAudit = 0
         let totalHmeAudit = 0
+        let totalHmeAuditAux = 0
         let totalPassHmeAudit = 0
+        let totalPassHmeAuditAux = 0
 
         //<<<NUEVO
         auditResultsForImgAndHme.criterions.forEach((criterion) => {     
@@ -1879,13 +1881,13 @@ const createAuditResultsTest = async(request, response) => {
                 if(criterion.criterion_id.isImgAudit){
                     // Peso total de los criterios imgAudit que aplican
                     if(criterion.criterion_id.isHmeAudit){
-                        totalImgAudit += 1
+                        totalImgAudit += criterion.criterion_id.value
                     } else{
                         totalImgAudit += criterion.criterion_id.value
                     }
                     if(criterion.pass)
                         if(criterion.criterion_id.isHmeAudit){
-                            totalPassImgAudit += 1
+                            totalPassImgAudit += criterion.criterion_id.value
                         } else{
                             totalPassImgAudit += criterion.criterion_id.value
                         }
@@ -1894,13 +1896,15 @@ const createAuditResultsTest = async(request, response) => {
                 if(criterion.criterion_id.isHmeAudit){
                     // Peso total de los criterios hmes que aplican
                     if(criterion.criterion_id.isHmeAudit){
-                        totalHmeAudit += 1
+                        totalHmeAudit += criterion.criterion_id.value
+                        totalHmeAuditAux += 1
                     } else{
                         totalHmeAudit += criterion.criterion_id.value
                     }
                     if(criterion.pass)
                         if(criterion.criterion_id.isHmeAudit){
-                            totalPassHmeAudit += 1
+                            totalPassHmeAudit += criterion.criterion_id.value
+                            totalPassHmeAuditAux += 1
                         } else{
                             totalPassHmeAudit += criterion.criterion_id.value
                         }
@@ -1977,7 +1981,7 @@ const createAuditResultsTest = async(request, response) => {
             else{ 
                 // Peso total de los criterios que aplican
                 if(criterion.criterion_id.isHmeAudit){
-                    totalCriterionWeight += 1
+                    totalCriterionWeight += criterion.criterion_id.value
                 } else{
                     totalCriterionWeight += criterion.criterion_id.value
                 }
@@ -2002,13 +2006,13 @@ const createAuditResultsTest = async(request, response) => {
                 if(criterion.criterion_id.isElectricAudit){
                     // Peso total de los criterios Electric que aplican
                     if(criterion.criterion_id.isHmeAudit){
-                        totalElectricAudit += 1
+                        totalElectricAudit += criterion.criterion_id.value
                     } else{
                         totalElectricAudit += criterion.criterion_id.value
                     }
                     if(criterion.pass)
                         if(criterion.criterion_id.isHmeAudit){
-                            totalPassElectricAudit += 1
+                            totalPassElectricAudit += criterion.criterion_id.value
                         } else{
                             totalPassElectricAudit += criterion.criterion_id.value
                         }
@@ -2070,14 +2074,14 @@ const createAuditResultsTest = async(request, response) => {
                     if(criterion.pass){
                         //Cantidad de peso acumulado de los cumplidos
                         if(criterion.criterion_id.isHmeAudit){
-                            accum += 1
+                            accum += criterion.criterion_id.value
                         } else{
                             accum += criterion.criterion_id.value
                         }
                     }
                     //Cantidad acumulada de peso total para esa categoría
                     if(criterion.criterion_id.isHmeAudit){
-                        totalAccum += 1
+                        totalAccum += criterion.criterion_id.value
                     } else{
                         totalAccum += criterion.criterion_id.value
                     }
@@ -2123,6 +2127,7 @@ const createAuditResultsTest = async(request, response) => {
                         instalation_audit_types = {
                             percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
                             percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
+                            percHmeAuditAux: totalHmeAuditAux === 0? null: (totalPassHmeAuditAux * 100)/totalHmeAuditAux,
                             percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
                         }
 
@@ -2151,13 +2156,13 @@ const createAuditResultsTest = async(request, response) => {
                     }
                     totalCriterionsByCat = 1
                     if(criterion.criterion_id.isHmeAudit){
-                        totalAccum = 1
+                        totalAccum = criterion.criterion_id.value
                     } else{
                         totalAccum = criterion.criterion_id.value
                     }
                     if(criterion.pass){
                         if(criterion.criterion_id.isHmeAudit){
-                            accum = 1
+                            accum = criterion.criterion_id.value
                         } else{
                             accum = criterion.criterion_id.value
                         }
@@ -2207,6 +2212,7 @@ const createAuditResultsTest = async(request, response) => {
                         instalation_audit_types = {
                             percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
                             percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
+                            percHmeAuditAux: totalHmeAuditAux === 0? null: (totalPassHmeAuditAux * 100)/totalHmeAuditAux,
                             percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
                         }
 
@@ -2244,10 +2250,12 @@ const createAuditResultsTest = async(request, response) => {
         let img_perc = 0
         let hme_total = 0
         let hme_perc = 0
+        let hme_perc_aux = 0
         let agency_by_types_customs = []
         let agency_by_types_customs_total = []
 
         let total_values = 0
+
         array_instalations_audit_details.forEach((installation) => {
             
             if(Array.isArray(installation)){
@@ -2314,8 +2322,8 @@ const createAuditResultsTest = async(request, response) => {
         let agency_by_types = {
             electric_perc: (electric_total === 0)? null: electric_perc / electric_total,
             img_perc: (img_total === 0)? null: img_perc / img_total,
-            hme_perc: (hme_total === 0)? null: hme_perc / hme_total,
-
+            // hme_perc: (hme_total === 0)? null: hme_perc / hme_total,
+            hme_perc: (hme_perc_aux === 0)? null : hme_perc_aux / hme_total,
             hp_perc: (hp_perc === 0)? null: hp_perc,
             v_perc: (v_perc === 0)? null: v_perc,
             general_perc: (general_perc === 0)? null: general_perc,
