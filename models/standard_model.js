@@ -21,7 +21,7 @@ const standardSchema = new Schema({
     isAgency: {type: Boolean,
                default: false },
     standard_abbreviation: {type: String,
-                        required: true},
+                        required: false},
     createdAt: {type: Date,
                 default: Date.now},
     updatedAt: {type: Date,
