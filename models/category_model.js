@@ -7,7 +7,7 @@ const categorySchema = new Schema({
            trim: true},
     abbreviation: {type: String,
                    trim: true,
-                   required: true },
+                   required: false },
     value: {type: Number,
             default: 0},
     blocks: [{type: Schema.Types.ObjectId, ref: 'Block'}],
