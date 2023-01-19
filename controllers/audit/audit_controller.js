@@ -470,7 +470,7 @@ const getAllAudit= async(request, response) => {
             // filterAuditInst['audit_status'] = {$in: ['closed', 'canceled', 'review', 'planned', 'review_hmes', 'in_process', 'auditor_signed', 'auditor_end', 'finished']}
           
             // Traigo todas las instalaciones que tiene esa agencia
-            const installationsForDealerships = await Installation.find({dealership: dealership})
+            const installationsForDealerships = await Installation.find({dealership: dealership, active: true})
             let arrayInst = []
             let arrayAuditInstPass = []
 
@@ -480,7 +480,7 @@ const getAllAudit= async(request, response) => {
             })
 
             // Busco dentro de las auditinstalations aquellas que contengan las instalaciones del array
-            const auditInstallationForDealerships = await AuditInstallation.find({installation_id: {$in: arrayInst}})
+            const auditInstallationForDealerships = await AuditInstallation.find({installation_id: {$in: arrayInst}}).populate('installation_id')
 
             // Armo un array de las auditorias que afectan a las instalaciones de la agencia
             auditInstallationForDealerships.forEach((auditInst) => {
@@ -491,7 +491,7 @@ const getAllAudit= async(request, response) => {
 
             // Del array de auditorias obtenido, elimino aquellas cuyo estado no sea closed
             auditInstallationForDealerships.forEach((audtInst) => {
-                if(audtInst.audit_status !== 'closed' && audtInst.audit_status !== 'canceled' && audtInst.audit_status !== 'review' && audtInst.audit_status !== 'planned'){
+                if(audtInst.audit_status !== 'closed' && audtInst.installation_id.active === true /* && audtInst.audit_status !== 'canceled' && audtInst.audit_status !== 'review' && audtInst.audit_status !== 'planned'*/){
                     const index = arrayAuditInstPass.indexOf(audtInst.audit_id.toString())
                     if(index > -1){
                         arrayAuditInstPass.splice(index, 1)
@@ -585,13 +585,13 @@ const getAllAudit= async(request, response) => {
             filterNo['_id'] = {$in: arrayAuditInstNoPass}
         }
 
-        let auditsInst = await AuditInstallation.find(filterClosed)
+        let auditsInst = await AuditInstallation.find(filterClosed).populate('installation_id')
         .catch(error => {        
            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
         })
 
         auditsInst.forEach((auditIns) => {
-            if(!arrayAuditsNotClosed.includes(auditIns.audit_id.toString())){
+            if(!arrayAuditsNotClosed.includes(auditIns.audit_id.toString()) && auditIns.installation_id.active === true){
                 arrayAuditsNotClosed = [...arrayAuditsNotClosed, auditIns.audit_id.toString()]
             }
         })
@@ -625,7 +625,7 @@ const getAllAudit= async(request, response) => {
                           totalPages: 1}
 
             return response.status(200).json({code: 200,
-                                              msg: 'success',
+                                              msg: 'success2',
                                               data: data })
         }
 
