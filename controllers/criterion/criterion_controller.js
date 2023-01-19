@@ -889,7 +889,7 @@ const getCalculatesCrit = async(installation_id) => {
 
     const sales_x_referencial = (sales_weight_per_installation) * referential_sales
     const number_x_referencial = (sales_weight_per_installation_number) * referential_sales
-    const fact_x_referencial = (post_sale_spare_parts_previous_year) * referential_sales
+    const fact_x_referencial = (post_sale_spare_parts_previous_year) * sales_weight_per_installation
 
     let arrayCalcCrit = []
 
