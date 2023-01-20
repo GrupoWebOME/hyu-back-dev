@@ -888,7 +888,7 @@ const getCalculatesCrit = async(installation_id) => {
     })
 
     const sales_x_referencial = (sales_weight_per_installation) * referential_sales
-    const number_x_referencial = (sales_weight_per_installation_number) * referential_sales
+    const number_x_referencial = Math.round(parseFloat((sales_weight_per_installation_number) / 222))
     const fact_x_referencial = (post_sale_spare_parts_previous_year) * sales_weight_per_installation
 
     let arrayCalcCrit = []
@@ -896,6 +896,7 @@ const getCalculatesCrit = async(installation_id) => {
     //VN.1.2.1.3
     const vn_1_2_1_3 = {_id: '624310a2dc9b3d6366d773d8', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(parking.rows, 1, sales_x_referencial): null}
     arrayCalcCrit = [...arrayCalcCrit, vn_1_2_1_3]
+
     //VN.1.2.3.2
     const vn_1_2_3_2 = {_id: '62431b00dc9b3d6366d7756f', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? 1: null}
     arrayCalcCrit = [...arrayCalcCrit, vn_1_2_3_2]
@@ -953,7 +954,7 @@ const getCalculatesCrit = async(installation_id) => {
     arrayCalcCrit = [...arrayCalcCrit, pv_1_2_6_1]
 
     //PV.1.2.7.1
-    const pv_1_2_7_1 = {_id: '6245a57454abde8cda638d4b', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pv.rows, 13, number_x_referencial): null}
+    const pv_1_2_7_1 = {_id: '6245a57454abde8cda638d4b', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pv.rows, 13, number_x_referencial, 'nemo'): null}
     arrayCalcCrit = [...arrayCalcCrit, pv_1_2_7_1]
 
     //PV.1.3.1.1
