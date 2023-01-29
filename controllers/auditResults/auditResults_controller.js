@@ -3266,7 +3266,6 @@ const getDataForFullAuditTest = async(request, response) => {
 
 const tablesTest = async(request, response) => {
     const {dealership_id, audit_id} = request.body
-    
     try{
         if(!ObjectId.isValid(dealership_id)){
             return response.status(400).json(
@@ -3297,9 +3296,21 @@ const tablesTest = async(request, response) => {
                             detail: `${audit_id} not found`}]}) 
         }
 
-        const tables = await AuditAgency.findOne({audit_id: audit_id, dealership_id: dealership_id})
+        let tables = await AuditAgency.findOne({audit_id: audit_id, dealership_id: dealership_id})
         .populate({path: 'audit_criterions_details.criterions.criterion_id', 
         populate: {path: 'standard installationType block area category auditResponsable criterionType'}})
+
+        let fixed_instalations_audit_details = []
+
+        tables.instalations_audit_details.forEach((i_audit_detail) => {
+            if(Array.isArray(i_audit_detail)){
+                fixed_instalations_audit_details.push(i_audit_detail[0])
+            } else {
+                fixed_instalations_audit_details.push(i_audit_detail)
+            }
+        })
+
+        tables.instalations_audit_details = fixed_instalations_audit_details
 
         return response.status(200).json({data: tables})
     }
