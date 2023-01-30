@@ -3301,22 +3301,27 @@ const tablesTest = async(request, response) => {
         }
 
         let tables = await AuditAgency.findOne({audit_id: audit_id, dealership_id: dealership_id})
-        .populate({path: 'audit_criterions_details.criterions.criterion_id', 
-        populate: {path: 'standard installationType block area category auditResponsable criterionType'}})
+            .populate({path: 'audit_criterions_details.criterions.criterion_id', 
+            populate: {path: 'standard installationType block area category auditResponsable criterionType'}})
 
-        let fixed_instalations_audit_details = []
-
-        tables.instalations_audit_details.forEach((i_audit_detail) => {
-            if(Array.isArray(i_audit_detail)){
-                fixed_instalations_audit_details.push(i_audit_detail[0])
-            } else {
-                fixed_instalations_audit_details.push(i_audit_detail)
-            }
-        })
-
-        tables.instalations_audit_details = fixed_instalations_audit_details
-
-        return response.status(200).json({data: tables})
+        if(tables){
+            let fixed_instalations_audit_details = []
+        
+            tables.instalations_audit_details.forEach((i_audit_detail) => {
+                if(Array.isArray(i_audit_detail)){
+                    fixed_instalations_audit_details.push(i_audit_detail[0])
+                } else {
+                    fixed_instalations_audit_details.push(i_audit_detail)
+                }
+            })
+    
+            tables.instalations_audit_details = fixed_instalations_audit_details
+    
+            return response.status(200).json({data: tables})
+        }
+        else {
+            getDataForTables(request, response)
+        }
     }
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
