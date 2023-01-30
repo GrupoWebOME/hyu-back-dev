@@ -2756,6 +2756,8 @@ const updateTest = async(request, response) => {
         // Es la sumatoria de los pesos de cada instalación
         totalWeightPerc +=  sales_weight_per_installation + post_sale_weight_per_installation
 
+        newAuditResults.criterions.sort((criterion_a, criterion_b) => (criterion_a.criterion_id.category.name).localeCompare(criterion_b.criterion_id.category.name));
+
         // Criterios electricos, hme, img
         newAuditResults.criterions.forEach((criterion) => {     
             let isValidType = false
