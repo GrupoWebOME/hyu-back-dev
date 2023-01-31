@@ -377,6 +377,7 @@ const updateAdmin = async(request, response) => {
                                    msg: 'the administrator has been updated successfully',
                                    data: {admin: newAdmin, token: token} })
 
+        /*
         if(audits){
            for(let i=0; i < audits.length; i++){
                 for(let j=0; j < audits[i].dealerships.length; j++){
@@ -390,6 +391,7 @@ const updateAdmin = async(request, response) => {
                 }
            }
         }
+        */
     }
     catch(error){
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
