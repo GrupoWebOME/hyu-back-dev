@@ -7,10 +7,10 @@ module.exports = async function(req, res, next) {
             
         const file = req.files.image;
 
-        if(file.size > 1024 * 1024){
+        if(file.size > 5120 * 5120){
             removeTmp(file.tempFilePath)
             return res.status(400).json({msg: "Size too large."})
-        } // 1mb
+        } // 5mb
 
         if(file.mimetype !== 'image/jpeg' && file.mimetype !== 'image/png'){
             removeTmp(file.tempFilePath)
