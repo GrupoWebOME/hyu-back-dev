@@ -77,7 +77,7 @@ const closedMailSubject = 'Notificación Auditoría Cerrada'
 const updateAuditInstallation = async(request, response) => {
     try{
         const {id} = request.params
-        const {comment, audit_status, audit_date, photo} = request.body
+        const {comment, audit_status, audit_date, photo, auditor_id} = request.body
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
 
         let errors = []
@@ -140,6 +140,9 @@ const updateAuditInstallation = async(request, response) => {
 
         if(photo)
             editAuditInst['photo'] = photo
+
+        if(auditor_id)
+            editAuditInst['auditor_id'] = auditor_id
 
         if(audit_status)
             editAuditInst['audit_status'] = audit_status
