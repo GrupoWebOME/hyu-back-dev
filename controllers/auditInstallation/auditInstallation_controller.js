@@ -141,7 +141,7 @@ const updateAuditInstallation = async(request, response) => {
         if(photo)
             editAuditInst['photo'] = photo
 
-        if(auditor_id)
+        if(auditor_id && Array.isArray(auditor_id))
             editAuditInst['auditor_id'] = auditor_id
 
         if(audit_status)
