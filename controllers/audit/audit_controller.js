@@ -511,16 +511,17 @@ const getAllAudit= async(request, response) => {
         }
 
         else if(role === 'auditor'){
-            // filterAuditInst['audit_status'] = {$in: ['planned', 'in_process']}
+            const auditIns = await AuditInstallation.find({auditor_id: {$in: [_id]}})
 
-            const auditorAdmin = await Admin.findById(_id)
-                        
             let arrayAuditInstPass = []
-            let arrayAuditsOk = []
 
-            auditorAdmin.audits.forEach((audit) => {
-                arrayAuditInstPass = [...arrayAuditInstPass, audit.audit.toString()]
+            auditIns.forEach((audit) => {
+                if(!arrayAuditInstPass.includes(audit.audit_id.toString())){
+                    arrayAuditInstPass = [...arrayAuditInstPass, audit.audit_id.toString()]
+                }
             })
+
+            let arrayAuditsOk = []
 
             let auditInstallationForDealerships = await AuditInstallation.find({audit_id: {$in: arrayAuditInstPass}})
 
@@ -548,16 +549,17 @@ const getAllAudit= async(request, response) => {
         }
 
         else if(role === 'superauditor'){
-            // filterAuditInst['audit_status'] = {$in: ['planned', 'in_process', 'auditor_signed']}
+            const auditIns = await AuditInstallation.find({auditor_id: {$in: [_id]}})
 
-            const auditorAdmin = await Admin.findById(_id)
-            
             let arrayAuditInstPass = []
-            let arrayAuditsOk = []
 
-            auditorAdmin.audits.forEach((audit) => {
-                arrayAuditInstPass = [...arrayAuditInstPass, audit.audit.toString()]
+            auditIns.forEach((audit) => {
+                if(!arrayAuditInstPass.includes(audit.audit_id.toString())){
+                    arrayAuditInstPass = [...arrayAuditInstPass, audit.audit_id.toString()]
+                }
             })
+
+            let arrayAuditsOk = []
 
             let auditInstallationForDealerships = await AuditInstallation.find({audit_id: {$in: arrayAuditInstPass}})
 
