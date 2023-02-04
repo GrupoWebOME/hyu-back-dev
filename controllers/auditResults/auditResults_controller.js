@@ -3013,6 +3013,10 @@ const updateTest = async(request, response) => {
                         installationAuditData['installation'] =  existInstallation
                         installationAuditData['totalWeightPerc'] = totalWeightPerc
                         
+                        if(instalations_audit_details === null){
+                            instalations_audit_details = []
+                        }
+                        
                         instalations_audit_details = [...instalations_audit_details, installationAuditData]
                     }
                 }
