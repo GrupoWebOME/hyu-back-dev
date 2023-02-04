@@ -846,7 +846,7 @@ const getValueFromTable = (rows, columnNumber, value, id = null) => {
         }
     })
 
-    if(!rowColvalue){
+    if(rowColvalue === null || rowColvalue === undefined){
         rowColvalue = rowColvalueAux
     }
 
