@@ -954,7 +954,7 @@ const getCalculatesCrit = async(installation_id) => {
     arrayCalcCrit = [...arrayCalcCrit, pv_1_2_6_1]
 
     //PV.1.2.7.1
-    const pv_1_2_7_1 = {_id: '6245a57454abde8cda638d4b', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pv.rows, 13, number_x_referencial, 'nemo'): null}
+    const pv_1_2_7_1 = {_id: '6245a57454abde8cda638d4b', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(m2pv.rows, 13, number_x_referencial): null}
     arrayCalcCrit = [...arrayCalcCrit, pv_1_2_7_1]
 
     //PV.1.3.1.1
