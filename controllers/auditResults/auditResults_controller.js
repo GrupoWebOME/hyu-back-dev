@@ -1917,7 +1917,7 @@ const createAuditResultsTest = async(request, response) => {
         //Convierto en false los criterios afectados por core
         if(!existAudit?.isCustomAudit){
             newAuditResults.criterions.forEach((criterion, index) => {
-                const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+                const existSt = arrayStandardsFalse.includes(criterion.criterion_id.standard.toString())
                 const existAr = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
                 if(existAr || existSt){
                     //Pongo en false los criterios afectados por el core
@@ -1925,7 +1925,6 @@ const createAuditResultsTest = async(request, response) => {
                 }
             })
         }
-
         //Ordeno el arreglo por standard id
         newAuditResults.criterions.sort(function (a, b) {
                 if (a.criterion_id.standard._id.toString() > b.criterion_id.standard._id.toString()) {
@@ -1959,10 +1958,9 @@ const createAuditResultsTest = async(request, response) => {
         const sales_weight_per_installation= (newAuditResults.installation_id.sales_weight_per_installation !== null)? newAuditResults.installation_id.sales_weight_per_installation : 0
         const post_sale_weight_per_installation= (newAuditResults.installation_id.post_sale_weight_per_installation !== null)? newAuditResults.installation_id.post_sale_weight_per_installation : 0
 
+
         // Es la sumatoria de los pesos de cada instalación
         totalWeightPerc +=  sales_weight_per_installation + post_sale_weight_per_installation
-
-        newAuditResults.criterions.sort((criterion_a, criterion_b) => (criterion_a.criterion_id.category.name).localeCompare(criterion_b.criterion_id.category.name));
 
         // Criterios electricos, hme, img
         newAuditResults.criterions.forEach((criterion) => {     
@@ -1972,6 +1970,7 @@ const createAuditResultsTest = async(request, response) => {
                     isValidType = true
                 }
             })
+
             // Si es inválido
             if(criterion.criterion_id.category._id.toString() === VENTA && !newAuditResults.installation_id.isSale ||
                 criterion.criterion_id.category._id.toString() === POSVENTA && !newAuditResults.installation_id.isPostSale ||
@@ -2022,7 +2021,7 @@ const createAuditResultsTest = async(request, response) => {
                 }
             }
         })
-        
+
         // Los demás criterios
         newAuditResults.criterions.forEach((criterion) => {
             let isValidType = false
@@ -2220,6 +2219,8 @@ const createAuditResultsTest = async(request, response) => {
 
                         installationAuditData['installation'] =  existInstallation
                         installationAuditData['totalWeightPerc'] = totalWeightPerc
+                        installationAuditData['instalation_audit_types'] = instalation_audit_types
+
                         instalations_audit_details = [...instalations_audit_details, installationAuditData]
 
                     }
@@ -2259,7 +2260,6 @@ const createAuditResultsTest = async(request, response) => {
         let total_values = 0
 
         array_instalations_audit_details.forEach((installation) => {
-            
             if(Array.isArray(installation)){
                 installation = installation[0]
             }
@@ -2753,10 +2753,10 @@ const updateTest = async(request, response) => {
         const sales_weight_per_installation= (newAuditResults.installation_id.sales_weight_per_installation !== null)? newAuditResults.installation_id.sales_weight_per_installation : 0
         const post_sale_weight_per_installation= (newAuditResults.installation_id.post_sale_weight_per_installation !== null)? newAuditResults.installation_id.post_sale_weight_per_installation : 0
 
+        newAuditResults.criterions.sort((criterion_a, criterion_b) => (criterion_a.criterion_id.category.name).localeCompare(criterion_b.criterion_id.category.name));
+
         // Es la sumatoria de los pesos de cada instalación
         totalWeightPerc +=  sales_weight_per_installation + post_sale_weight_per_installation
-
-        newAuditResults.criterions.sort((criterion_a, criterion_b) => (criterion_a.criterion_id.category.name).localeCompare(criterion_b.criterion_id.category.name));
 
         // Criterios electricos, hme, img
         newAuditResults.criterions.forEach((criterion) => {     
@@ -3010,13 +3010,14 @@ const updateTest = async(request, response) => {
                             percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
                         }
 
+                        installationAuditData['instalation_audit_types'] =  instalation_audit_types
                         installationAuditData['installation'] =  existInstallation
                         installationAuditData['totalWeightPerc'] = totalWeightPerc
                         
                         if(instalations_audit_details === null){
                             instalations_audit_details = []
                         }
-                        
+
                         instalations_audit_details = [...instalations_audit_details, installationAuditData]
                     }
                 }
