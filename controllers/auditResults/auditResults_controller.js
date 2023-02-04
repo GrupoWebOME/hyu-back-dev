@@ -4567,7 +4567,10 @@ const getDataForAudit = async(request, response) => {
             let installation_details = []
 
             auditAgencies.forEach((agency) => {
-                agency.instalations_audit_details.forEach((installation) => {          
+                agency.instalations_audit_details.forEach((inst) => {   
+                    
+                    let installation = Array.isArray(inst)? inst[0] : inst
+
                     installation_details = [...installation_details, {
                         installation_name: installation.installation.name,                        
                         installation_id: installation.installation._id.toString(),
