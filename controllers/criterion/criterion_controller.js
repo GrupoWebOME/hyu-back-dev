@@ -1034,6 +1034,24 @@ const calculates = async(request, response) => {
                     }
                 })
             }
+        } else {
+            const criterionsAll = await Criterion.find({_id: {$in: calculables.map(crit => crit._id.toString())}}).populate({path: 'category block standard area criterionType installationType auditResponsable'})
+            const instForType = await Installation.findById(installation_id)
+            criterionsAll.forEach((element) => {
+                const arrayIntTypesAplication = element.installationType.map(crit => crit._id.toString())
+                const exceptionsAplication = element.exceptions.map((el) => el.toString())
+                const existCalc = calculables.find((calc) => calc?._id.toString() === element?._id.toString())
+                if(arrayIntTypesAplication.includes(instForType.installation_type.toString()) && !exceptionsAplication.includes(installation_id)){
+                    const crit = {
+                        criterion: element,
+                        exceptions: [],
+                        _id: element?._id,
+                        isCalc: existCalc? true: false,
+                        refValue: existCalc? existCalc.value: null
+                    }
+                    criterionsFilter = [...criterionsFilter, crit]
+                }
+            })
         }
 
         const data = {criterions: criterionsFilter, 
