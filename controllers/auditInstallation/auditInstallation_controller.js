@@ -241,11 +241,13 @@ const getAllAuditInstallation = async(request, response) => {
 
 const sendMail = async(subject, content) => {    
     try{
-        var transporter = nodemailer.createTransport({
-            service: 'gmail',
+          var transporter = nodemailer.createTransport({
+            host: "smtp.hornet.email",
+            port: 587,
+            secure: false,
             auth: {
-              user: process.env.EMAIL_SENDER,
-              pass: process.env.EMAIL_PASSWORD,
+                user: 'estandares@redhyundai.com',
+                pass: 'P6xJ9*e1'
             }
           });
           
