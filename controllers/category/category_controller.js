@@ -77,7 +77,7 @@ const createCategory = async(request, response) => {
 const updateCategory = async(request, response) => {
     try{
         const {id} = request.params
-        const {name, abbreviation} = request.body
+        const {name, abbreviation, categoryType} = request.body
         let existId = null
         let errors = []
 
@@ -140,6 +140,15 @@ const updateCategory = async(request, response) => {
             }
         }
 
+        if(categoryType){
+            if(categoryType.length < 1 || (categoryType !== "VN" && categoryType !== "PV" && categoryType !== "HP") ){
+                errors.push({code: 400, 
+                                msg: 'invalid categoryType',
+                                detail: `categoryType is required and should be VN, PV, HP`
+                            })
+                }
+        }
+
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
 
@@ -148,6 +157,8 @@ const updateCategory = async(request, response) => {
             updatedFields['name'] = name
         if(abbreviation)
             updatedFields['abbreviation'] = abbreviation
+        if(categoryType)
+            updatedFields['categoryType'] = categoryType
         updatedFields['updatedAt'] = Date.now()
 
         const updatedCategory = await Category.findByIdAndUpdate(id, updatedFields, {new: true})
