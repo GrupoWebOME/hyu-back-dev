@@ -10,6 +10,10 @@ const categorySchema = new Schema({
                    required: false },
     value: {type: Number,
             default: 0},
+    categoryType: {
+        type: String,
+        default: null
+    },
     blocks: [{type: Schema.Types.ObjectId, ref: 'Block'}],
     isAgency: {type: Boolean,
                default: false },
