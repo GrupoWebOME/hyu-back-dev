@@ -7,7 +7,7 @@ const ObjectId = require('mongodb').ObjectId
 
 const createCategory = async(request, response) => {
     try{
-        const {name, abbreviation, isAgency} = request.body
+        const {name, abbreviation, isAgency, categoryType} = request.body
 
         let errors = []
 
@@ -26,6 +26,15 @@ const createCategory = async(request, response) => {
                              msg: 'invalid name',
                              detail: `${name} is already in use`
                             })
+        }
+
+        if(categoryType){
+            if(categoryType.length < 1 || (categoryType !== "VN" && categoryType !== "PV" && categoryType !== "HP") ){
+                errors.push({code: 400, 
+                                msg: 'invalid categoryType',
+                                detail: `categoryType is required and should be VN, PV, HP`
+                            })
+                }
         }
 
         if(!abbreviation || abbreviation.length < 1)
@@ -57,7 +66,8 @@ const createCategory = async(request, response) => {
         const newCategory = new Category({
             name: name,
             abbreviation: abbreviation,
-            isAgency: (!isAgency || isAgency === false)? false : true
+            isAgency: (!isAgency || isAgency === false)? false : true,
+            categoryType: categoryType
         })
 
         await newCategory.save()
