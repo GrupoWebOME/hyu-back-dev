@@ -1800,7 +1800,7 @@ const createAuditResultsTest = async(request, response) => {
             .populate({ path: 'criterions.criterion_id', 
                         populate: {
                             path: 'standard block area category auditResponsable criterionType installationType',
-                            select: 'name code description isCore number abbreviation'
+                            select: 'name code description isCore number abbreviation categoryType'
                         },
                     }) 
 
@@ -1810,7 +1810,7 @@ const createAuditResultsTest = async(request, response) => {
                                                 .populate({ path: 'criterions.criterion_id', 
                                                         populate: {
                                                             path: 'standard block area category auditResponsable criterionType installationType',
-                                                            select: 'name code description isCore number abbreviation'
+                                                            select: 'name code description isCore number abbreviation categoryType'
                                                         },
                                                     }) 
                              
