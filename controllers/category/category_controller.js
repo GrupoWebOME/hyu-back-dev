@@ -29,7 +29,7 @@ const createCategory = async(request, response) => {
         }
 
         if(categoryType){
-            if(categoryType.length < 1 || (categoryType !== "VN" && categoryType !== "PV" && categoryType !== "HP") ){
+            if(categoryType.length < 1 || (categoryType !== "VN" && categoryType !== "PV" && categoryType !== "HP" && categoryType !== "OTHER") ){
                 errors.push({code: 400, 
                                 msg: 'invalid categoryType',
                                 detail: `categoryType is required and should be VN, PV, HP`
@@ -151,7 +151,7 @@ const updateCategory = async(request, response) => {
         }
 
         if(categoryType){
-            if(categoryType.length < 1 || (categoryType !== "VN" && categoryType !== "PV" && categoryType !== "HP") ){
+            if(categoryType.length < 1 || (categoryType !== "VN" && categoryType !== "PV" && categoryType !== "HP" && categoryType !== "OTHER") ){
                 errors.push({code: 400, 
                                 msg: 'invalid categoryType',
                                 detail: `categoryType is required and should be VN, PV, HP`
