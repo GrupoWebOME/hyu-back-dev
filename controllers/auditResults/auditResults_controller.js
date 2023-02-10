@@ -1870,9 +1870,9 @@ const createAuditResultsTest = async(request, response) => {
                 }
             })
             // Si es inválido
-            if(criterion.criterion_id.category._id.toString() === VENTA && !newAuditResults.installation_id.isSale ||
-                criterion.criterion_id.category._id.toString() === POSVENTA && !newAuditResults.installation_id.isPostSale ||
-                criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !newAuditResults.installation_id.isHP ||
+            if(criterion.criterion_id.category.categoryType.toString() === "VN" && !newAuditResults.installation_id.isSale ||
+                criterion.criterion_id.category.categoryType.toString() === "PV" && !newAuditResults.installation_id.isPostSale ||
+                criterion.criterion_id.category.categoryType.toString() === "HP" && !newAuditResults.installation_id.isHP ||
                 criterion.criterion_id.exceptions.includes(newAuditResults.installation_id._id) ||
                 !isValidType){
             }
@@ -1972,9 +1972,9 @@ const createAuditResultsTest = async(request, response) => {
             })
 
             // Si es inválido
-            if(criterion.criterion_id.category._id.toString() === VENTA && !newAuditResults.installation_id.isSale ||
-                criterion.criterion_id.category._id.toString() === POSVENTA && !newAuditResults.installation_id.isPostSale ||
-                criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !newAuditResults.installation_id.isHP ||
+            if(criterion.criterion_id.category.categoryType.toString() === "VN" && !newAuditResults.installation_id.isSale ||
+                criterion.criterion_id.category.categoryType.toString() === "PV" && !newAuditResults.installation_id.isPostSale ||
+                criterion.criterion_id.category.categoryType.toString() === "HP" && !newAuditResults.installation_id.isHP ||
                 criterion.criterion_id.exceptions.includes(newAuditResults.installation_id._id) ||
                 !isValidType){
             }
@@ -2031,9 +2031,9 @@ const createAuditResultsTest = async(request, response) => {
                 }
             })
             // El criterio no aplica
-            if(criterion.criterion_id.category._id.toString() === VENTA && !newAuditResults.installation_id.isSale ||
-                criterion.criterion_id.category._id.toString() === POSVENTA && !newAuditResults.installation_id.isPostSale ||
-                criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !newAuditResults.installation_id.isHP || 
+            if(criterion.criterion_id.category.categoryType.toString() === "VN" && !newAuditResults.installation_id.isSale ||
+                criterion.criterion_id.category.categoryType.toString() === "PV" && !newAuditResults.installation_id.isPostSale ||
+                criterion.criterion_id.category.categoryType.toString() === "HP" && !newAuditResults.installation_id.isHP || 
                 criterion.criterion_id.exceptions.includes(newAuditResults.installation_id._id) ||
                 !isValidType){
             }
@@ -2664,9 +2664,9 @@ const updateTest = async(request, response) => {
                 }
             })
             // Si es inválido
-            if(criterion.criterion_id.category._id.toString() === VENTA && !newAuditResults.installation_id.isSale ||
-                criterion.criterion_id.category._id.toString() === POSVENTA && !newAuditResults.installation_id.isPostSale ||
-                criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !newAuditResults.installation_id.isHP ||
+            if(criterion.criterion_id.category.categoryType.toString() === "VN" && !newAuditResults.installation_id.isSale ||
+                criterion.criterion_id.category.categoryType.toString() === "PV" && !newAuditResults.installation_id.isPostSale ||
+                criterion.criterion_id.category.categoryType.toString() === "HP" && !newAuditResults.installation_id.isHP ||
                 criterion.criterion_id.exceptions.includes(newAuditResults.installation_id._id) ||
                 !isValidType){
             }
@@ -2767,9 +2767,9 @@ const updateTest = async(request, response) => {
                 }
             })
             // Si es inválido
-            if(criterion.criterion_id.category._id.toString() === VENTA && !newAuditResults.installation_id.isSale ||
-                criterion.criterion_id.category._id.toString() === POSVENTA && !newAuditResults.installation_id.isPostSale ||
-                criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !newAuditResults.installation_id.isHP ||
+            if(criterion.criterion_id.category.categoryType.toString() === "VN" && !newAuditResults.installation_id.isSale ||
+                criterion.criterion_id.category.categoryType.toString() === "PV" && !newAuditResults.installation_id.isPostSale ||
+                criterion.criterion_id.category.categoryType.toString() === "HP" && !newAuditResults.installation_id.isHP ||
                 criterion.criterion_id.exceptions.includes(newAuditResults.installation_id._id) ||
                 !isValidType){
             }
@@ -2818,9 +2818,9 @@ const updateTest = async(request, response) => {
                 }
             })
             // El criterio no aplica
-            if(criterion.criterion_id.category._id.toString() === VENTA && !newAuditResults.installation_id.isSale ||
-                criterion.criterion_id.category._id.toString() === POSVENTA && !newAuditResults.installation_id.isPostSale ||
-                criterion.criterion_id.category._id.toString() === HYUNDAI_PROMISE && !newAuditResults.installation_id.isHP || 
+            if(criterion.criterion_id.category.categoryType.toString() === "VN" && !newAuditResults.installation_id.isSale ||
+                criterion.criterion_id.category.categoryType.toString() === "PV" && !newAuditResults.installation_id.isPostSale ||
+                criterion.criterion_id.category.categoryType.toString() === "HP" && !newAuditResults.installation_id.isHP || 
                 criterion.criterion_id.exceptions.includes(newAuditResults.installation_id._id) ||
                 !isValidType){
             }
