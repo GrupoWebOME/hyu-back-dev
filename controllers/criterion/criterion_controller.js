@@ -253,7 +253,7 @@ const updateCriterion = async(request, response) => {
     try{
         const {id} = request.params
         const {description, number, value, comment, installationType, standard, auditResponsable, criterionType,
-               isException, isHmeAudit, isImgAudit, isElectricAudit, photo, saleCriterion, hmesComment,
+               isException, isHmeAudit, isImgAudit, isIoniqAudit, isElectricAudit, photo, saleCriterion, hmesComment,
                imageUrl, imageComment, hmeCode, exceptions } = request.body
 
         let criterion_abbreviation = null
@@ -425,6 +425,11 @@ const updateCriterion = async(request, response) => {
                 msg: 'invalid isImgAudit',
                 detail: `isImgAudit should be a boolean type`
             })
+        if((isIoniqAudit !== undefined && isIoniqAudit !== null) && (isIoniqAudit !== true && isIoniqAudit !== false))
+            errors.push({code: 400, 
+                msg: 'invalid isIoniqAudit',
+                detail: `isIoniqAudit should be a boolean type`
+            })
         if((isElectricAudit !== undefined && isElectricAudit !== null) && (isElectricAudit !== true && isElectricAudit !== false))
             errors.push({code: 400, 
                 msg: 'invalid isElectricAudit',
@@ -490,6 +495,8 @@ const updateCriterion = async(request, response) => {
             updatedFields['isException'] = isException
         if(isImgAudit !== null && isImgAudit !== undefined)
             updatedFields['isImgAudit'] = isImgAudit
+        if(isIoniqAudit !== null && isIoniqAudit !== undefined)
+            updatedFields['isIoniqAudit'] = isIoniqAudit
         if(isHmeAudit !== null && isHmeAudit !== undefined)
             updatedFields['isHmeAudit'] = isHmeAudit
         if(imageUrl !== null && imageUrl !== undefined)
