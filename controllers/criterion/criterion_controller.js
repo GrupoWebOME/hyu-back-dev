@@ -17,7 +17,7 @@ var mongoose = require('mongoose')
 const createCriterion = async(request, response) => {
     try{
         const {description, number, comment, installationType, standard, auditResponsable, criterionType, isAgency,
-               isException, isHmeAudit, isImgAudit, isElectricAudit, photo, saleCriterion, hmesComment, value, 
+               isException, isHmeAudit, isImgAudit, isIoniqAudit, isElectricAudit, photo, saleCriterion, hmesComment, value, 
                imageUrl, imageComment, hmeCode } = request.body
         let criterion_abbreviation = null
         let errors = []
@@ -146,6 +146,11 @@ const createCriterion = async(request, response) => {
                         msg: 'invalid isImgAudit',
                         detail: `isImgAudit should be a boolean type`
                         }) 
+        if(isIoniqAudit!==null && isIoniqAudit!==undefined && typeof isIoniqAudit !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid isIoniqAudit',
+                        detail: `isIoniqAudit should be a boolean type`
+                        }) 
         if(isElectricAudit!==null && isElectricAudit!==undefined && typeof isElectricAudit !== 'boolean')
             errors.push({code: 400, 
                         msg: 'invalid isElectricAudit',
@@ -205,6 +210,7 @@ const createCriterion = async(request, response) => {
             isException: (isException && isException === true)? true : false,
             isHmeAudit: (isHmeAudit && isHmeAudit === true)? true : false,
             isImgAudit: (isImgAudit && isImgAudit === true)? true : false,
+            isIoniqAudit: (isIoniqAudit && isIoniqAudit === true)? true : false,
             isElectricAudit: (isElectricAudit && isElectricAudit === true)? true : false,
             photo: (photo && photo === true)? true : false,
             saleCriterion: (saleCriterion && saleCriterion === true)? true : false,
