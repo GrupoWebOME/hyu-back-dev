@@ -26,6 +26,7 @@ const criterionSchema = new Schema({
     hmeCode: {type: String, default: null},
     isImgAudit: {type: Boolean, default: false },
     imageUrl: {type: String, default: null},
+    isIoniqAudit : {type: Boolean, default: false },
     imageComment: {type: String, default: null},
     isElectricAudit: {type: Boolean, default: false },
     photo: {type: Boolean, default: false },
