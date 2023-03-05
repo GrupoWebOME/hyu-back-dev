@@ -3140,7 +3140,7 @@ const updateTest = async(request, response) => {
 
         if(existAudit?.isCustomAudit){
             agency_by_types_customs.forEach((element, index) => {
-                agency_by_types_customs[index].promedioCategory = agency_by_types_customs[index].promedioCategory / agency_by_types_customs_total[index].total
+                agency_by_types_customs[index].promedioCategory = agency_by_types_customs[index].promedioCategory / maxCategories //agency_by_types_customs_total[index].total
             })
         }
 
