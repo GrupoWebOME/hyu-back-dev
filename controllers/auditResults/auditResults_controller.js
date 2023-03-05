@@ -3055,7 +3055,15 @@ const updateTest = async(request, response) => {
         let agency_by_types_customs_total = []
 
         let total_values = 0
+        
         // LLEGUE
+        let maxCategories = 0
+        array_instalations_audit_details.forEach((installation) => {
+            if(installation.categories.length - 1 > maxCategories){
+                maxCategories = (installation.categories.length - 1)
+            }
+        })
+        
         array_instalations_audit_details.forEach((installation) => {
             if(Array.isArray(installation)){
                 installation = installation[0]
