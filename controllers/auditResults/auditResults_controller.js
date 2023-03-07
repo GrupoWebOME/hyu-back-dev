@@ -3065,7 +3065,9 @@ const updateTest = async(request, response) => {
         
         // LLEGUE
         let maxCategories = 0
+        let cantInst = 0
         array_instalations_audit_details.forEach((installation) => {
+            cantInst += 1
             if(installation.categories.length - 1 > maxCategories){
                 maxCategories = (installation.categories.length - 1)
             }
@@ -3147,7 +3149,7 @@ const updateTest = async(request, response) => {
 
         if(existAudit?.isCustomAudit){
             agency_by_types_customs.forEach((element, index) => {
-                agency_by_types_customs[index].promedioCategory = agency_by_types_customs[index].promedioCategory / maxCategories //agency_by_types_customs_total[index].total
+                agency_by_types_customs[index].promedioCategory = agency_by_types_customs[index].promedioCategory / cantInst //agency_by_types_customs_total[index].total
             })
         }
 
