@@ -11,9 +11,9 @@ const upload = {
     uploadAvatar: (req, res) => {
         try {
             const file = req.files.image;
-            
+            const folderName = req?.body?.folderName || 'photos'
             cloudinary.v2.uploader.upload(file.tempFilePath, {
-                folder: 'photos'
+                folder: folderName
             }, async(err, result) => {
                 if(err) throw err;
 
@@ -21,12 +21,10 @@ const upload = {
 
                 res.json({url: result.secure_url})
             })
-        
         } catch (err) {
             return res.status(500).json({msg: err.message})
         }
     }
-
 }
 
 
