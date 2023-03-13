@@ -8,7 +8,7 @@ const ObjectId = require('mongodb').ObjectId
 
 const createAudit = async(request, response) => {
     try{
-        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions, auditMVE, auditElectrics, auditIonic5, isCustomAudit, mistery} = request.body
+        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions, auditMVE, auditElectrics, auditIonic5, isCustomAudit, mistery, autoAudit} = request.body
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
         if(!name)
@@ -153,7 +153,11 @@ const createAudit = async(request, response) => {
                         msg: 'invalid mistery',
                         detail: `mistery should be a boolean type`
                         }) 
-
+        if(autoAudit!==null && autoAudit!==undefined && typeof autoAudit !== 'boolean')
+                    errors.push({code: 400, 
+                                msg: 'invalid autoAudit',
+                                detail: `autoAudit should be a boolean type`
+                                }) 
         if(errors.length > 0)
             return response.status(400).json({errors: errors})
 
@@ -169,7 +173,8 @@ const createAudit = async(request, response) => {
             auditElectrics: (auditElectrics !== null && auditElectrics !== undefined && auditElectrics === false)? false : true,
             auditMVE: (auditMVE !== null && auditMVE !== undefined  && auditMVE === false)? false : true,
             installation_exceptions: installation_exceptions? installation_exceptions : [],
-            mistery: mistery
+            mistery: mistery,
+            autoAudit: autoAudit,
         })
 
         await newAudit.save()
@@ -203,7 +208,7 @@ const createAudit = async(request, response) => {
 
 const updateAudit = async(request, response) => {
     try{
-        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions, auditMVE, auditElectrics, auditIonic5, isCustomAudit, audits, mistery} = request.body
+        let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions, auditMVE, auditElectrics, auditIonic5, isCustomAudit, audits, mistery, autoAudit} = request.body
         const {id} = request.params
         const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
         let errors = []
@@ -302,6 +307,11 @@ const updateAudit = async(request, response) => {
                         msg: 'invalid mistery',
                         detail: `mistery should be a boolean type`
                         }) 
+        if(autoAudit!==null && autoAudit!==undefined && typeof autoAudit !== 'boolean')
+            errors.push({code: 400, 
+                        msg: 'invalid autoAudit',
+                        detail: `autoAudit should be a boolean type`
+                        }) 
         if(auditIonic5!==null && auditIonic5!==undefined && typeof auditIonic5 !== 'boolean')
             errors.push({code: 400, 
                         msg: 'invalid auditIonic5',
@@ -374,6 +384,8 @@ const updateAudit = async(request, response) => {
             updatedFields['isAgency'] = isAgency
         if(mistery !== null && mistery !== undefined)
             updatedFields['mistery'] = mistery
+        if(autoAudit !== null && autoAudit !== undefined)
+            updatedFields['autoAudit'] = autoAudit
         if(auditIonic5 !== null && auditIonic5 !== undefined)
             updatedFields['auditIonic5'] = auditIonic5
         if(auditElectrics !== null && auditElectrics !== undefined)
