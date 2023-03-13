@@ -125,7 +125,7 @@ const createSizingTable = async(request, response) => {
 const updateSizingTable = async(request, response) => {
     try{
         const {id} = request.params
-        const {name, columns, rows} = request.body
+        const {name, columns, rows, row} = request.body
 
         let errors = []
 
