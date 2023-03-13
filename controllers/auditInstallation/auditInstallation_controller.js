@@ -176,14 +176,14 @@ const updateAuditInstallation = async(request, response) => {
         const auditInst = await AuditInstallation.findByIdAndUpdate(id, editAuditInst, {new: true})
                                         .catch( error => {return response.status(500).json({code: 500, msg: 'created error', detail: error.message})})
         
-        if(audit_status === 'planned' && !auditInstallation.audit_id.mistery){
-            await sendMail(plannedMailsubject, plannedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id.name))
+        if(audit_status === 'planned' && !auditInstallation.audit_id?.mistery){
+            await sendMail(plannedMailsubject, plannedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name))
         } else if(audit_status === 'review' && !auditInstallation?.audit_id?.autoAudit){
-            await sendMail(reviewMailsubject, reviewMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id.name))
+            await sendMail(reviewMailsubject, reviewMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name))
         } else if(audit_status === 'review' && auditInstallation?.audit_id?.autoAudit){
-            await sendMail(reviewAutoMailsubject, reviewAutoMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id.name))
+            await sendMail(reviewAutoMailsubject, reviewAutoMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name))
         } else if(audit_status === 'closed'){
-            await sendMail(closedMailSubject, closedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id.name))
+            await sendMail(closedMailSubject, closedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name))
         }
 
         response.status(200).json({code: 200,
