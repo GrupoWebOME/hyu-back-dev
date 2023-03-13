@@ -2,15 +2,17 @@ const AuditInstallation = require('../../models/audit_installation_model')
 var ObjectId = require('mongodb').ObjectId
 const nodemailer = require('nodemailer')
 
-const plannedMailContent = (installation) => { return `
+const plannedMailContent = (installation, audit) => { return `
     <p>
         Estimado concesionario,
     </p> 
     <p>
-        Paso a comunicarte que la auditoría de este trimestre para la instalación <b>${installation}</b> ya se encuentra con fecha asignada para auditar 
+        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación <b>${installation}</b> ya se encuentra con fecha asignada para auditar. 
+        <b>Dispones de un plazo de 48h para solicitar de forma justificada un cambio de fecha.</b>
     </p> 
     <p>
-        Esta informacion se encuentra accesible a través de la aplicación de Estándares HMES. Para cualquier duda contactar con Elena Drandar: 
+        Esta informacion se encuentra accesible a través de la aplicación Hyundai Standars Application
+        (HSA). Para cualquier duda contactar con Elena Drandar: 
         <span>estandares@redhyundai.com</span>.
     </p> 
     <p>
@@ -18,12 +20,12 @@ const plannedMailContent = (installation) => { return `
     </p>
 `}
 
-const reviewMailContent = (installation) => { return `
+const reviewMailContent = (installation, audit) => { return `
     <p>
         Estimado concesionario,
     </p> 
     <p>
-        Paso a comunicarte que la auditoría de este trimestre para la instalación <b>${installation}</b> está finalizada por parte del auditor y se encuentra en Pendiente revisar concesión. 
+        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación <b>${installation}</b> está finalizada por parte del auditor y se encuentra en Pendiente revisar concesión. 
     </p> 
     <p>
         Antes de publicar los resultados definitivos, queremos ofrecerte la posibilidad de revisar
@@ -44,26 +46,42 @@ const reviewMailContent = (installation) => { return `
     </p>
 `}
 
-const closedMailContent = (installation) => { return `
+const reviewAutoMailContent = (installation, audit) => { return `
     <p>
         Estimado concesionario,
     </p> 
     <p>
-        Paso a comunicarte que la auditoría de este trimestre para la instalación: <b>${installation}</b> se encuentra <b>cerrada</b> desde este momento puedes acceder para consultar los resultados. 
+        Paso a comunicarte que la auditoría ${audit} para la instalación <b>${installation}</b> se encuentra en
+        <b>Pendiente revisar concesión</b> para ser cumplimentada por la Concesión.. 
     </p> 
     <p>
-        Antes de publicar los resultados definitivos, queremos ofrecerte la posibilidad de revisar
-        aquellos incumplimientos que consideres puedan ser susceptibles de emitir alegaciones para
-        ser revisadas por HMES. En caso de que compruebes, que efectivamente, existe una
-        justificación razonable para alegar un incumplimiento, podrás realizar la alegación incluyendo
-        toda aquella información que consideréis necesaria, fotos y/o comentarios.
+        Accediendo a esta auditoria podréis consultar cada uno de los criterios a auto auditar por la
+        Concesión e incluir los comentarios e imágenes que consideréis oportuno. Una vez finalizada la
+        auto auditoria de todos los criterios debéis pulsar el botón “Cerrar Alegaciones/ Auto
+        auditoria”.
     </p> 
     <p>
-        El plazo de alegaciones será de <b>una semana</b> contando a partir del día de hoy.
+        El plazo para realizar la auto auditoria será de <b>una semana</b> contando a partir del día de hoy.
     </p>
     <p>
-        Esta informacion se encuentra accesible a través de la aplicación de Estándares HMES. Para
-        cualquier duda contactar con Elena Drandar: estandares@redhyundai.com.
+        Esta informacion se encuentra accesible a través de la aplicación Hyundai Standars Application
+        (HSA). Para cualquier duda contactar con Elena Drandar: estandares@redhyundai.com.
+    </p>
+    <p>
+        Recibe un cordial saludo,
+    </p>
+`}
+
+const closedMailContent = (installation, audit) => { return `
+    <p>
+        Estimado concesionario,
+    </p> 
+    <p>
+        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación: <b>${installation}</b> se encuentra <b>cerrada</b> desde este momento puedes acceder para consultar los resultados. 
+    </p> 
+    <p>
+        Esta informacion se encuentra accesible a través de la aplicación Hyundai Standars Application
+        (HSA). Para cualquier duda contactar con Elena Drandar: estandares@redhyundai.com.
     </p>
     <p>
         Recibe un cordial saludo,
@@ -72,6 +90,7 @@ const closedMailContent = (installation) => { return `
 
 const plannedMailsubject = 'Notificación Auditoría planificada'
 const reviewMailsubject = 'Notificación Auditoría en Pendiente revisar concesión - Alegaciones'
+const reviewAutoMailsubject = 'Notificación Auto auditoría'
 const closedMailSubject = 'Notificación Auditoría Cerrada'
 
 const updateAuditInstallation = async(request, response) => {
@@ -158,11 +177,13 @@ const updateAuditInstallation = async(request, response) => {
                                         .catch( error => {return response.status(500).json({code: 500, msg: 'created error', detail: error.message})})
         
         if(audit_status === 'planned' && !auditInstallation.audit_id.mistery){
-            await sendMail(plannedMailsubject, plannedMailContent(auditInstallation.installation_id.name))
-        } else if(audit_status === 'review'){
-            await sendMail(reviewMailsubject, reviewMailContent(auditInstallation.installation_id.name))
+            await sendMail(plannedMailsubject, plannedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id.name))
+        } else if(audit_status === 'review' && !auditInstallation?.audit_id?.autoAudit){
+            await sendMail(reviewMailsubject, reviewMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id.name))
+        } else if(audit_status === 'review' && auditInstallation?.audit_id?.autoAudit){
+            await sendMail(reviewAutoMailsubject, reviewAutoMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id.name))
         } else if(audit_status === 'closed'){
-            await sendMail(closedMailSubject, closedMailContent(auditInstallation.installation_id.name))
+            await sendMail(closedMailSubject, closedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id.name))
         }
 
         response.status(200).json({code: 200,
