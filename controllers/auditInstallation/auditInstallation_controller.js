@@ -227,9 +227,22 @@ const getAllAuditInstallation = async(request, response) => {
         */
         
         if(page === 0){
-            let auditInstallations = await AuditInstallation.find(filter).populate('installation_id auditor_id')
-
-            const data = {auditInstallations: auditInstallations, 
+            let auditInstallations = await AuditInstallation.find(filter).populate('installation_id auditor_id dealership_id')
+            const audtiInstTransform = auditInstallations?.map((auditIns) => {
+                return {
+                    _id: auditIns._id, 
+                    installation_id: auditIns.installation_id, 
+                    audit_id: auditIns.audit_id, 
+                    auditor_id: auditIns.auditor_id, 
+                    audit_status: auditIns.audit_status, 
+                    audit_date: auditIns.audit_date,
+                    dealership_id: auditIns.dealership_id._id,
+                    dealership_name: auditIns.dealership_id.name,
+                    createdAt: auditIns.createdAt,
+                    updatedAt: auditIns.updatedAt
+                 }
+            }) || null
+            const data = {auditInstallations: audtiInstTransform, 
                           totalPages: 1}
 
             return response.status(200).json({code: 200,
@@ -246,9 +259,23 @@ const getAllAuditInstallation = async(request, response) => {
                                               msg: 'invalid page', 
                                               detail: `totalPages: ${countPage}`})
 
-        const auditInstallations = await AuditInstallation.find(filter).populate('installation_id auditor_id').skip(skip).limit(10)
-        
-        const data = {auditInstallations: auditInstallations, 
+        let auditInstallations = await AuditInstallation.find(filter).populate('installation_id auditor_id dealership_id').skip(skip).limit(10)
+        const audtiInstTransform = auditInstallations?.map((auditIns) => {
+            return {
+                _id: auditIns._id, 
+                installation_id: auditIns.installation_id, 
+                audit_id: auditIns.audit_id, 
+                auditor_id: auditIns.auditor_id, 
+                audit_status: auditIns.audit_status, 
+                audit_date: auditIns.audit_date,
+                dealership_id: auditIns.dealership_id._id,
+                dealership_name: auditIns.dealership_id.name,
+                createdAt: auditIns.createdAt,
+                updatedAt: auditIns.updatedAt
+             }
+        }) || null
+
+        const data = {auditInstallations: audtiInstTransform, 
                       totalPages: countPage}
 
         response.status(200).json({code: 200,
