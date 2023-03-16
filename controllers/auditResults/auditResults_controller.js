@@ -718,7 +718,20 @@ const getDataForTables = async(request, response) => {
             })
         }
 
-        agency_by_types_customs.pop()
+        let indexDelEl = -1
+
+        agency_by_types_customs.forEach((el, index) => {
+            if(el.nameCategory === undefined || el.nameCategory === null || el.promedioCategory === NaN){
+                indexDelEl = index
+            }
+        })
+
+        if(indexDelEl > -1){
+            agency_by_types_customs.splice(indexDelEl, 1)
+        } else{
+            agency_by_types_customs.pop()
+        }
+        
         agency_by_types['agency_by_types_customs'] = agency_by_types_customs
 
         let total_agency = 0
@@ -2349,7 +2362,20 @@ const createAuditResultsTest = async(request, response) => {
             })
         }
 
-        agency_by_types_customs.pop()
+        let indexDelEl = -1
+
+        agency_by_types_customs.forEach((el, index) => {
+            if(el.nameCategory === undefined || el.nameCategory === null || el.promedioCategory === NaN){
+                indexDelEl = index
+            }
+        })
+
+        if(indexDelEl > -1){
+            agency_by_types_customs.splice(indexDelEl, 1)
+        } else{
+            agency_by_types_customs.pop()
+        }
+        
         agency_by_types['agency_by_types_customs'] = agency_by_types_customs
 
         let total_agency = 0
@@ -3155,8 +3181,21 @@ const updateTest = async(request, response) => {
                 agency_by_types_customs[index].promedioCategory = agency_by_types_customs[index].promedioCategory / cantInst //agency_by_types_customs_total[index].total
             })
         }
+        
+        let indexDelEl = -1
 
-        agency_by_types_customs.pop()
+        agency_by_types_customs.forEach((el, index) => {
+            if(el.nameCategory === undefined || el.nameCategory === null || el.promedioCategory === NaN){
+                indexDelEl = index
+            }
+        })
+
+        if(indexDelEl > -1){
+            agency_by_types_customs.splice(indexDelEl, 1)
+        } else{
+            agency_by_types_customs.pop()
+        }
+        
         agency_by_types['agency_by_types_customs'] = agency_by_types_customs
 
         let total_agency = 0
