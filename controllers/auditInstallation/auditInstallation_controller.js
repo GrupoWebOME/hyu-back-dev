@@ -18,6 +18,9 @@ const plannedMailContent = (installation, audit) => { return `
     <p>
         Recibe un cordial saludo,
     </p>
+    <div>
+        <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
+    </div>
 `}
 
 const reviewMailContent = (installation, audit) => { return `
@@ -44,6 +47,9 @@ const reviewMailContent = (installation, audit) => { return `
     <p>
         Recibe un cordial saludo,
     </p>
+    <div>
+        <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
+    </div>
 `}
 
 const reviewAutoMailContent = (installation, audit) => { return `
@@ -70,6 +76,9 @@ const reviewAutoMailContent = (installation, audit) => { return `
     <p>
         Recibe un cordial saludo,
     </p>
+    <div>
+        <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
+    </div>
 `}
 
 const closedMailContent = (installation, audit) => { return `
@@ -86,6 +95,9 @@ const closedMailContent = (installation, audit) => { return `
     <p>
         Recibe un cordial saludo,
     </p>
+    <div>
+        <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
+    </div>
 `}
 
 const plannedMailsubject = 'Notificación Auditoría planificada'
