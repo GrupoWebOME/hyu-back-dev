@@ -1,4 +1,5 @@
 const AuditInstallation = require('../../models/audit_installation_model')
+const Dealership = require('../../models/dealership_model')
 var ObjectId = require('mongodb').ObjectId
 const nodemailer = require('nodemailer')
 
@@ -188,14 +189,18 @@ const updateAuditInstallation = async(request, response) => {
         const auditInst = await AuditInstallation.findByIdAndUpdate(id, editAuditInst, {new: true})
                                         .catch( error => {return response.status(500).json({code: 500, msg: 'created error', detail: error.message})})
         
+        const dealership = await Dealership.findById(auditInstallation.dealership_id)
+
+        const dealershipEmail = dealership.email
+
         if(audit_status === 'planned' && !auditInstallation.audit_id?.mistery){
-            await sendMail(plannedMailsubject, plannedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name))
+            await sendMail(plannedMailsubject, plannedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name, dealershipEmail))
         } else if(audit_status === 'review' && !auditInstallation?.audit_id?.autoAudit){
-            await sendMail(reviewMailsubject, reviewMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name))
-        } else if(audit_status === 'review' && auditInstallation?.audit_id?.autoAudit){
-            await sendMail(reviewAutoMailsubject, reviewAutoMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name))
+            await sendMail(reviewMailsubject, reviewMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name, dealershipEmail))
+        } else if(audit_status === 'review' && auditInstallation?.audit_id?.autoAudit){//nuevo
+            await sendMail(reviewAutoMailsubject, reviewAutoMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name, dealershipEmail))
         } else if(audit_status === 'closed'){
-            await sendMail(closedMailSubject, closedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name))
+            await sendMail(closedMailSubject, closedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name, dealershipEmail))
         }
 
         response.status(200).json({code: 200,
@@ -301,6 +306,10 @@ const getAllAuditInstallation = async(request, response) => {
 
 const sendMail = async(subject, content) => {    
     try{
+          const WORK_ENVIROMENT = process.env.WORK_ENVIROMENT || 'test'
+
+          const subject_mail = WORK_ENVIROMENT === 'test'? process.env.EMAIL_SENDER: dealershipEmail
+          
           var transporter = nodemailer.createTransport({
             host: "smtp.hornet.email",
             port: 587,
@@ -313,7 +322,7 @@ const sendMail = async(subject, content) => {
           
           var mailOptions = {
             from: process.env.EMAIL_SENDER,
-            to: process.env.EMAIL_SENDER,
+            to: subject_mail,
             subject: subject,
             html: content
           };
