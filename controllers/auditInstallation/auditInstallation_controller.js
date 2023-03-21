@@ -304,7 +304,7 @@ const getAllAuditInstallation = async(request, response) => {
     }  
 }
 
-const sendMail = async(subject, content) => {    
+const sendMail = async(subject, content, dealershipEmail) => {    
     try{
           const WORK_ENVIROMENT = process.env.WORK_ENVIROMENT || 'test'
 
