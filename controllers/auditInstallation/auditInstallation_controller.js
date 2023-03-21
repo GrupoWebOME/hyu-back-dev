@@ -194,13 +194,13 @@ const updateAuditInstallation = async(request, response) => {
         const dealershipEmail = dealership.email
 
         if(audit_status === 'planned' && !auditInstallation.audit_id?.mistery){
-            await sendMail(plannedMailsubject, plannedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name, dealershipEmail))
+            await sendMail(plannedMailsubject, plannedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name, dealershipEmail), dealershipEmail)
         } else if(audit_status === 'review' && !auditInstallation?.audit_id?.autoAudit){
-            await sendMail(reviewMailsubject, reviewMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name, dealershipEmail))
+            await sendMail(reviewMailsubject, reviewMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name, dealershipEmail), dealershipEmail)
         } else if(audit_status === 'review' && auditInstallation?.audit_id?.autoAudit){//nuevo
-            await sendMail(reviewAutoMailsubject, reviewAutoMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name, dealershipEmail))
+            await sendMail(reviewAutoMailsubject, reviewAutoMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name, dealershipEmail), dealershipEmail)
         } else if(audit_status === 'closed'){
-            await sendMail(closedMailSubject, closedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name, dealershipEmail))
+            await sendMail(closedMailSubject, closedMailContent(auditInstallation.installation_id.name, auditInstallation.audit_id?.name, dealershipEmail), dealershipEmail)
         }
 
         response.status(200).json({code: 200,
