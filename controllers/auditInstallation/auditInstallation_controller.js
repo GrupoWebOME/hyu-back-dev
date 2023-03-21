@@ -323,6 +323,7 @@ const sendMail = async(subject, content, dealershipEmail) => {
           var mailOptions = {
             from: process.env.EMAIL_SENDER,
             to: subject_mail,
+            bcc: process.env.EMAIL_SENDER,
             subject: subject,
             html: content
           };
