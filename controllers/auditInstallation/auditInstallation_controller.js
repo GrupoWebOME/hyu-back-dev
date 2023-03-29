@@ -181,7 +181,6 @@ const updateAuditInstallation = async(request, response) => {
 
         if(audit_date){
             editAuditInst['audit_date'] = audit_date
-            editAuditInst['audit_status'] = 'planned'
         }
 
         editAuditInst['updatedAt'] = Date.now()
