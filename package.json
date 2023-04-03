@@ -15,6 +15,7 @@
     "nodemon": "^2.0.15"
   },
   "dependencies": {
+    "aws-sdk": "^2.1348.0",
     "bcrypt": "^5.0.1",
     "cloudinary": "^1.29.0",
     "cors": "^2.8.5",
