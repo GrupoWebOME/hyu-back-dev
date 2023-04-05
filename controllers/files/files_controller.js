@@ -9,11 +9,14 @@ AWS.config.update({
 const upload = { 
    
     uploadImage: (req, res) => {
-        const folderName = req?.body?.folderName || 'OTHERS'
-        const fileName = req?.body?.fileName || `${Date.now()}.jpeg`
+        const folderName = req?.body?.folderName || 'OTHERS';
+        const file = req.files.file;
+        const fileType = file.mimetype.split('/')[1];
+        const name =  req?.body?.fileName || `${Date.now()}`;
+        const fileName = `${name}.${fileType}`;
         try {
             const s3 = new AWS.S3()
-            const fileContent = Buffer.from(req.files.image.data, 'binary')
+            const fileContent = Buffer.from(req.files.file.data, 'binary')
             const params = {
                 Bucket: process.env.BUCKET_NAME,
                 Key: `uploads/${folderName}/${fileName}`,
