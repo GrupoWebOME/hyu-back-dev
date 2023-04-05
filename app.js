@@ -9,9 +9,7 @@ const api = require('./routes/routes')
 const app = express()
 app.use(cors())
 app.use(express.json())
-app.use(fileUpload({
-    useTempFiles: true
-}))
+app.use(fileUpload())
 app.get('/', (request, response) => {response.status(200).json({msg: "raiz"})})
 app.use('/api', api)
 

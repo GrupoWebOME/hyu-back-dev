@@ -10,12 +10,13 @@ const upload = {
    
     uploadImage: (req, res) => {
         const folderName = req?.body?.folderName || 'OTHERS'
+        const fileName = req?.body?.fileName || `${Date.now()}.jpeg`
         try {
             const s3 = new AWS.S3()
             const fileContent = Buffer.from(req.files.image.data, 'binary')
             const params = {
                 Bucket: process.env.BUCKET_NAME,
-                Key: `uploads/${folderName}/${req.files.image.name}`,
+                Key: `uploads/${folderName}/${fileName}`,
                 Body: fileContent,
               };              
             s3.upload(params, (err, data) => {
