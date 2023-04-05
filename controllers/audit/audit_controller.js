@@ -516,7 +516,7 @@ const getAllAudit= async(request, response) => {
             })
             
             filterClosed['audit_id'] = {$in: arrayAuditInstPass.concat(arrayAuditInstNoPass)}
-            filterClosed['audit_status'] = {$ne: 'closed'}
+            filterClosed['audit_status'] = {$nin: ['closed', 'canceled']}
 
             filter['_id'] = {$in: arrayAuditInstPass}
             filterNo['_id'] = {$in: arrayAuditInstNoPass}
