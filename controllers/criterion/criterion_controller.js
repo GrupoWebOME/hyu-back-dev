@@ -460,11 +460,6 @@ const updateCriterion = async(request, response) => {
                 msg: 'invalid hmeCode',
                 detail: `hmeCode should be a string type`
             })
-        if(imageUrl && imageUrl.length < 1)
-            errors.push({code: 400, 
-                msg: 'invalid imageUrl',
-                detail: `imageUrl should be a string type`
-            })
         if(imageComment && imageComment.length < 1)
             errors.push({code: 400, 
                 msg: 'invalid imageComment',
