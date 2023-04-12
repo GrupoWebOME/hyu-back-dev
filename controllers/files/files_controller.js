@@ -41,11 +41,9 @@ const upload = {
 
     migrationImage: async (req, res) => {
         const { folderName, url } = req.body
-        console.log('folderName',folderName)
-        console.log(url)
+        console.log('Migration to S3: ',folderName)
         try {
             axios.get(url, { responseType: 'arraybuffer' }).then((response) => {
-                console.log('response', response)
                 if (!response?.data) {
                     throw err
                 }
