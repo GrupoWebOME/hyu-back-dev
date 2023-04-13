@@ -4408,6 +4408,9 @@ const getDataForAudit = async(request, response) => {
     try{
         let existAudit = null
 
+        const dealershipsInactives = (await Dealership.find({active: false}).select('_id')).map((dealership) => { return dealership._id.toString() })
+        const installationsInactives = (await Installation.find({active: false}).select('_id')).map((installation) => { return installation._id.toString() })
+
         if(audit_id === "last"){
             let audit = null
 
@@ -4548,44 +4551,50 @@ const getDataForAudit = async(request, response) => {
             let installation_details = []
 
             auditAgencies.forEach((agency) => {
-                agency.instalations_audit_details.forEach((installation) => {          
-                    installation_details = [...installation_details, {
-                        installation_name: installation.installation.name,                        
-                        installation_id: installation.installation._id.toString(),
-                        perc: installation.categories[installation.categories.length - 1].auditTotalResult
-                    }]
-                    if(installation.installation.installation_type.toString() === AOH){
-                        if(installation.instalation_audit_types?.percImgAudit !== null && installation.instalation_audit_types?.percImgAudit !== undefined){
-                            cant_img_dealership += 1
-                            img_dealership += installation.instalation_audit_types.percImgAudit
+                const findedDeal = dealershipsInactives.includes(agency.dealership_details._id.toString())
+                if(!findedDeal){
+                    agency.instalations_audit_details.forEach((installation) => {   
+                        const findedInst = installationsInactives.includes(inst.installation._id.toString())
+                        if(!findedInst){
+                            installation_details = [...installation_details, {
+                                installation_name: installation.installation.name,                        
+                                installation_id: installation.installation._id.toString(),
+                                perc: installation.categories[installation.categories.length - 1].auditTotalResult
+                            }]
+                            if(installation.installation.installation_type.toString() === AOH){
+                                if(installation.instalation_audit_types?.percImgAudit !== null && installation.instalation_audit_types?.percImgAudit !== undefined){
+                                    cant_img_dealership += 1
+                                    img_dealership += installation.instalation_audit_types.percImgAudit
+                                }
+                                if(installation.instalation_audit_types?.percHmeAudit !== null && installation.instalation_audit_types?.percHmeAudit !== undefined){
+                                    cant_hmes_dealership += 1
+                                    hmes_dealership += installation.instalation_audit_types.percHmeAudit
+                                }
+                                if(installation.instalation_audit_types?.percElectricAudit !== null && installation.instalation_audit_types?.percElectricAudit !== undefined){
+                                    cant_electric_dealership += 1
+                                    electric_dealership += installation.instalation_audit_types.percElectricAudit
+                                }
+                                total_dealership += installation.categories[installation.categories.length - 1].auditTotalResult
+                                cant_total_dealership += 1
+                            } else {
+                                if(installation.instalation_audit_types?.percImgAudit !== null && installation.instalation_audit_types?.percImgAudit !== undefined){
+                                    cant_img_inst += 1
+                                    img_inst += installation.instalation_audit_types.percImgAudit
+                                }
+                                if(installation.instalation_audit_types?.percHmeAudit !== null && installation.instalation_audit_types?.percHmeAudit !== undefined){
+                                    cant_hmes_inst += 1
+                                    hmes_inst += installation.instalation_audit_types.percHmeAudit
+                                }
+                                if(installation.instalation_audit_types?.percElectricAudit !== null && installation.instalation_audit_types?.percElectricAudit !== undefined){
+                                    cant_electric_inst += 1
+                                    electric_inst += installation.instalation_audit_types.percElectricAudit
+                                }
+                                total_inst += installation.categories[installation.categories.length - 1].auditTotalResult
+                                cant_total_inst += 1
+                            }
                         }
-                        if(installation.instalation_audit_types?.percHmeAudit !== null && installation.instalation_audit_types?.percHmeAudit !== undefined){
-                            cant_hmes_dealership += 1
-                            hmes_dealership += installation.instalation_audit_types.percHmeAudit
-                        }
-                        if(installation.instalation_audit_types?.percElectricAudit !== null && installation.instalation_audit_types?.percElectricAudit !== undefined){
-                            cant_electric_dealership += 1
-                            electric_dealership += installation.instalation_audit_types.percElectricAudit
-                        }
-                        total_dealership += installation.categories[installation.categories.length - 1].auditTotalResult
-                        cant_total_dealership += 1
-                    } else {
-                        if(installation.instalation_audit_types?.percImgAudit !== null && installation.instalation_audit_types?.percImgAudit !== undefined){
-                            cant_img_inst += 1
-                            img_inst += installation.instalation_audit_types.percImgAudit
-                        }
-                        if(installation.instalation_audit_types?.percHmeAudit !== null && installation.instalation_audit_types?.percHmeAudit !== undefined){
-                            cant_hmes_inst += 1
-                            hmes_inst += installation.instalation_audit_types.percHmeAudit
-                        }
-                        if(installation.instalation_audit_types?.percElectricAudit !== null && installation.instalation_audit_types?.percElectricAudit !== undefined){
-                            cant_electric_inst += 1
-                            electric_inst += installation.instalation_audit_types.percElectricAudit
-                        }
-                        total_inst += installation.categories[installation.categories.length - 1].auditTotalResult
-                        cant_total_inst += 1
-                    }
-                })
+                    })
+                }
             })
 
             const data = {
@@ -4627,47 +4636,51 @@ const getDataForAudit = async(request, response) => {
             let installation_details = []
 
             auditAgencies.forEach((agency) => {
-                agency.instalations_audit_details.forEach((inst) => {   
-                    
-                    let installation = Array.isArray(inst)? inst[0] : inst
-
-                    installation_details = [...installation_details, {
-                        installation_name: installation.installation.name,                        
-                        installation_id: installation.installation._id.toString(),
-                        perc: installation.categories[installation.categories.length - 1].auditTotalResult
-                    }]
-                    if(installation.installation.installation_type.toString() === AOH){
-                        if(installation.instalation_audit_types?.percImgAudit !== null && installation.instalation_audit_types?.percImgAudit !== undefined){
-                            cant_img_dealership += 1
-                            img_dealership += installation.instalation_audit_types.percImgAudit
+                const findedDeal = dealershipsInactives.includes(agency.dealership_details._id.toString())
+                if(!findedDeal){
+                    agency.instalations_audit_details.forEach((inst) => {  
+                        const findedInst = installationsInactives.includes(inst.installation._id.toString())
+                        if(!findedInst){
+                            let installation = Array.isArray(inst)? inst[0] : inst
+                            installation_details = [...installation_details, {
+                                installation_name: installation.installation.name,                        
+                                installation_id: installation.installation._id.toString(),
+                                perc: installation.categories[installation.categories.length - 1].auditTotalResult
+                            }]
+                            if(installation.installation.installation_type.toString() === AOH){
+                                if(installation.instalation_audit_types?.percImgAudit !== null && installation.instalation_audit_types?.percImgAudit !== undefined){
+                                    cant_img_dealership += 1
+                                    img_dealership += installation.instalation_audit_types.percImgAudit
+                                }
+                                if(installation.instalation_audit_types?.percHmeAudit !== null && installation.instalation_audit_types?.percHmeAudit !== undefined){
+                                    cant_hmes_dealership += 1
+                                    hmes_dealership += installation.instalation_audit_types.percHmeAudit
+                                }
+                                if(installation.instalation_audit_types?.percElectricAudit !== null && installation.instalation_audit_types?.percElectricAudit !== undefined){
+                                    cant_electric_dealership += 1
+                                    electric_dealership += installation.instalation_audit_types.percElectricAudit
+                                }
+                                total_dealership += installation.categories[installation.categories.length - 1].auditTotalResult
+                                cant_total_dealership += 1
+                            } else {
+                                if(installation.instalation_audit_types?.percImgAudit !== null && installation.instalation_audit_types?.percImgAudit !== undefined){
+                                    cant_img_inst += 1
+                                    img_inst += installation.instalation_audit_types.percImgAudit
+                                }
+                                if(installation.instalation_audit_types?.percHmeAudit !== null && installation.instalation_audit_types?.percHmeAudit !== undefined){
+                                    cant_hmes_inst += 1
+                                    hmes_inst += installation.instalation_audit_types.percHmeAudit
+                                }
+                                if(installation.instalation_audit_types?.percElectricAudit !== null && installation.instalation_audit_types?.percElectricAudit !== undefined){
+                                    cant_electric_inst += 1
+                                    electric_inst += installation.instalation_audit_types.percElectricAudit
+                                }
+                                total_inst += installation.categories[installation.categories.length - 1].auditTotalResult
+                                cant_total_inst += 1
+                            }
                         }
-                        if(installation.instalation_audit_types?.percHmeAudit !== null && installation.instalation_audit_types?.percHmeAudit !== undefined){
-                            cant_hmes_dealership += 1
-                            hmes_dealership += installation.instalation_audit_types.percHmeAudit
-                        }
-                        if(installation.instalation_audit_types?.percElectricAudit !== null && installation.instalation_audit_types?.percElectricAudit !== undefined){
-                            cant_electric_dealership += 1
-                            electric_dealership += installation.instalation_audit_types.percElectricAudit
-                        }
-                        total_dealership += installation.categories[installation.categories.length - 1].auditTotalResult
-                        cant_total_dealership += 1
-                    } else {
-                        if(installation.instalation_audit_types?.percImgAudit !== null && installation.instalation_audit_types?.percImgAudit !== undefined){
-                            cant_img_inst += 1
-                            img_inst += installation.instalation_audit_types.percImgAudit
-                        }
-                        if(installation.instalation_audit_types?.percHmeAudit !== null && installation.instalation_audit_types?.percHmeAudit !== undefined){
-                            cant_hmes_inst += 1
-                            hmes_inst += installation.instalation_audit_types.percHmeAudit
-                        }
-                        if(installation.instalation_audit_types?.percElectricAudit !== null && installation.instalation_audit_types?.percElectricAudit !== undefined){
-                            cant_electric_inst += 1
-                            electric_inst += installation.instalation_audit_types.percElectricAudit
-                        }
-                        total_inst += installation.categories[installation.categories.length - 1].auditTotalResult
-                        cant_total_inst += 1
-                    }
-                })
+                    })
+                }
             })
 
             const data = {
