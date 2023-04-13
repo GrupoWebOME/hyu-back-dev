@@ -290,6 +290,27 @@ const getAllCategories = async(request, response) => {
                                              .catch(error => {        
                                                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
                                              })
+
+            if(filter.isAgency === false && filter.isAgency !== undefined){
+                function categoryValue(category_name){
+                    if(category_name === 'GENERAL'){
+                        return 1
+                    } else if(category_name === 'VENTA'){
+                        return 2
+                    } else if(category_name === 'HYUNDAI PROMISE'){
+                        return 3
+                    } else {
+                        return 4
+                    }
+                }
+
+                categories?.sort((a,b) => {
+                    const a_value = categoryValue(a.name)
+                    const b_value = categoryValue(b.name)
+                    return a_value-b_value
+                })   
+            }
+
             const data = {categories: categories, 
                           totalPages: 1}
 
@@ -322,6 +343,26 @@ const getAllCategories = async(request, response) => {
             .catch(error => {        
                 return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
             })
+
+        if(filter.isAgency === false && filter.isAgency !== undefined){
+            function categoryValue(category_name){
+                if(category_name === 'GENERAL'){
+                    return 1
+                } else if(category_name === 'VENTA'){
+                    return 2
+                } else if(category_name === 'HYUNDAI PROMISE'){
+                    return 3
+                } else {
+                    return 4
+                }
+            }
+
+            categories?.sort((a,b) => {
+                const a_value = categoryValue(a.name)
+                const b_value = categoryValue(b.name)
+                return a_value-b_value
+            })   
+        }
 
         const data = {categories: categories, 
                       totalPages: countPage}
