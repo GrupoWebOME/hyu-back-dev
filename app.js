@@ -10,7 +10,7 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 app.use(fileUpload())
-app.get('/', (request, response) => {response.status(200).json({msg: "raiz"})})
+app.get('/', (request, response) => {response.status(200).json({msg: 'raiz'})})
 app.use('/api', api)
 
 app.use(notFound)

@@ -667,4 +667,4 @@ apiAdmin.post('/', authenticationAdminMain.validate, Admin.createAdmin)
  *                                  example: something went wrong on the server
  */
 
- module.exports = apiAdmin
+module.exports = apiAdmin

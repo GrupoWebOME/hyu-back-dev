@@ -622,9 +622,9 @@ api.delete('/:id', Audit.deleteAudit)
  *                                  example: something went wrong on the server
  */
 
- api.get('/byupdate/:totalResults', Audit.getAllUpdateAudit)
+api.get('/byupdate/:totalResults', Audit.getAllUpdateAudit)
 
- /**
+/**
   * @swagger
   * /api/audit/byupdate/{totalResults}:
   *  get:

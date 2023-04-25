@@ -2,36 +2,36 @@ const cloudinary = require('cloudinary')
 const fs = require('fs')
 
 cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.CLOUD_API_KEY,
-    api_secret: process.env.CLOUD_API_SECRET
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET
 })
 
 const upload = {
-    uploadAvatar: (req, res) => {
-        try {
-            const file = req.files.image;
-            const folderName = req?.body?.folderName || 'photos'
-            cloudinary.v2.uploader.upload(file.tempFilePath, {
-                folder: folderName
-            }, async(err, result) => {
-                if(err) throw err;
+  uploadAvatar: (req, res) => {
+    try {
+      const file = req.files.image
+      const folderName = req?.body?.folderName || 'photos'
+      cloudinary.v2.uploader.upload(file.tempFilePath, {
+        folder: folderName
+      }, async(err, result) => {
+        if(err) throw err
 
-                removeTmp(file.tempFilePath)
+        removeTmp(file.tempFilePath)
 
-                res.json({url: result.secure_url})
-            })
-        } catch (err) {
-            return res.status(500).json({msg: err.message})
-        }
+        res.json({url: result.secure_url})
+      })
+    } catch (err) {
+      return res.status(500).json({msg: err.message})
     }
+  }
 }
 
 
 const removeTmp = (path) => {
-    fs.unlink(path, err => {
-        if(err) throw err
-    })
+  fs.unlink(path, err => {
+    if(err) throw err
+  })
 }
 
 module.exports = upload

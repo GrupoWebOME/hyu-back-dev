@@ -7,4 +7,4 @@ apiAuditInstallation.post('/', authenticationAdmin.validate, AuditInstallation.g
 
 apiAuditInstallation.put('/:id', AuditInstallation.updateAuditInstallation)
 
- module.exports = apiAuditInstallation
+module.exports = apiAuditInstallation
