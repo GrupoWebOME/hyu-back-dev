@@ -214,7 +214,6 @@ const updateAuditInstallation = async(request, response) => {
 const getAllAuditInstallation = async(request, response) => {
   try{
     const {installation_id, dealership_id, audit_id, pageReq} = request.body
-    const admin = request.jwt
 
     const page = !pageReq ? 0 : pageReq
 
@@ -230,17 +229,6 @@ const getAllAuditInstallation = async(request, response) => {
 
     if(audit_id)
       filter['audit_id'] = audit_id
-
-    /*
-        if(admin?.admin?.role === 'auditor')
-            filter['audit_status'] = {$in: ['planned', 'in_process']}
-
-        if(admin?.admin?.role === 'superauditor')
-            filter['audit_status'] = {$in: ['planned', 'in_process', 'auditor_signed']}
-
-        if(admin?.admin?.role === 'dealership')
-            filter['audit_status'] = {$in: ['closed', 'canceled', 'review', 'planned', 'review_hmes', 'in_process', 'auditor_signed', 'auditor_end', 'finished']}
-        */
         
     if(page === 0){
       let auditInstallations = await AuditInstallation.find(filter).populate('installation_id auditor_id dealership_id')
@@ -338,7 +326,7 @@ const sendMail = async(subject, content, dealershipEmail) => {
     return
   }
   catch(error){
-    return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
+    console.log('err: ', error)
   }
 }
 

@@ -2,7 +2,6 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const Admin = require('../../models/admin_model')
 const Dealership = require('../../models/dealership_model')
-const AuditInstallation = require('../../models/audit_installation_model')
 var ObjectId = require('mongodb').ObjectId
 
 const createAdmin = async(request, response) => {
@@ -110,13 +109,15 @@ const createAdmin = async(request, response) => {
       dealership: dealership? dealership: null
     })
     
-    const token = jwt.sign(
-      {admin},
-      process.env.SECRET,
-      {
-        expiresIn: 60 * 60 * 24
-      }
-    )
+    /*
+      const token = jwt.sign(
+        {admin},
+        process.env.SECRET,
+        {
+          expiresIn: 60 * 60 * 24
+        }
+      )
+    */
     
     await admin.save()
         
@@ -144,7 +145,7 @@ const loginAdmin = async(request, response) => {
     const passwordHash = admin.password
 
     const correctCred = await bcrypt.compare(password, passwordHash)
-      .catch(error => {
+      .catch(error => {admin
         return response.status(500).json({errors: [{code: 500, msg: 'hash fail', detail: error.message}]})
       })
 
@@ -376,22 +377,6 @@ const updateAdmin = async(request, response) => {
     response.status(200).json({code: 200,
       msg: 'the administrator has been updated successfully',
       data: {admin: newAdmin, token: token} })
-
-    /*
-        if(audits){
-           for(let i=0; i < audits.length; i++){
-                for(let j=0; j < audits[i].dealerships.length; j++){
-                    for(let k=0; k < audits[i].dealerships[j].installations.length; k++){
-                        const auditInstFind = await AuditInstallation.findOne({installation_id: audits[i].dealerships[j].installations[k], audit_id: audits[i].audit})
-                        const existAuditor = auditInstFind?.auditor_id?.includes(id)
-                        if(auditInstFind && !existAuditor){
-                            await AuditInstallation.findByIdAndUpdate(auditInstFind._id, {$push: {auditor_id: id}})
-                        }
-                    }
-                }
-           }
-        }
-        */
   }
   catch(error){
     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
@@ -420,7 +405,7 @@ const deleteAdmin = async(request, response) => {
         msg: 'invalid id',
         detail: 'id should be an objectId'})
 
-    admin = await Admin.findById(id)
+    const admin = await Admin.findById(id)
     if (!admin)
       return response.status(404).json({code: 404,
         msg: 'invalid id',

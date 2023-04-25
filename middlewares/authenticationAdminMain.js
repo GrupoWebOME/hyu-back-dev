@@ -10,7 +10,8 @@ const validate = async(request, response, next) => {
       detail: 'you do not have permissions'})
 
   let decodedToken = null
-
+  let token = null
+  
   if (authorization && authorization.toLowerCase().startsWith('bearer')) {
     token = authorization.substring(7)
   }

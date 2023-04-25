@@ -242,6 +242,19 @@ const deleteCategory = async(request, response) => {
   }
 }
 
+function categoryValue(category_name){
+  if(category_name === 'GENERAL'){
+    return 1
+  } else if(category_name === 'VENTA'){
+    return 2
+  } else if(category_name === 'HYUNDAI PROMISE'){
+    return 3
+  } else {
+    return 4
+  }
+}
+
+
 const getAllCategories = async(request, response) => {
   try{
     const {name, abbreviation, value, installationType, isAgency, pageReq} = request.body
@@ -292,18 +305,6 @@ const getAllCategories = async(request, response) => {
         })
 
       if(filter.isAgency === false && filter.isAgency !== undefined){
-        function categoryValue(category_name){
-          if(category_name === 'GENERAL'){
-            return 1
-          } else if(category_name === 'VENTA'){
-            return 2
-          } else if(category_name === 'HYUNDAI PROMISE'){
-            return 3
-          } else {
-            return 4
-          }
-        }
-
         categories?.sort((a,b) => {
           const a_value = categoryValue(a.name)
           const b_value = categoryValue(b.name)
@@ -345,18 +346,6 @@ const getAllCategories = async(request, response) => {
       })
 
     if(filter.isAgency === false && filter.isAgency !== undefined){
-      function categoryValue(category_name){
-        if(category_name === 'GENERAL'){
-          return 1
-        } else if(category_name === 'VENTA'){
-          return 2
-        } else if(category_name === 'HYUNDAI PROMISE'){
-          return 3
-        } else {
-          return 4
-        }
-      }
-
       categories?.sort((a,b) => {
         const a_value = categoryValue(a.name)
         const b_value = categoryValue(b.name)

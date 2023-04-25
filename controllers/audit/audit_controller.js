@@ -3,7 +3,6 @@ const AuditInstallation = require('../../models/audit_installation_model')
 const InstallationType = require('../../models/installationType_model')
 const Installation = require('../../models/installation_schema')
 const AuditResults = require('../../models/audit_results_model')
-const Admin = require('../../models/admin_model')
 const ObjectId = require('mongodb').ObjectId
 
 const createAudit = async(request, response) => {
@@ -208,7 +207,7 @@ const createAudit = async(request, response) => {
 
 const updateAudit = async(request, response) => {
   try{
-    let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions, auditMVE, auditElectrics, auditIonic5, isCustomAudit, audits, mistery, autoAudit} = request.body
+    let {name, installation_type, initial_date, end_date, criterions, isAgency, installation_exceptions, auditMVE, auditElectrics, auditIonic5, isCustomAudit, mistery, autoAudit} = request.body
     const {id} = request.params
     const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
     let errors = []
@@ -475,12 +474,8 @@ const getAllAudit= async(request, response) => {
       filter['start_date'] = {$gt : start_date}
       filter['end_date'] = {$lt : end_date}
     }
-        
-    let filterAuditInst = {}
-        
-    if(role === 'dealership'){
-      // filterAuditInst['audit_status'] = {$in: ['closed', 'canceled', 'review', 'planned', 'review_hmes', 'in_process', 'auditor_signed', 'auditor_end', 'finished']}
-          
+                
+    if(role === 'dealership'){          
       // Traigo todas las instalaciones que tiene esa agencia
       const installationsForDealerships = await Installation.find({dealership: dealership, active: true})
       let arrayInst = []
@@ -697,209 +692,6 @@ const getAllAudit= async(request, response) => {
     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
   }  
 }
-
-/*
-const getAllAudit= async(request, response) => {
-
-    try{
-        const { name, installation_type, start_date, end_date, pageReq} = request.body
-        const {role, dealership, _id} = request.jwt.admin
-        const page = !pageReq ? 0 : pageReq
-        let skip = (page - 1) * 10
-        const filter = {}
-        let filterNo = {}
-        let countDocsNo = 0
-        let arrayAuditInstNoPass = []
-
-        if(installation_type && !ObjectId.isValid(installation_type)){
-            return response.status(400).json({code: 400, 
-                                              msg: 'invalid installation_type',
-                                              detail: `format should be a ObjectId`
-                                            })  
-        }
-        if(name)
-            filter['name'] = { $regex : new RegExp(name, "i") } 
-        if(installation_type)
-            filter['installation_type'] = installation_type
-        if(start_date && end_date){
-            filter['start_date'] = {$gt : start_date}
-            filter['end_date'] = {$lt : end_date}
-        }
-        
-        let filterAuditInst = {}
-        
-        if(role === 'dealership'){
-            filterAuditInst['audit_status'] = {$in: ['closed', 'canceled', 'review', 'planned', 'review_hmes', 'in_process', 'auditor_signed', 'auditor_end', 'finished']}
-            // Traigo todas las instalaciones que tiene esa agencia
-            const installationsForDealerships = await Installation.find({dealership: dealership})
-            let arrayInst = []
-            let arrayAuditInstPass = []
-
-            // Armo un array de ids de instalaciones que pertenecen a esa agencia
-            installationsForDealerships.forEach((inst) => {
-                arrayInst.push(inst._id)
-            })
-
-            // Busco dentro de las auditinstalations aquellas que contengan las instalaciones del array
-            const auditInstallationForDealerships = await AuditInstallation.find({installation_id: {$in: arrayInst}})
-
-            // Armo un array de las auditorias que afectan a las instalaciones de la agencia
-            auditInstallationForDealerships.forEach((auditInst) => {
-                if(!arrayAuditInstPass.includes(auditInst.audit_id.toString())){
-                    arrayAuditInstPass.push(auditInst.audit_id.toString())
-                }
-            })
-
-            // Del array de auditorias obtenido, elimino aquellas cuyo estado no sea closed
-            auditInstallationForDealerships.forEach((audtInst) => {
-                if(audtInst.audit_status !== 'closed' && audtInst.audit_status !== 'canceled' && audtInst.audit_status !== 'review' && audtInst.audit_status !== 'planned'){
-                    const index = arrayAuditInstPass.indexOf(audtInst.audit_id.toString())
-                    if(index > -1){
-                        arrayAuditInstPass.splice(index, 1)
-                    }
-                    const indexNo = arrayAuditInstNoPass.indexOf(audtInst.audit_id.toString())
-                    if(indexNo < 0){
-                        arrayAuditInstNoPass.push(audtInst.audit_id.toString())
-                    }
-                }
-            })
-
-            // elimino los que tengan created
-            auditInstallationForDealerships.forEach((audtInst) => {
-                if(audtInst.audit_status === 'created'){
-                    const index = arrayAuditInstNoPass.indexOf(audtInst.audit_id.toString())
-                    if(index > -1){
-                        arrayAuditInstNoPass.splice(index, 1)
-                    }
-                }
-            })
-            
-            filter['_id'] = {$in: arrayAuditInstPass}
-            filterNo['_id'] = {$in: arrayAuditInstNoPass}
-        }
-
-        else if(role === 'auditor'){
-            filterAuditInst['audit_status'] = {$in: ['planned', 'in_process']}
-
-            const auditorAdmin = await Admin.findById(_id)
-            
-            let arrayAuditInstPass = []
-            let arrayAuditsOk = []
-
-            auditorAdmin.audits.forEach((audit) => {
-                arrayAuditInstPass = [...arrayAuditInstPass, audit.audit.toString()]
-            })
-
-            let auditInstallationForDealerships = await AuditInstallation.find({audit_id: {$in: arrayAuditInstPass}, audit_status: {$in: ['planned', 'in_process']}})
-            
-            auditInstallationForDealerships.forEach((audtInst) => {
-                if(audtInst.audit_status === 'planned' || audtInst.audit_status === 'in_process'){
-                    const index = arrayAuditsOk.indexOf(audtInst.audit_id.toString())
-                    if(index < 0){
-                        arrayAuditsOk = [...arrayAuditsOk, audtInst.audit_id.toString()]
-                    }
-                }
-            })
-
-            filter['_id'] = {$in: arrayAuditsOk}
-        }
-
-        else if(role === 'superauditor'){
-            filterAuditInst['audit_status'] = {$in: ['planned', 'in_process', 'auditor_signed']}
-
-            const auditorAdmin = await Admin.findById(_id)
-            
-            let arrayAuditInstPass = []
-            let arrayAuditsOk = []
-
-            auditorAdmin.audits.forEach((audit) => {
-                arrayAuditInstPass = [...arrayAuditInstPass, audit.audit.toString()]
-            })
-
-            let auditInstallationForDealerships = await AuditInstallation.find({audit_id: {$in: arrayAuditInstPass}, audit_status: {$in: ['planned', 'in_process', 'auditor_signed']}})
-
-            // Del array de auditorias obtenido, elimino aquellas cuyo estado no sea closed
-            auditInstallationForDealerships.forEach((audtInst) => {
-                if(audtInst.audit_status === 'planned' || audtInst.audit_status === 'in_process'){
-                    const index = arrayAuditsOk.indexOf(audtInst.audit_id.toString())
-                    if(index < 0){
-                        arrayAuditsOk = [...arrayAuditsOk, audtInst.audit_id.toString()]
-                    }
-                }
-            })
-
-            filter['_id'] = {$in: arrayAuditsOk}
-        }
-
-        if(page === 0){
-
-            const audits = await Audit.find(filter).populate("installation_type criterions.criterion")
-                                             .catch(error => {        
-                                                return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-                                             })
-
-            let auditsNo = []
-
-            if(arrayAuditInstNoPass.length > 0){
-                auditsNo = await Audit.find(filterNo).select('name installation_type initial_date end_date isAgency auditMVE auditElectrics auditIonic5 isCustomAudit')
-                .catch(error => {        
-                    return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-                })
-            }
-            
-            const data = {audits: audits.concat(auditsNo), 
-                          totalPages: 1}
-
-            return response.status(200).json({code: 200,
-                                              msg: 'success',
-                                              data: data })
-        }
-
-        let countDocs = await Audit.countDocuments(filter)
-                                        .catch(error => {        
-                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-                                        })
-
-        if(arrayAuditInstNoPass.length > 0){
-            countDocsNo = await Audit.countDocuments(filterNo)
-            .catch(error => {        
-               return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-            })
-        }
-
-        countDocs = countDocs + countDocsNo
-
-        let countPage = countDocs % 10 === 0? countDocs/10 : Math.floor((countDocs/10) + 1)
-        if((countPage < page) && page !== 1)
-            return response.status(400).json({code: 400, 
-                                              msg: 'invalid page', 
-                                              detail: `totalPages: ${countPage}`})
-        const audits = await Audit.find(filter).skip(skip).limit(10).populate("installation_type criterions.criterion")
-                                        .catch(error => {        
-                                            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-                                        })
-
-        let auditsNo = []
-
-        if(arrayAuditInstNoPass.length > 0){
-            auditsNo = await Audit.find(filterNo).select('name installation_type initial_date end_date isAgency auditMVE auditElectrics auditIonic5 isCustomAudit')
-            .catch(error => {        
-                return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-            })
-        }
-
-        const data = {audits: audits.concat(auditsNo), 
-                      totalPages: countPage}
-
-        return response.status(200).json({code: 200,
-                                   msg: 'success',
-                                   data: data })
-    }
-   catch(error){
-        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-    }  
-}
-*/
 
 const getAudit = async(request, response) => {
   try{

@@ -130,7 +130,7 @@ const updateSizingTable = async(request, response) => {
     let errors = []
 
     if(id && ObjectId.isValid(id)){
-      sizingTableById = await SizingTable.findById(id)
+      const sizingTableById = await SizingTable.findById(id)
         .catch(error => {return response.status(400).json({code: 500, 
           msg: 'error id',
           detail: error.message

@@ -9,15 +9,13 @@ const URI = process.env.MONGOOSE_URI
   ? process.env.MONGOOSE_URI
   : 'mongodb://localhost'
 
-let db
-
 if(mongoose.STATES[mongoose.connection.readyState] !== 'connected'){
-  db = mongoose.connect(URI, { useNewUrlParser: true, 
+  mongoose.connect(URI, { useNewUrlParser: true, 
     useUnifiedTopology: true})
-    .then(db => console.log('BD conectada'))
+    .then(() => console.log('BD conectada'))
     .catch(err => console.error(err))
 } else {
-  db = mongoose.connection.on('open', () => {
+  mongoose.connection.on('open', () => {
     console.log('[ MONGOOSE] Connected with poolSize')
   })
 }

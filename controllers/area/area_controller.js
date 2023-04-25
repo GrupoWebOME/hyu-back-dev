@@ -228,7 +228,7 @@ const deleteArea = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
 
-    await Block.findByIdAndUpdate(deletedArea.block, {$pull: { areas: id }, $inc: {value: -deletedArea.value}})
+    const blockById = await Block.findByIdAndUpdate(deletedArea.block, {$pull: { areas: id }, $inc: {value: -deletedArea.value}})
       .catch(error => {        
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })

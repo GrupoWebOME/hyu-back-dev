@@ -695,15 +695,10 @@ const filtersCriterions = async(request, response) => {
         detail: 'format should be a ObjectId'
       })  
     }
-    if(audit_id && !ObjectId.isValid(audit_id)){
-      return response.status(400).json({code: 400, 
-        msg: 'invalid audit_id',
-        detail: 'format should be a ObjectId'
-      })  
-    }
+
+    let id_inst = mongoose.Types.ObjectId(installation_id)
 
     if(page === 0){ 
-      let id_inst = mongoose.Types.ObjectId(installation_id)
       const criterions = await Criterion.find(filter).populate({path: 'installationType standard block area auditResponsable criterionType category'})
         .catch(error => {        
           return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
@@ -838,7 +833,7 @@ const getCriterion = async(request, response) => {
   } 
 }
 
-const getValueFromTable = (rows, columnNumber, value, id = null) => {
+const getValueFromTable = (rows, columnNumber, value) => {
   let rowColvalue = null
   let rowColvalueAux = null
   let maxEndValue = 0

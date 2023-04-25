@@ -27,6 +27,9 @@ module.exports = {
     'semi': [
       'error',
       'never'
-    ]
+    ],
+    'no-useless-escape': 'off',
+    'no-prototype-builtins': 'off',
+    'use-isnan': 'off'
   }
 }
