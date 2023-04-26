@@ -2833,8 +2833,10 @@ const updateTest = async(request, response) => {
     if(criterions){
       const auditResultsForUpd = await AuditResults.findById(id)
       const critIndex = auditResultsForUpd.criterions.findIndex(crit => crit.criterion_id.toString() == criterions[0].criterion_id)
-      auditResultsForUpd.criterions[critIndex] = criterions[0]
-      updatedFields['criterions'] = auditResultsForUpd.criterions
+      if(critIndex > -1){
+          auditResultsForUpd.criterions[critIndex] = criterions[0]
+          updatedFields['criterions'] = auditResultsForUpd.criterions
+      }
     }
     if(state)
       updatedFields['state'] = state
