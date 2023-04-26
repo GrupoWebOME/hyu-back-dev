@@ -2715,7 +2715,7 @@ const updateTest = async(request, response) => {
     let cantInst = 0
     array_instalations_audit_details.forEach((installation) => {
       cantInst += 1
-      if(installation.categories.length - 1 > maxCategories){
+      if(installation?.categories.length - 1 > maxCategories){
         maxCategories = (installation.categories.length - 1)
       }
     })
@@ -2830,8 +2830,12 @@ const updateTest = async(request, response) => {
       updatedFields['audit_id'] = audit_id
     if(installation_id)
       updatedFields['installation_id'] = installation_id
-    if(criterions)
-      updatedFields['criterions'] = criterions
+    if(criterions){
+      const auditResultsForUpd = await AuditResults.findById(id)
+      const critIndex = auditResultsForUpd.criterions.findIndex(crit => crit.criterion_id.toString() == criterions[0].criterion_id)
+      auditResultsForUpd.criterions[critIndex] = criterions[0]
+      updatedFields['criterions'] = auditResultsForUpd.criterions
+    }
     if(state)
       updatedFields['state'] = state
     if(dateForAudit){
