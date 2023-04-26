@@ -24,7 +24,7 @@ const apiAuditEconomic = require('./auditEconomic/audit_economic_routes')
 const apiSwagger = require('./doc/doc_routes')
 
 api.get('/', (request, response) => {
-    response.status(200).json({msg: "api"})
+  response.status(200).json({msg: 'api'})
 })
 
 api.use('/admin', apiAdmin)

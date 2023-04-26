@@ -1,7 +1,6 @@
 const express = require('express')
 const api = express.Router()
 
-const uploadImage = require('../../middlewares/uploadImage')
 const images = require('../../controllers/files/files_controller')
 
 api.post('/', images.uploadImage)

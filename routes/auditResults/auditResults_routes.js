@@ -59,8 +59,8 @@ const AuditResults = require('../../controllers/auditResults/auditResults_contro
   *   description: Rutas de Resultados de Auditorias
   */
 
- api.post('/', AuditResults.createAuditResults)
- api.post('/createTest', AuditResults.createAuditResultsTest)
+api.post('/', AuditResults.createAuditResults)
+api.post('/createTest', AuditResults.createAuditResultsTest)
 
 /**
  * @swagger
@@ -381,19 +381,19 @@ api.delete('/:id', AuditResults.deleteAuditResults)
  *                                  example: something went wrong on the server
  */
 
- api.post('/tables', AuditResults.getDataForTables)
- api.post('/tables2', AuditResults.tablesTest)
+api.post('/tables', AuditResults.getDataForTables)
+api.post('/tables2', AuditResults.tablesTest)
 
- api.put('/updatetest/:id', AuditResults.updateTest)
+api.put('/updatetest/:id', AuditResults.updateTest)
 
- api.post('/tables/audit/:audit_id', AuditResults.getDataForAudit)
+api.post('/tables/audit/:audit_id', AuditResults.getDataForAudit)
 
- api.get('/tables/audit/:audit_id/details', AuditResults.getDataForFullAudit)
+api.get('/tables/audit/:audit_id/details', AuditResults.getDataForFullAudit)
 
- api.get('/tables/audit/:audit_id/details2', AuditResults.getDataForFullAuditTest)
+api.get('/tables/audit/:audit_id/details2', AuditResults.getDataForFullAuditTest)
 
- api.get('/audit/:auditid/installation/:installationid', AuditResults.getAuditResByAuditIDAndInstallationID)
+api.get('/audit/:auditid/installation/:installationid', AuditResults.getAuditResByAuditIDAndInstallationID)
 
- api.get('/audit/:auditid', AuditResults.getAuditResByAuditID)
+api.get('/audit/:auditid', AuditResults.getAuditResByAuditID)
 
 module.exports = api
