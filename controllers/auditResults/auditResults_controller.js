@@ -2278,10 +2278,16 @@ const updateTest = async(request, response) => {
     if(errors.length > 0)
       return response.status(400).json({errors: errors})
 
+    const findCrit = await AuditResults.findById(id)
+    const critIndex = findCrit.criterions.findIndex(crit => crit.criterion_id.toString() == criterions[0].criterion_id)
+    if(critIndex > -1){
+      findCrit.criterions[critIndex] = criterions[0]
+    }
+
     const newAuditResults = await (await ((new AuditResults({
       audit_id,
       installation_id,
-      criterions,
+      criterions: findCrit?.criterions || criterions,
       state: 'created'
     })).populate({
       path: 'installation_id', 
@@ -2834,8 +2840,8 @@ const updateTest = async(request, response) => {
       const auditResultsForUpd = await AuditResults.findById(id)
       const critIndex = auditResultsForUpd.criterions.findIndex(crit => crit.criterion_id.toString() == criterions[0].criterion_id)
       if(critIndex > -1){
-          auditResultsForUpd.criterions[critIndex] = criterions[0]
-          updatedFields['criterions'] = auditResultsForUpd.criterions
+        auditResultsForUpd.criterions[critIndex] = criterions[0]
+        updatedFields['criterions'] = auditResultsForUpd.criterions
       }
     }
     if(state)
