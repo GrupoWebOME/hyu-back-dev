@@ -25,7 +25,6 @@ const validate = async(request, response, next) => {
       decodedToken = decoded
     }
   })
-  console.log('entra', decodedToken.admin)
 
   if(decodedToken === false)
     return response.status(401).json({code: 401,

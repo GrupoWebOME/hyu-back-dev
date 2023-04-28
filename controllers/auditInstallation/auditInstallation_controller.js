@@ -293,6 +293,9 @@ const getAllAuditInstallation = async(request, response) => {
 
 const sendMail = async(subject, content, dealershipEmail) => {    
   try{
+    if(!process.env.EMAIL_SENDER || !process.env.WORK_ENVIROMENT || !process.env.EMAIL_PASSWORD){
+      return
+    }
     const WORK_ENVIROMENT = process.env.WORK_ENVIROMENT || 'test'
 
     const subject_mail = WORK_ENVIROMENT === 'test'? process.env.EMAIL_SENDER: dealershipEmail
