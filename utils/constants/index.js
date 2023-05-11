@@ -9,6 +9,16 @@ const PARKING = '62870bba6300fe53343a7b4e'
 const PERSONAL_TALLER = '62bbc6cc5de609ea3079e4e7'
 const ARRAY_SIZING_TABLES_VALUES = [M2VN, VEHICEXPOVN, PERSVN, PERSHP, POSTVENTAM2, POSTVENTAM2_RECAMBIOS, PERSONAL_RECAMBIOS, PARKING, PERSONAL_TALLER]
 
+const SHOW_RESULTS_STATES = [
+  'closed',
+  'finished',
+  'canceled',
+  'review_hmes',
+  'review',
+  'auditor_signed',
+  'auditor_end',
+]
+ 
 module.exports = {
   M2VN,
   VEHICEXPOVN,
@@ -19,5 +29,6 @@ module.exports = {
   PERSONAL_RECAMBIOS,
   PARKING,
   PERSONAL_TALLER,
-  ARRAY_SIZING_TABLES_VALUES
+  ARRAY_SIZING_TABLES_VALUES,
+  SHOW_RESULTS_STATES
 }
