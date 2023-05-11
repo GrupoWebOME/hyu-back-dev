@@ -7,6 +7,7 @@ const AuditInstallation = require('../../models/audit_installation_model')
 const AuditAgency = require('../../models/audit_agency_model')
 const Admin = require('../../models/admin_model')
 const ObjectId = require('mongodb').ObjectId
+const { SHOW_RESULTS_STATES } = require('../../utils/constants')
 
 const createAuditResults = async(request, response) => {
   try{
@@ -2918,7 +2919,10 @@ const getDataForFullAuditTest = async(request, response) => {
 
     let dealership_details = []
 
-    auditAgencies.forEach((element) => {
+    for(let i = 0; i < auditAgencies.length; i++) {
+      const element = auditAgencies[i]
+      const AuditInstallationFind = await AuditInstallation.find({audit_id: audit_id, dealership_id: element.dealership_id, audit_status: {$nin: SHOW_RESULTS_STATES}})
+    
       let data = {
         code: element.code,
         name: element.name,
@@ -2934,12 +2938,13 @@ const getDataForFullAuditTest = async(request, response) => {
         percentage_audit_electric: element.agency_by_types.electric_perc,
         percentage_audit_img: element.agency_by_types.img_perc,
         percentage_audit_hme: element.agency_by_types.hme_perc,
-        agency_by_types_customs: element?.agency_by_types?.agency_by_types_customs
+        agency_by_types_customs: element?.agency_by_types?.agency_by_types_customs,
+        showAuditResults: AuditInstallationFind.length > 0? false : true
       }
       dealership_details = [...dealership_details, data]
 
       compliance_audit += element.agency_by_types.total_agency !== null? element.agency_by_types.total_agency : 0
-    })
+    }
 
     const audit_data = {
       name: existAudit.name,
