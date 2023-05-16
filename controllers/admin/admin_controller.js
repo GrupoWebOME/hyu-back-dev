@@ -21,10 +21,10 @@ const createAdmin = async(request, response) => {
         detail: 'you do not have permissions for creating admin type'})
     }
 
-    if(!role || (role.toLowerCase() !== 'admin' && role.toLowerCase() !== 'dealership' && role.toLowerCase() !== 'auditor' && role.toLowerCase() !== 'superauditor'))
+    if(!role || (role.toLowerCase() !== 'admin' && role.toLowerCase() !== 'dealership' && role.toLowerCase() !== 'auditor' && role.toLowerCase() !== 'superauditor' && role.toLowerCase() !== 'processmanager'))
       errors.push({code: 400, 
         msg: 'invalid role',
-        detail: 'role should be "admin", "dealership", "auditor" or "superauditor"'
+        detail: 'role should be "admin", "dealership", "auditor", "processmanager" or "superauditor"'
       })
         
     if(role && role.toLowerCase() === 'dealership'){
@@ -214,10 +214,10 @@ const updateAdmin = async(request, response) => {
           detail: 'id not found'})
     }
 
-    if(role !== undefined && role !== null && role.toLowerCase() !== 'admin' && role.toLowerCase() !== 'dealership' && role.toLowerCase() !== 'auditor')
+    if(role !== undefined && role !== null && role.toLowerCase() !== 'admin' && role.toLowerCase() !== 'dealership' && role.toLowerCase() !== 'auditor' && role.toLowerCase() !== 'processmanager')
       errors.push({code: 400, 
         msg: 'invalid role',
-        detail: 'role should be "admin", "dealership" or "auditor"'
+        detail: 'role should be "admin", "dealership", "processmanager" or "auditor"'
       })
         
     if(role !== undefined && role !== null && role.toLowerCase() === 'dealership'){
