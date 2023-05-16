@@ -516,6 +516,48 @@ const getAllAudit= async(request, response) => {
       filter['_id'] = {$in: arrayAuditInstPass}
       filterNo['_id'] = {$in: arrayAuditInstNoPass}
     }
+    
+    else if(role === 'processmanager'){          
+      // Traigo todas las instalaciones que tiene esa agencia
+      const installationsForDealerships = await Installation.find({active: true})
+      let arrayInst = []
+      let arrayAuditInstPass = []
+
+      // Armo un array de ids de instalaciones que pertenecen a esa agencia
+      installationsForDealerships.forEach((inst) => {
+        arrayInst.push(inst._id)
+      })
+
+      // Busco dentro de las auditinstalations aquellas que contengan las instalaciones del array
+      const auditInstallationForDealerships = await AuditInstallation.find({installation_id: {$in: arrayInst}}).populate('installation_id')
+
+      // Armo un array de las auditorias que afectan a las instalaciones de la agencia
+      auditInstallationForDealerships.forEach((auditInst) => {
+        if(!arrayAuditInstPass.includes(auditInst.audit_id.toString())){
+          arrayAuditInstPass.push(auditInst.audit_id.toString())
+        }
+      })
+
+      // Del array de auditorias obtenido, elimino aquellas cuyo estado no sea closed
+      auditInstallationForDealerships.forEach((audtInst) => {
+        if(audtInst.audit_status !== 'closed' && audtInst.installation_id.active === true && audtInst.audit_status !== 'canceled' && audtInst.audit_status !== 'review' && audtInst.audit_status !== 'planned'){
+          const index = arrayAuditInstPass.indexOf(audtInst.audit_id.toString())
+          if(index > -1){
+            arrayAuditInstPass.splice(index, 1)
+          }
+          const indexNo = arrayAuditInstNoPass.indexOf(audtInst.audit_id.toString())
+          if(indexNo < 0){
+            arrayAuditInstNoPass.push(audtInst.audit_id.toString())
+          }
+        }
+      })
+            
+      filterClosed['audit_id'] = {$in: arrayAuditInstPass.concat(arrayAuditInstNoPass)}
+      filterClosed['audit_status'] = {$nin: ['closed', 'canceled']}
+
+      filter['_id'] = {$in: arrayAuditInstPass}
+      filterNo['_id'] = {$in: arrayAuditInstNoPass}
+    }
 
     else if(role === 'auditor'){
       const auditIns = await AuditInstallation.find({auditor_id: {$in: [_id]}})
