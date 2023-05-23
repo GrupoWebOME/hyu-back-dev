@@ -2279,6 +2279,42 @@ const updateTest = async(request, response) => {
     if(errors.length > 0)
       return response.status(400).json({errors: errors})
 
+    const tablesObjectRes = {
+      audit_id: audit_id,
+      dealership_id: dealershipByID._id,
+      code: dealershipByID.code,
+      name: dealershipByID.name,
+      ionic5_quaterly_billing: dealershipByID.ionic5_quaterly_billing,
+      vn_quaterly_billing: dealershipByID.vn_quaterly_billing,
+      electric_quaterly_billing: dealershipByID.electric_quaterly_billing,
+      audit_name: existAudit.name,
+      audit_initial_date: existAudit.initial_date,
+      audit_end_date: existAudit.end_date,
+      dealership_details: dealershipByID
+    }
+
+    const auditResultsForUpdRes = await AuditResults.findById(id)
+    const critIndexRes = auditResultsForUpdRes.criterions.findIndex(crit => crit.criterion_id.toString() == criterions[0].criterion_id)
+    if(critIndexRes > -1){
+      auditResultsForUpdRes.criterions[critIndexRes] = criterions[0]
+    }
+
+    const updatedObjectRes = {
+      audit_id,
+      createdAt: audiResultstById.createdAt,
+      installation_id: existInstallation._id,
+      state: audiResultstById.state,
+      dateForAudit: audiResultstById.dateForInstallation,
+      updatedAt: audiResultstById.updatedAt,
+      _id: audiResultstById._id,
+      criterions: auditResultsForUpdRes.criterions
+    }
+
+    response.status(200).json({code: 200,
+      msg: 'the AuditResults has been updated successfully',
+      data: updatedObjectRes,
+      tables: tablesObjectRes })
+
     const findCrit = await AuditResults.findById(id)
     const critIndex = findCrit.criterions.findIndex(crit => crit.criterion_id.toString() == criterions[0].criterion_id)
     if(critIndex > -1){
@@ -2883,10 +2919,7 @@ const updateTest = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
 
-    response.status(200).json({code: 200,
-      msg: 'the AuditResults has been updated successfully',
-      data: updatedAuditResults,
-      tables: newConsetionResult })
+    return
   } catch(error){
     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
   }
