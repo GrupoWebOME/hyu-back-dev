@@ -50,6 +50,10 @@ const auditSchema = new Schema({
     type: Boolean,
     default: false
   },
+  state: {
+    type: String,
+    default: null
+  },
   createdAt: {type: Date,
     default: Date.now},
   updatedAt: {type: Date,
