@@ -458,8 +458,7 @@ const getAllAudit= async(request, response) => {
     let filterClosed = {}
     let countDocsNo = 0
     let arrayAuditInstNoPass = []
-    // let arrayAuditsNotClosed = []
-    let arrayAuditID = []
+    let arrayAuditsNotClosed = []
 
     if(installation_type && !ObjectId.isValid(installation_type)){
       return response.status(400).json({code: 400, 
@@ -512,7 +511,6 @@ const getAllAudit= async(request, response) => {
       })
             
       filterClosed['audit_id'] = {$in: arrayAuditInstPass.concat(arrayAuditInstNoPass)}
-      arrayAuditID = {$in: arrayAuditInstPass.concat(arrayAuditInstNoPass)}
       filterClosed['audit_status'] = {$nin: ['closed', 'canceled']}
 
       filter['_id'] = {$in: arrayAuditInstPass}
@@ -555,7 +553,6 @@ const getAllAudit= async(request, response) => {
       })
             
       filterClosed['audit_id'] = {$in: arrayAuditInstPass.concat(arrayAuditInstNoPass)}
-      arrayAuditID = {$in: arrayAuditInstPass.concat(arrayAuditInstNoPass)}
       filterClosed['audit_status'] = {$nin: ['closed', 'canceled']}
 
       filter['_id'] = {$in: arrayAuditInstPass}
@@ -639,32 +636,25 @@ const getAllAudit= async(request, response) => {
       filterNo['_id'] = {$in: arrayAuditInstNoPass}
     }
 
-    /*
-    console.log('filterClosed: ', filterClosed)
     let auditsInst = await AuditInstallation.find(filterClosed).populate('installation_id')
       .catch(error => {        
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
-
-    console.log('auditsInst: ', auditsInst.length)
 
     auditsInst.forEach((auditIns) => {
       if(!arrayAuditsNotClosed.includes(auditIns.audit_id.toString()) && auditIns.installation_id.active === true){
         arrayAuditsNotClosed = [...arrayAuditsNotClosed, auditIns.audit_id.toString()]
       }
     })
-    */
 
     if(page === 0){
-      //let audits = await Audit.find(filter).populate('installation_type criterions.criterion')
-      let audits = await Audit.find({_id: arrayAuditID}).populate('installation_type criterions.criterion')
+      let audits = await Audit.find(filter).populate('installation_type criterions.criterion')
         .catch(error => {        
           return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
         })
 
       audits = audits?.map((audit) => {
-        console.log('audit: ', audit.closed)
-        const closed = audit.closed // !arrayAuditsNotClosed.includes(audit._id.toString())
+        const closed = !arrayAuditsNotClosed.includes(audit._id.toString())
         return {...audit._doc, visible: true, closed}
       })
 
@@ -678,7 +668,7 @@ const getAllAudit= async(request, response) => {
       }
 
       auditsNo = auditsNo?.map((audit) => {
-        const closed = audit.closed // !arrayAuditsNotClosed.includes(audit._id.toString())
+        const closed = !arrayAuditsNotClosed.includes(audit._id.toString())
         return {...audit._doc, visible: false, closed}
       })
 
@@ -696,8 +686,7 @@ const getAllAudit= async(request, response) => {
       })
 
     if(arrayAuditInstNoPass.length > 0){
-      //countDocsNo = await Audit.countDocuments(filterNo)
-      countDocsNo = await Audit.countDocuments({_id: arrayAuditID})
+      countDocsNo = await Audit.countDocuments(filterNo)
         .catch(error => {        
           return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
         })
@@ -716,7 +705,7 @@ const getAllAudit= async(request, response) => {
       })
 
     audits = audits?.map((audit) => {
-      const closed = audit.closed // !arrayAuditsNotClosed.includes(audit._id.toString()) 
+      const closed = !arrayAuditsNotClosed.includes(audit._id.toString()) 
       return {...audit._doc, visible: true, closed}
     })
 
@@ -730,7 +719,7 @@ const getAllAudit= async(request, response) => {
     }
 
     auditsNo = auditsNo?.map((audit) => {
-      const closed = audit.closed // !arrayAuditsNotClosed.includes(audit._id.toString())
+      const closed = !arrayAuditsNotClosed.includes(audit._id.toString())
       return {...audit._doc, visible: false, closed}
     })
 
