@@ -50,9 +50,9 @@ const auditSchema = new Schema({
     type: Boolean,
     default: false
   },
-  state: {
-    type: String,
-    default: null
+  closed: {
+    type: Boolean,
+    default: false
   },
   createdAt: {type: Date,
     default: Date.now},
