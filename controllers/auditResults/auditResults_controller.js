@@ -2946,7 +2946,7 @@ const getDataForFullAuditTest = async(request, response) => {
             detail: `${audit_id} not found`}]}) 
     }
 
-    let auditAgencies = await AuditAgency.find({audit_id: audit_id})
+    let auditAgencies = await AuditAgency.find({audit_id: audit_id}).select('code name dealership_id ionic5_quaterly_billing vn_quaterly_billing dealership_details agency_by_types _id id')
 
     let compliance_audit = 0
 
