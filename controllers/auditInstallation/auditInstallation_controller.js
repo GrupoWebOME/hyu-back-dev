@@ -2,6 +2,7 @@ const AuditInstallation = require('../../models/audit_installation_model')
 const Dealership = require('../../models/dealership_model')
 var ObjectId = require('mongodb').ObjectId
 const nodemailer = require('nodemailer')
+const Audit = require('../../models/audit_model')
 
 const plannedMailContent = (installation, audit) => { return `
     <p>
@@ -205,6 +206,34 @@ const updateAuditInstallation = async(request, response) => {
     response.status(200).json({code: 200,
       msg: 'the AuditInstallation has been updated successfully',
       data: auditInst })
+
+    const audits = await Audit.find().select('_id')
+    const arrayAuditIds = audits.map(audit => audit._id.toString())
+
+    let auditStatus = []
+
+    for(let i = 0; i < arrayAuditIds.length; i++) {
+      let auditsInst = await AuditInstallation.find({audit_id: arrayAuditIds[i]}).populate('installation_id')
+        .catch(error => {        
+          return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+        })
+
+      let closed = true
+
+      auditsInst.forEach((auditIns) => {
+        if(auditIns.installation_id.active === true && (auditIns.audit_status !== 'closed' && auditIns.audit_status !== 'canceled')){
+          closed = false
+        }
+      })
+
+      auditStatus = [...auditStatus, {_id: arrayAuditIds[i], closed}]
+    }
+
+    for(let i = 0; i < auditStatus.length; i++) {
+      await Audit.findByIdAndUpdate(auditStatus[i]._id, {closed: auditStatus[i].closed})
+    }
+
+    return
   }
   catch(error){
     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
