@@ -12,7 +12,6 @@ const createAdmin = async(request, response) => {
 
     let errors = []
     
-    const regExPatternNamesAndSurname = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
     const regExPatternEmailAddress= /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
     
     if(adminRole !== 'main' && (!role || (role.toLowerCase() !== 'dealership' && role.toLowerCase() !== 'auditor'))){
@@ -45,16 +44,16 @@ const createAdmin = async(request, response) => {
       }
     }
 
-    if(!names || !names.match(regExPatternNamesAndSurname))
+    if(!names)
       errors.push({code: 400, 
         msg: 'invalid names',
-        detail: `${names} is not valid names format. The names field can only contain letters, and is required`
+        detail: `${names} is not valid names format. The names field is required`
       })
     
-    if(!surnames || !surnames.match(regExPatternNamesAndSurname))
+    if(!surnames)
       errors.push({code: 400, 
         msg: 'invalid surnames',
-        detail: `${surnames} is not valid surnames format. The surnames field can only contain letters, and is required`
+        detail: `${surnames} is not valid surnames format. The surnames field is required`
       })
     
     if(!emailAddress || !emailAddress.match(regExPatternEmailAddress))
@@ -186,7 +185,6 @@ const updateAdmin = async(request, response) => {
     const { adminRole, _id } = request.jwt.admin
     let errors = []
     
-    const regExPatternNamesAndSurname = /^[a-zA-ZàáâäãåąčćęèéêëėįìíîïłńòóôöõøùúûüųūÿýżźñçčšžÀÁÂÄÃÅĄĆČĖĘÈÉÊËÌÍÎÏĮŁŃÒÓÔÖÕØÙÚÛÜŲŪŸÝŻŹÑßÇŒÆČŠŽ∂ð ,.'-]+$/u
     const regExPatternEmailAddress= /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
     
     if(!id)
@@ -238,12 +236,6 @@ const updateAdmin = async(request, response) => {
       }
     }
 
-    if(names && !names.match(regExPatternNamesAndSurname))
-      errors.push({code: 400, 
-        msg: 'invalid names',
-        detail: `${names} is not valid names format. The names field can only contain letters`
-      })
-    
     if(audits){
       if(!Array.isArray(audits) || audits.length < 1){
         errors.push({code: 400, 
@@ -282,12 +274,6 @@ const updateAdmin = async(request, response) => {
         })
       }
     }
-
-    if(surnames && !surnames.match(regExPatternNamesAndSurname))
-      errors.push({code: 400, 
-        msg: 'invalid surnames',
-        detail: `${surnames} is not valid surnames format. The surnames field can only contain letters`
-      })
     
     if(emailAddress && !emailAddress.match(regExPatternEmailAddress))
       errors.push({code: 400, 
