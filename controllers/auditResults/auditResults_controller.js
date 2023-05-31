@@ -3096,7 +3096,7 @@ const getDataForAudit = async(request, response) => {
             }
           })
 
-          const auditsFiltereds = await Audit.find({_id: {$in: audit_ids}})
+          const auditsFiltereds = await Audit.find({_id: {$in: audit_ids}, closed: true})
                     
           auditsFiltereds.sort((a, b) => {
             return b.createdAt - a.createdAt
@@ -3109,7 +3109,7 @@ const getDataForAudit = async(request, response) => {
         }
                 
       } else{
-        audit = await Audit.findOne().sort({$natural:-1}).limit(1)
+        audit = await Audit.findOne({ closed: true }).sort({$natural:-1}).limit(1)
       }
 
       if(audit){
@@ -3118,7 +3118,7 @@ const getDataForAudit = async(request, response) => {
         return response.status(404).json({errors: [{code: 404, msg: 'not found', detail: 'No audits in ddbb'}]})
       }
 
-      if(dealership_id){
+      /*if(dealership_id){
         const isAuditClosed = await AuditInstallation.find({audit_id: audit._id, audit_status: {$ne: 'closed'}})
 
         if(isAuditClosed?.length > 0){
@@ -3126,7 +3126,9 @@ const getDataForAudit = async(request, response) => {
         } else {
           isClosed = true
         }
-      }
+      }*/
+
+      isClosed = true
     }
 
     if(!ObjectId.isValid(audit_id)){

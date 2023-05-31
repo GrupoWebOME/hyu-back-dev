@@ -23,7 +23,7 @@ const apiAuditDealership = require('./auditDealership/audit_dealership_routes')
 const apiAuditEconomic = require('./auditEconomic/audit_economic_routes')
 const apiSwagger = require('./doc/doc_routes')
 
-api.get('/', (request, response) => {
+api.get('/', (_request, response) => {
   response.status(200).json({msg: 'api'})
 })
 

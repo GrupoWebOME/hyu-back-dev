@@ -5,7 +5,6 @@ const Dealership = require('../../models/dealership_model')
 var ObjectId = require('mongodb').ObjectId
 
 const createAdmin = async(request, response) => {
-    
   try{
     const {names, surnames, emailAddress, userName, password, role, dealership} = request.body
     const adminRole = request.jwt.admin.role
