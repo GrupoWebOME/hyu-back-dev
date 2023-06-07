@@ -194,7 +194,7 @@ const createAudit = async(request, response) => {
         installation_id: installationsFind[i]._id,
         dealership_id: installationsFind[i].dealership,
         audit_id: newAudit._id,
-        audit_status: 'created'
+        audit_status: installationsFind[i].active? 'created' : 'canceled'
       })
       await newAuditInstallation.save()
     }
