@@ -3255,6 +3255,7 @@ const getDataForAudit = async(request, response) => {
       })
 
       const data = {
+        auditId: audit_id,
         hmes_dealership: (cant_hmes_dealership === 0)? null: hmes_dealership/cant_hmes_dealership,
         img_dealership: (cant_img_dealership === 0)? null: img_dealership/cant_img_dealership,
         electric_dealership: (cant_electric_dealership === 0)? null: electric_dealership/cant_electric_dealership,
@@ -3341,6 +3342,7 @@ const getDataForAudit = async(request, response) => {
       })
 
       const data = {
+        auditId: audit_id,
         hmes_dealership: (cant_hmes_dealership === 0)? null: hmes_dealership/cant_hmes_dealership,
         img_dealership: (cant_img_dealership === 0)? null: img_dealership/cant_img_dealership,
         electric_dealership: (cant_electric_dealership === 0)? null: electric_dealership/cant_electric_dealership,
