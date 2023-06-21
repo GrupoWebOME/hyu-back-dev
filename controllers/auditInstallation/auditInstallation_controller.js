@@ -333,8 +333,8 @@ const sendMail = async(subject, content, dealershipEmail) => {
       port: 587,
       secure: false,
       auth: {
-        user: 'estandares@redhyundai.com',
-        pass: 'P6xJ9*e1'
+        user: process.env.EMAIL_SENDER,
+        pass: process.env.EMAIL_PASSWORD
       }
     })
           
