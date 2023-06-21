@@ -43,7 +43,7 @@ const reviewMailContent = (installation, audit) => { return `
     </p>
     <p>
         Esta información se encuentra accesible a través de la aplicación Hyundai Standards Application (HSA) en el apartado Auditorías/ Alegaciones. 
-        Para cualquier duda contactar con Elena Drandar: estandares@redhyundai.com.
+        Para cualquier duda contactar con Elena Drandar: estandares-hyundai@redhyundai.com.
     </p>
     <p>
         Recibe un cordial saludo,
