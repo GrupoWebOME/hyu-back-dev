@@ -42,8 +42,8 @@ const reviewMailContent = (installation, audit) => { return `
         <b>El plazo de alegaciones/ plan de acción será de 10 días, desde el día 21/06/2023 hasta el día 30/06/2023 inclusive.</b>
     </p>
     <p>
-        Esta informacion se encuentra accesible a través de la aplicación de Estándares HMES. Para
-        cualquier duda contactar con Elena Drandar: estandares@redhyundai.com.
+        Esta información se encuentra accesible a través de la aplicación Hyundai Standards Application (HSA) en el apartado Auditorías/ Alegaciones. 
+        Para cualquier duda contactar con Elena Drandar: estandares@redhyundai.com.
     </p>
     <p>
         Recibe un cordial saludo,
