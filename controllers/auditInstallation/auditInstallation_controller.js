@@ -87,11 +87,10 @@ const closedMailContent = (installation, audit) => { return `
         Estimado concesionario,
     </p> 
     <p>
-        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación: <b>${installation}</b> se encuentra <b>cerrada</b> desde este momento puedes acceder para consultar los resultados. 
+        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación: <b>${installation}</b> se encuentra <b>Cerrada</b> desde este momento puedes acceder para consultar los resultados. 
     </p> 
     <p>
-        Esta informacion se encuentra accesible a través de la aplicación Hyundai Standars Application
-        (HSA). Para cualquier duda contactar con Elena Drandar: estandares@redhyundai.com.
+      Esta información se encuentra accesible a través de la aplicación Hyundai Standards Application (HSA) en el apartado Resultados Auditorías > ${audit}. Para cualquier duda contactar con Elena Drandar: estandares-hyundai@redhyundai.com
     </p>
     <p>
         Recibe un cordial saludo,
