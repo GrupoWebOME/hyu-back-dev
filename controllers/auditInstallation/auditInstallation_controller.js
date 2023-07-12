@@ -55,30 +55,32 @@ const reviewMailContent = (installation, audit) => { return `
 
 const reviewAutoMailContent = (installation, audit) => { return `
     <p>
-        Estimado concesionario,
+      Estimado concesionario,
     </p> 
     <p>
-        Paso a comunicarte que la auditoría ${audit} para la instalación <b>${installation}</b> se encuentra en
-        <b>Pendiente revisar concesión</b> para ser cumplimentada por la Concesión.. 
+      Paso a comunicarte que la auditoría ${audit} para la instalación <b>${installation}</b> se encuentra en
+      <b>Pendiente revisar concesión</b> para ser cumplimentada por la Concesión.
     </p> 
     <p>
-        Accediendo a esta auditoria podréis consultar cada uno de los criterios a auto auditar por la
-        Concesión e incluir los comentarios e imágenes que consideréis oportuno. Una vez finalizada la
-        auto auditoria de todos los criterios debéis pulsar el botón “Cerrar Alegaciones/ Auto
-        auditoria”.
+      Accediendo a esta auditoria podréis consultar cada uno de los criterios a auto auditar por la
+      Concesión e incluir los comentarios e imágenes que consideréis oportuno. Una vez finalizada la
+      auto auditoria de todos los criterios debéis pulsar el botón “Cerrar Alegaciones/ Auto
+      auditoria”.
     </p> 
     <p>
-        El plazo para realizar la auto auditoria será de <b>una semana</b> contando a partir del día de hoy.
+      <b>
+        El plazo para realizar esta auto auditoría será desde el viernes 14/07/2023 al martes 18/07/2023 inclusive.
+      </b>
     </p>
     <p>
-        Esta informacion se encuentra accesible a través de la aplicación Hyundai Standars Application
-        (HSA). Para cualquier duda contactar con Elena Drandar: estandares@redhyundai.com.
+      Esta información se encuentra accesible a través de la aplicación Hyundai Standards Application (HSA). 
+      Para cualquier duda contactar con Elena Drandar: estandares-hyundai@redhyundai.com.
     </p>
     <p>
-        Recibe un cordial saludo,
+      Recibe un cordial saludo,
     </p>
     <div>
-        <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
+      <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
     </div>
 `}
 
