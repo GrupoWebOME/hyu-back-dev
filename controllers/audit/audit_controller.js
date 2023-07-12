@@ -194,7 +194,7 @@ const createAudit = async(request, response) => {
         installation_id: installationsFind[i]._id,
         dealership_id: installationsFind[i].dealership,
         audit_id: newAudit._id,
-        audit_status: 'created'
+        audit_status: installationsFind[i].active? 'created' : 'canceled'
       })
       await newAuditInstallation.save()
     }
@@ -653,7 +653,7 @@ const getAllAudit= async(request, response) => {
     */
 
     if(page === 0){
-      let audits = await Audit.find(filter).populate('installation_type criterions.criterion')
+      let audits = await Audit.find(filter).populate('installation_type').select({criterions: 0})
         .catch(error => {        
           return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
         })
@@ -666,7 +666,7 @@ const getAllAudit= async(request, response) => {
       let auditsNo = []
 
       if(arrayAuditInstNoPass.length > 0){
-        auditsNo = await Audit.find(filterNo).populate('installation_type criterions.criterion')
+        auditsNo = await Audit.find(filterNo).populate('installation_type criterions.criterion').select({criterions: 0})
           .catch(error => {        
             return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
           })
@@ -681,7 +681,7 @@ const getAllAudit= async(request, response) => {
         totalPages: 1}
 
       return response.status(200).json({code: 200,
-        msg: 'success2',
+        msg: 'success',
         data: data })
     }
 
@@ -705,7 +705,7 @@ const getAllAudit= async(request, response) => {
       return response.status(400).json({code: 400, 
         msg: 'invalid page', 
         detail: `totalPages: ${countPage}`})
-    let audits = await Audit.find(filter).skip(skip).limit(10).populate('installation_type criterions.criterion')
+    let audits = await Audit.find(filter).skip(skip).limit(10).populate('installation_type').select({criterions: 0})
       .catch(error => {        
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
@@ -718,7 +718,7 @@ const getAllAudit= async(request, response) => {
     let auditsNo = []
 
     if(arrayAuditInstNoPass.length > 0){
-      auditsNo = await Audit.find(filterNo).select('name installation_type initial_date end_date isAgency auditMVE auditElectrics auditIonic5 isCustomAudit')
+      auditsNo = await Audit.find(filterNo).select({name: 1, installation_type: 1, initial_date: 1, end_date: 1, isAgency: 1, auditMVE: 1, auditElectrics: 1, auditIonic5: 1, isCustomAudit: 1, criterions: 0 })
         .catch(error => {        
           return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
         })
