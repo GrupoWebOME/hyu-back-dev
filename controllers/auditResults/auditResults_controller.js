@@ -267,6 +267,8 @@ const getDataForTables = async(request, response) => {
     let totalPassImgAudit = 0
     let totalHmeAudit = 0
     let totalPassHmeAudit = 0
+    let totalIoniqAudit = 0
+    let totalPassIoniqAudit = 0
 
     //<<<NUEVO
     auditResultsForImgAndHme.forEach((element) => {
@@ -289,6 +291,13 @@ const getDataForTables = async(request, response) => {
             totalImgAudit+= criterion.criterion_id.value
             if(criterion.pass)
               totalPassImgAudit+= criterion.criterion_id.value
+            // Peso total de los criterios imgAudit que aplican
+          }
+          if(criterion.criterion_id.isIoniqAudit){
+            // Peso total de los criterios imgAudit que aplican
+            totalIoniqAudit+= criterion.criterion_id.value
+            if(criterion.pass)
+              totalPassIoniqAudit+= criterion.criterion_id.value
             // Peso total de los criterios imgAudit que aplican
           }
           if(criterion.criterion_id.isHmeAudit){
@@ -487,6 +496,7 @@ const getDataForTables = async(request, response) => {
 
               instalation_audit_types = {
                 percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
+                percIonicAudit: totalImgAudit === 0? null : (totalPassIoniqAudit * 100)/totalIoniqAudit,
                 percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
                 percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
               }
@@ -568,6 +578,7 @@ const getDataForTables = async(request, response) => {
 
               instalation_audit_types = {
                 percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
+                percIonicAudit: totalImgAudit === 0? null : (totalPassIoniqAudit * 100)/totalIoniqAudit,
                 percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
                 percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
               }
@@ -2356,17 +2367,25 @@ const updateTest = async(request, response) => {
     //Recorro el arreglo de resultados
     let arrayStandardsFalse = []
     let arrayAreasFalse = []
+    let arrayStandardsFalseForElectric = []
+    let arrayAreasFalseForElectric = []
         
     newAuditResults.criterions.forEach((criterion) => {
       if(!criterion.pass && !criterion.criterion_id.exceptions.includes(newAuditResults.installation_id._id)){
         const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
         if(!existStandard){
           arrayStandardsFalse = [...arrayStandardsFalse, criterion.criterion_id.standard._id.toString()]
+          if(criterion.criterion_id.isElectricAudit){
+            arrayStandardsFalseForElectric = [...arrayStandardsFalseForElectric, criterion.criterion_id.standard._id.toString()]
+          }
         }
         if(criterion.criterion_id.standard.isCore){
           const existArea = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
           if(!existArea){
             arrayAreasFalse = [...arrayAreasFalse, criterion.criterion_id.area._id.toString()]
+            if(criterion.criterion_id.isElectricAudit){
+              arrayAreasFalseForElectric = [...arrayAreasFalseForElectric, criterion.criterion_id.area._id.toString()]
+            }
           }
         }
       }
@@ -2393,6 +2412,8 @@ const updateTest = async(request, response) => {
     let totalPassHmeAuditAux = 0
     let totalElectricAuditWithoutCore = 0
     let totalPassElectricAuditWithoutCore = 0
+    let totalIoniqAudit = 0
+    let totalPassIoniqAudit = 0
 
     //<<<NUEVO
     auditResultsForImgAndHme.criterions.forEach((criterion) => {     
@@ -2423,6 +2444,21 @@ const updateTest = async(request, response) => {
             }
           // Peso total de los criterios imgAudit que aplican
         }
+        if(criterion.criterion_id.isIoniqAudit){
+          // Peso total de los criterios isIoniqAudit que aplican
+          if(criterion.criterion_id.isHmeAudit){
+            totalIoniqAudit += criterion.criterion_id.value
+          } else{
+            totalIoniqAudit += criterion.criterion_id.value
+          }
+          if(criterion.pass)
+            if(criterion.criterion_id.isHmeAudit){
+              totalPassIoniqAudit += criterion.criterion_id.value
+            } else{
+              totalPassIoniqAudit += criterion.criterion_id.value
+            }
+          // Peso total de los criterios isIoniqAudit que aplican
+        }
         if(criterion.criterion_id.isHmeAudit){
           // Peso total de los criterios hmes que aplican
           if(criterion.criterion_id.isHmeAudit){
@@ -2442,17 +2478,20 @@ const updateTest = async(request, response) => {
         }
         if(criterion.criterion_id.isElectricAudit){
           // Peso total de los criterios imgAudit que aplican
-          if(criterion.criterion_id.isElectricAudit){
+          const existSt = arrayStandardsFalseForElectric.includes(criterion.criterion_id.standard._id.toString())
+          const existAr = arrayAreasFalseForElectric.includes(criterion.criterion_id.area._id.toString())
+          if(criterion.criterion_id.isHmeAudit){
             totalElectricAuditWithoutCore += criterion.criterion_id.value
           } else{
             totalElectricAuditWithoutCore += criterion.criterion_id.value
           }
-          if(criterion.pass)
-            if(criterion.criterion_id.isElectricAudit){
+          if (criterion.pass && !existSt && !existAr) {
+            if(criterion.criterion_id.isHmeAudit){
               totalPassElectricAuditWithoutCore += criterion.criterion_id.value
             } else{
               totalPassElectricAuditWithoutCore += criterion.criterion_id.value
             }
+          }
           // Peso total de los criterios imgAudit que aplican
         }
       }
@@ -2637,6 +2676,7 @@ const updateTest = async(request, response) => {
 
             instalation_audit_types = {
               percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
+              percIoniqAudit: totalIoniqAudit === 0? null : (totalPassIoniqAudit * 100)/totalIoniqAudit,
               percElectricAuditWithoutCore: totalImgAudit === 0? null : (totalPassElectricAuditWithoutCore * 100)/totalElectricAuditWithoutCore,
               percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
               percHmeAuditAux: totalHmeAuditAux === 0? null: (totalPassHmeAuditAux * 100)/totalHmeAuditAux,
@@ -2723,6 +2763,7 @@ const updateTest = async(request, response) => {
 
             instalation_audit_types = {
               percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
+              percIoniqAudit: totalIoniqAudit === 0? null : (totalPassIoniqAudit * 100)/totalIoniqAudit,
               percElectricAuditWithoutCore: totalImgAudit === 0? null : (totalPassElectricAuditWithoutCore * 100)/totalElectricAuditWithoutCore,
               percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
               percHmeAuditAux: totalHmeAuditAux === 0? null: (totalPassHmeAuditAux * 100)/totalHmeAuditAux,
@@ -2766,6 +2807,8 @@ const updateTest = async(request, response) => {
     let img_perc = 0
     let hme_total = 0
     let hme_perc_aux = 0
+    let ioniq_total = 0
+    let ioniq_perc = 0
     let agency_by_types_customs = []
     let agency_by_types_customs_total = []
         
@@ -2825,6 +2868,10 @@ const updateTest = async(request, response) => {
           img_perc+= installation.instalation_audit_types.percImgAudit
           img_total+= 1
         }
+        if(installation.instalation_audit_types.percIoniqAudit !== null && installation.instalation_audit_types.percIoniqAudit !== undefined){
+          ioniq_perc+= installation.instalation_audit_types.percIoniqAudit
+          ioniq_total+= 1
+        }
         if(installation.instalation_audit_types.percElectricAudit !== null){
           electric_perc+= installation.instalation_audit_types.percElectricAudit
           electric_total+= 1
@@ -2844,6 +2891,7 @@ const updateTest = async(request, response) => {
       electric_perc: (electric_total === 0)? null: electric_perc / electric_total,
       electric_perc_without_core: (electric_perc_without_core_total === 0)? null: electric_perc_without_core / electric_perc_without_core_total,
       img_perc: (img_total === 0)? null: img_perc / img_total,
+      ioniq_perc: (ioniq_total === 0)? null: ioniq_perc / ioniq_total,
       hme_perc: (hme_total === 0)? null : hme_perc_aux / hme_total,
       hp_perc: (hp_perc === 0)? null: hp_perc,
       v_perc: (v_perc === 0)? null: v_perc,
@@ -2990,6 +3038,7 @@ const getDataForFullAuditTest = async(request, response) => {
         percentage_HP: element.agency_by_types.hp_perc,
         percentage_audit_electric: element.agency_by_types.electric_perc,
         percentage_audit_img: element.agency_by_types.img_perc,
+        percentage_audit_ioniq: element.agency_by_types.ioniq_perc,
         percentage_audit_hme: element.agency_by_types.hme_perc,
         agency_by_types_customs: element?.agency_by_types?.agency_by_types_customs,
         percentage_audit_electric_without_core: element?.agency_by_types?.electric_perc_without_core,
