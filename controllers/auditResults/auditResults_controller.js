@@ -2373,16 +2373,22 @@ const updateTest = async(request, response) => {
     newAuditResults.criterions.forEach((criterion) => {
       if(!criterion.pass && !criterion.criterion_id.exceptions.includes(newAuditResults.installation_id._id)){
         const existStandard = arrayStandardsFalse.includes(criterion.criterion_id.standard._id.toString())
+        const existStandardForElectric = arrayStandardsFalseForElectric.includes(criterion.criterion_id.standard._id.toString())
         if(!existStandard){
           arrayStandardsFalse = [...arrayStandardsFalse, criterion.criterion_id.standard._id.toString()]
+        }
+        if(!existStandardForElectric){
           if(criterion.criterion_id.isElectricAudit){
             arrayStandardsFalseForElectric = [...arrayStandardsFalseForElectric, criterion.criterion_id.standard._id.toString()]
           }
         }
         if(criterion.criterion_id.standard.isCore){
           const existArea = arrayAreasFalse.includes(criterion.criterion_id.area._id.toString())
+          const existAreaForElectric = arrayAreasFalseForElectric.includes(criterion.criterion_id.area._id.toString())
           if(!existArea){
             arrayAreasFalse = [...arrayAreasFalse, criterion.criterion_id.area._id.toString()]
+          }
+          if(!existAreaForElectric){
             if(criterion.criterion_id.isElectricAudit){
               arrayAreasFalseForElectric = [...arrayAreasFalseForElectric, criterion.criterion_id.area._id.toString()]
             }
