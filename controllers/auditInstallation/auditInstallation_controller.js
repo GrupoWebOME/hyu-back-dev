@@ -33,14 +33,13 @@ const reviewMailContent = (installation, audit) => { return `
         Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación <b>${installation}</b> está finalizada por parte del auditor y se encuentra en Pendiente revisar concesión. 
     </p> 
     <p>
-        Antes de publicar los resultados definitivos, queremos ofrecerte la posibilidad de revisar
-        aquellos incumplimientos que consideres puedan ser susceptibles de emitir alegaciones para
-        ser revisadas por HMES. En caso de que compruebes, que efectivamente, existe una
-        justificación razonable para alegar un incumplimiento, podrás realizar la alegación incluyendo
-        toda aquella información que consideréis necesaria, fotos y/o comentarios.
+        Antes de publicar los resultados definitivos, queremos ofrecerte la posibilidad de revisar aquellos incumplimientos que consideres puedan ser susceptibles 
+        de haber sido auditado incorrectamente, emitir alegaciones o realizar plan de acción por tu parte. En caso de que compruebes, que efectivamente, existe una 
+        justificación razonable para alegar un incumplimiento o debas realizar un plan de acción, podrás realizarlo incluyendo toda aquella información que consideréis 
+        necesaria, fotos/ documentos Office y/o comentarios.
     </p> 
     <p>
-        El plazo de alegaciones será de <b>una semana</b> contando a partir del día de hoy.
+        <b>El plazo de alegaciones/ plan de acción será de 10 días, desde el día 21/06/2023 hasta el día 30/06/2023 inclusive.</b>
     </p>
     <p>
         Esta informacion se encuentra accesible a través de la aplicación de Estándares HMES. Para
@@ -56,30 +55,32 @@ const reviewMailContent = (installation, audit) => { return `
 
 const reviewAutoMailContent = (installation, audit) => { return `
     <p>
-        Estimado concesionario,
+      Estimado concesionario,
     </p> 
     <p>
-        Paso a comunicarte que la auditoría ${audit} para la instalación <b>${installation}</b> se encuentra en
-        <b>Pendiente revisar concesión</b> para ser cumplimentada por la Concesión.. 
+      Paso a comunicarte que la auditoría ${audit} para la instalación <b>${installation}</b> se encuentra en
+      <b>Pendiente revisar concesión</b> para ser cumplimentada por la Concesión.
     </p> 
     <p>
-        Accediendo a esta auditoria podréis consultar cada uno de los criterios a auto auditar por la
-        Concesión e incluir los comentarios e imágenes que consideréis oportuno. Una vez finalizada la
-        auto auditoria de todos los criterios debéis pulsar el botón “Cerrar Alegaciones/ Auto
-        auditoria”.
+      Accediendo a esta auditoria podréis consultar cada uno de los criterios a auto auditar por la
+      Concesión e incluir los comentarios e imágenes que consideréis oportuno. Una vez finalizada la
+      auto auditoria de todos los criterios debéis pulsar el botón “Cerrar Alegaciones/ Auto
+      auditoria”.
     </p> 
     <p>
-        El plazo para realizar la auto auditoria será de <b>una semana</b> contando a partir del día de hoy.
+      <b>
+        El plazo para realizar esta auto auditoría será desde el viernes 14/07/2023 al martes 18/07/2023 inclusive.
+      </b>
     </p>
     <p>
-        Esta informacion se encuentra accesible a través de la aplicación Hyundai Standars Application
-        (HSA). Para cualquier duda contactar con Elena Drandar: estandares@redhyundai.com.
+      Esta información se encuentra accesible a través de la aplicación Hyundai Standards Application (HSA). 
+      Para cualquier duda contactar con Elena Drandar: estandares-hyundai@redhyundai.com.
     </p>
     <p>
-        Recibe un cordial saludo,
+      Recibe un cordial saludo,
     </p>
     <div>
-        <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
+      <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
     </div>
 `}
 
@@ -88,11 +89,10 @@ const closedMailContent = (installation, audit) => { return `
         Estimado concesionario,
     </p> 
     <p>
-        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación: <b>${installation}</b> se encuentra <b>cerrada</b> desde este momento puedes acceder para consultar los resultados. 
+        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación: <b>${installation}</b> se encuentra <b>Cerrada</b> desde este momento puedes acceder para consultar los resultados. 
     </p> 
     <p>
-        Esta informacion se encuentra accesible a través de la aplicación Hyundai Standars Application
-        (HSA). Para cualquier duda contactar con Elena Drandar: estandares@redhyundai.com.
+      Esta información se encuentra accesible a través de la aplicación Hyundai Standards Application (HSA) en el apartado Resultados Auditorías > ${audit}. Para cualquier duda contactar con Elena Drandar: estandares-hyundai@redhyundai.com
     </p>
     <p>
         Recibe un cordial saludo,
@@ -334,8 +334,8 @@ const sendMail = async(subject, content, dealershipEmail) => {
       port: 587,
       secure: false,
       auth: {
-        user: 'estandares@redhyundai.com',
-        pass: 'P6xJ9*e1'
+        user: process.env.EMAIL_SENDER,
+        pass: process.env.EMAIL_PASSWORD
       }
     })
           

@@ -2134,7 +2134,6 @@ const updateTest = async(request, response) => {
   try{
     const {audit_id, installation_id, criterions, state, dateForAudit} = request.body
     const {id} = request.params
-
     let errors = []
     let audiResultstById = null
     let arrayInstallations = []
@@ -2379,23 +2378,21 @@ const updateTest = async(request, response) => {
     }
 
     const auditResultsForImgAndHme = newAuditResults
-
     let instalations_audit_details = null
     let instalation_audit_types = null
-
     const VENTA = '6233b3ace74b428c2dcf3068'
     const POSVENTA = '6233b450e74b428c2dcf3091'
     const HYUNDAI_PROMISE = '6233b445e74b428c2dcf3088'
     const GENERAL = '6233b39fe74b428c2dcf305f'
-
     let totalWeightPerc = 0
-
     let totalImgAudit = 0
     let totalPassImgAudit = 0
     let totalHmeAudit = 0
     let totalHmeAuditAux = 0
     let totalPassHmeAudit = 0
     let totalPassHmeAuditAux = 0
+    let totalElectricAuditWithoutCore = 0
+    let totalPassElectricAuditWithoutCore = 0
 
     //<<<NUEVO
     auditResultsForImgAndHme.criterions.forEach((criterion) => {     
@@ -2442,6 +2439,21 @@ const updateTest = async(request, response) => {
               totalPassHmeAudit += criterion.criterion_id.value
             }
           // Peso total de los criterios hmes que aplican
+        }
+        if(criterion.criterion_id.isElectricAudit){
+          // Peso total de los criterios imgAudit que aplican
+          if(criterion.criterion_id.isElectricAudit){
+            totalElectricAuditWithoutCore += criterion.criterion_id.value
+          } else{
+            totalElectricAuditWithoutCore += criterion.criterion_id.value
+          }
+          if(criterion.pass)
+            if(criterion.criterion_id.isElectricAudit){
+              totalPassElectricAuditWithoutCore += criterion.criterion_id.value
+            } else{
+              totalPassElectricAuditWithoutCore += criterion.criterion_id.value
+            }
+          // Peso total de los criterios imgAudit que aplican
         }
       }
     })
@@ -2524,7 +2536,6 @@ const updateTest = async(request, response) => {
         }
       }
     })
-
     // Los demás criterios
     newAuditResults.criterions.forEach((criterion) => {
       let isValidType = false
@@ -2626,6 +2637,7 @@ const updateTest = async(request, response) => {
 
             instalation_audit_types = {
               percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
+              percElectricAuditWithoutCore: totalImgAudit === 0? null : (totalPassElectricAuditWithoutCore * 100)/totalElectricAuditWithoutCore,
               percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
               percHmeAuditAux: totalHmeAuditAux === 0? null: (totalPassHmeAuditAux * 100)/totalHmeAuditAux,
               percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
@@ -2711,6 +2723,7 @@ const updateTest = async(request, response) => {
 
             instalation_audit_types = {
               percImgAudit: totalImgAudit === 0? null : (totalPassImgAudit * 100)/totalImgAudit,
+              percElectricAuditWithoutCore: totalImgAudit === 0? null : (totalPassElectricAuditWithoutCore * 100)/totalElectricAuditWithoutCore,
               percHmeAudit: totalHmeAudit === 0? null :  (totalPassHmeAudit * 100)/totalHmeAudit,
               percHmeAuditAux: totalHmeAuditAux === 0? null: (totalPassHmeAuditAux * 100)/totalHmeAuditAux,
               percElectricAudit: totalElectricAudit === 0? null :  (totalPassElectricAudit * 100)/totalElectricAudit,
@@ -2747,6 +2760,8 @@ const updateTest = async(request, response) => {
     let pv_perc = 0
     let electric_total = 0
     let electric_perc = 0
+    let electric_perc_without_core = 0
+    let electric_perc_without_core_total = 0
     let img_total = 0
     let img_perc = 0
     let hme_total = 0
@@ -2814,6 +2829,10 @@ const updateTest = async(request, response) => {
           electric_perc+= installation.instalation_audit_types.percElectricAudit
           electric_total+= 1
         }
+        if(installation.instalation_audit_types.percElectricAuditWithoutCore !== null && installation.instalation_audit_types.percElectricAuditWithoutCore !== undefined){
+          electric_perc_without_core+= installation.instalation_audit_types.percElectricAuditWithoutCore
+          electric_perc_without_core_total+= 1
+        }
         if(installation.instalation_audit_types.percHmeAudit !== null){
           hme_perc_aux+= installation.instalation_audit_types.percHmeAuditAux
           hme_total+= 1
@@ -2823,6 +2842,7 @@ const updateTest = async(request, response) => {
 
     let agency_by_types = {
       electric_perc: (electric_total === 0)? null: electric_perc / electric_total,
+      electric_perc_without_core: (electric_perc_without_core_total === 0)? null: electric_perc_without_core / electric_perc_without_core_total,
       img_perc: (img_total === 0)? null: img_perc / img_total,
       hme_perc: (hme_total === 0)? null : hme_perc_aux / hme_total,
       hp_perc: (hp_perc === 0)? null: hp_perc,
@@ -2972,6 +2992,7 @@ const getDataForFullAuditTest = async(request, response) => {
         percentage_audit_img: element.agency_by_types.img_perc,
         percentage_audit_hme: element.agency_by_types.hme_perc,
         agency_by_types_customs: element?.agency_by_types?.agency_by_types_customs,
+        percentage_audit_electric_without_core: element?.agency_by_types?.electric_perc_without_core,
         showAuditResults: AuditInstallationFind.length > 0? false : true
       }
       dealership_details = [...dealership_details, data]
@@ -3029,7 +3050,6 @@ const tablesTest = async(request, response) => {
     let tables = await AuditAgency.findOne({audit_id: audit_id, dealership_id: dealership_id})
       .populate({path: 'audit_criterions_details.criterions.criterion_id', 
         populate: {path: 'standard installationType block area category auditResponsable criterionType'}})
-
     if(tables){
       let fixed_instalations_audit_details = []
         
