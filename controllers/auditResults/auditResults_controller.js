@@ -3283,10 +3283,10 @@ const getDataForAudit = async(request, response) => {
       let installation_details = []
 
       auditAgencies.forEach((agency) => {
-        const findedDeal = dealershipsInactives.includes(agency.dealership_details._id.toString())
+        const findedDeal = dealershipsInactives.includes(agency.dealership_details?._id?.toString())
         if(!findedDeal){
           agency.instalations_audit_details.forEach((installation) => {   
-            const findedInst = installationsInactives.includes(installation.installation._id.toString())
+            const findedInst = installationsInactives.includes(installation.installation?._id?.toString())
             if(!findedInst){
               installation_details = [...installation_details, {
                 installation_name: installation.installation.name,                        
