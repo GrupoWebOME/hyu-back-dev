@@ -3377,7 +3377,7 @@ const getDataForAudit = async(request, response) => {
               let installation = Array.isArray(inst)? inst[0] : inst
               installation_details = [...installation_details, {
                 installation_name: installation.installation.name,                        
-                installation_id: installation.installation._id.toString(),
+                installation_id: installation.installation?._id?.toString(),
                 perc: installation.categories[installation.categories.length - 1].auditTotalResult
               }]
               if(installation.installation.installation_type.toString() === AOH){
