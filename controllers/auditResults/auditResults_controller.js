@@ -3138,8 +3138,8 @@ const getDataForAudit = async(request, response) => {
   try{
     let existAudit = null
 
-    const dealershipsInactives = (await Dealership.find({active: false}).select('_id')).map((dealership) => { return dealership._id.toString() })
-    const installationsInactives = (await Installation.find({active: false}).select('_id')).map((installation) => { return installation._id.toString() })
+    const dealershipsInactives = (await Dealership.find({active: false}).select('_id')).map((dealership) => { return dealership._id?.toString() })
+    const installationsInactives = (await Installation.find({active: false}).select('_id')).map((installation) => { return installation._id?.toString() })
 
     if(audit_id === 'last'){
       let audit = null
