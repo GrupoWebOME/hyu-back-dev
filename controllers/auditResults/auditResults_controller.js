@@ -3219,7 +3219,7 @@ const getDataForAudit = async(request, response) => {
           detail: `${dealership_id} is not an ObjectId`}]})
     }
     else{
-      existAudit = await Audit.findById(audit_id)
+      existAudit = await Audit.exists({_id: audit_id})
       if(!existAudit)
         return response.status(400).json(
           {errors: [{code: 400, 
@@ -3239,7 +3239,7 @@ const getDataForAudit = async(request, response) => {
             msg: 'invalid dealership_id', 
             detail: `${dealership_id} is not an ObjectId`}]})
       }
-      const dealershipByID = await Dealership.findById(dealership_id)
+      const dealershipByID = await Dealership.exists({_id: dealership_id})
 
       if(!dealershipByID)
         return response.status(400).json({code: 404, 
@@ -3254,7 +3254,7 @@ const getDataForAudit = async(request, response) => {
             detail: `${audit_id} is not an ObjectId`}]})
       }
       else{
-        existAudit = await Audit.findById(audit_id)
+        existAudit = await Audit.exists({_id: audit_id})
         if(!existAudit)
           return response.status(400).json(
             {errors: [{code: 400, 
@@ -3262,8 +3262,8 @@ const getDataForAudit = async(request, response) => {
               detail: `${audit_id} not found`}]}) 
       }
     
-      let auditAgencies = await AuditAgency.find(filter)
-                
+      let auditAgencies = await AuditAgency.find(filter).select('_id dealership_details._id instalations_audit_details')
+
       let hmes_dealership = 0
       let cant_hmes_dealership = 0
       let img_dealership = 0
@@ -3347,9 +3347,8 @@ const getDataForAudit = async(request, response) => {
       return response.status(200).json({data: data})
 
     } else {
+      let auditAgencies = await AuditAgency.find(filter).select('_id dealership_details._id instalations_audit_details')
 
-      let auditAgencies = await AuditAgency.find(filter)
-    
       let hmes_dealership = 0
       let cant_hmes_dealership = 0
       let img_dealership = 0
