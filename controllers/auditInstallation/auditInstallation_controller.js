@@ -30,23 +30,29 @@ const reviewMailContent = (installation, audit) => { return `
         Estimado concesionario,
     </p> 
     <p>
-        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación <b>${installation}</b> está finalizada por parte del auditor y se encuentra en Pendiente revisar concesión. 
+        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación <b>${installation}</b> se encuentra en Pendiente revisar
+        concesión como se ha informado en la circular 7569 
     </p> 
     <p>
-        Antes de publicar los resultados definitivos, queremos ofrecerte la posibilidad de revisar aquellos incumplimientos que consideres puedan ser susceptibles 
-        de haber sido auditado incorrectamente, emitir alegaciones o realizar plan de acción por tu parte. En caso de que compruebes, que efectivamente, existe una 
-        justificación razonable para alegar un incumplimiento o debas realizar un plan de acción, podrás realizarlo incluyendo toda aquella información que consideréis 
-        necesaria, fotos/ documentos Office y/o comentarios.
+      Aquí volvéis a tener la posibilidad de revisar aquellos incumplimientos que
+      consideres puedan ser susceptibles de haber sido auditado incorrectamente,
+      emitir alegaciones o realizar plan de acción por tu parte. En caso de que
+      compruebes, que efectivamente, existe una justificación razonable para
+      alegar un incumplimiento o debas realizar un plan de acción, podrás
+      realizarlo incluyendo toda aquella información que consideréis necesaria,
+      fotos/ documentos Office y/o comentarios.
     </p> 
     <p>
-        <b>El plazo de alegaciones/ plan de acción será de 10 días, desde el día 21/06/2023 hasta el día 30/06/2023 inclusive.</b>
+        <b>El plazo de alegaciones/ plan de acción será hasta el día 15/09/2023
+        inclusive.</b>
     </p>
     <p>
-        Esta información se encuentra accesible a través de la aplicación Hyundai Standards Application (HSA) en el apartado Auditorías/ Alegaciones. 
-        Para cualquier duda contactar con Elena Drandar: estandares-hyundai@redhyundai.com.
+      Esta información se encuentra accesible a través de la aplicación Hyundai
+      Standards Application (HSA) en el apartado Auditorías/ Alegaciones. Para
+      cualquier duda contactar con Elena Drandar: estandares-hyundai@redhyundai.com
     </p>
     <p>
-        Recibe un cordial saludo,
+      Recibe un cordial saludo,
     </p>
     <div>
         <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
