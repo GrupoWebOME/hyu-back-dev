@@ -31,7 +31,7 @@ const reviewMailContent = (installation, audit) => { return `
     </p> 
     <p>
         Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación <b>${installation}</b> se encuentra en Pendiente revisar
-        concesión como se ha informado en la circular 7569 
+        concesión como se ha informado en la circular <b>7569</b>  
     </p> 
     <p>
       Aquí volvéis a tener la posibilidad de revisar aquellos incumplimientos que
