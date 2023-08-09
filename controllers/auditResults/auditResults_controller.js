@@ -3366,10 +3366,12 @@ const getDataForAudit = async(request, response) => {
       let total_inst = 0
       let cant_total_inst = 0
       let installation_details = []
+      let total_dealership_inst_proms = []
 
       auditAgencies.forEach((agency) => {
         const findedDeal = dealershipsInactives.includes(agency.dealership_details?._id?.toString())
         if(!findedDeal){
+          let deal_inst_prom = 0
           agency.instalations_audit_details.forEach((inst) => {  
             const findedInst = installationsInactives.includes(inst.installation?._id?.toString())
             if(!findedInst){
@@ -3379,6 +3381,7 @@ const getDataForAudit = async(request, response) => {
                 installation_id: installation.installation?._id?.toString(),
                 perc: installation.categories[installation.categories.length - 1].auditTotalResult
               }]
+              deal_inst_prom += installation.categories[installation.categories.length - 1].auditTotalResult
               if(installation.installation.installation_type.toString() === AOH){
                 if(installation.instalation_audit_types?.percImgAudit !== null && installation.instalation_audit_types?.percImgAudit !== undefined){
                   cant_img_dealership += 1
@@ -3412,8 +3415,13 @@ const getDataForAudit = async(request, response) => {
               }
             }
           })
+          deal_inst_prom = deal_inst_prom / agency.instalations_audit_details.length
+          total_dealership_inst_proms.push(deal_inst_prom)
         }
       })
+
+      const sum_deal_inst_prom = total_dealership_inst_proms?.reduce((a, b) => a + b, 0)
+      const dealerships_prom = total_dealership_inst_proms.length > 0 ? sum_deal_inst_prom / total_dealership_inst_proms.length : 0
 
       const data = {
         auditId: audit_id,
@@ -3424,8 +3432,9 @@ const getDataForAudit = async(request, response) => {
         img_inst: (cant_img_inst === 0)? null: img_inst/cant_img_inst,
         electric_inst: (cant_electric_inst === 0)? null: electric_inst/cant_electric_inst,
         total_dealership: (cant_total_dealership === 0)? null: total_dealership/cant_total_dealership ,
+        dealerships_prom,
         total_inst: (cant_total_inst === 0)? null: total_inst/cant_total_inst,
-        total: (total_dealership + total_inst)/(cant_total_dealership+cant_total_inst),
+        total: (total_dealership + total_inst)/(cant_total_dealership + cant_total_inst),
         instalations_detail: installation_details,
         closed: isClosed
       }
