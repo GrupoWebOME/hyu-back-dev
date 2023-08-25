@@ -3347,7 +3347,7 @@ const getDataForAudit = async(request, response) => {
       return response.status(200).json({data: data})
 
     } else {
-      let auditAgencies = await AuditAgency.find(filter).select('_id dealership_details._id instalations_audit_details')
+      let auditAgencies = await AuditAgency.find(filter).select('_id dealership_details._id agency_by_types dealership_details.name instalations_audit_details')
 
       let hmes_dealership = 0
       let cant_hmes_dealership = 0
@@ -3368,8 +3368,10 @@ const getDataForAudit = async(request, response) => {
       let installation_details = []
       let total_dealership_inst_proms = []
 
+      let dealership_details = []
       auditAgencies.forEach((agency) => {
         const findedDeal = dealershipsInactives.includes(agency.dealership_details?._id?.toString())
+        dealership_details = [...dealership_details, agency?.agency_by_types?.total_agency]  
         if(!findedDeal){
           let deal_inst_prom = 0
           agency.instalations_audit_details.forEach((inst) => {  
@@ -3415,13 +3417,14 @@ const getDataForAudit = async(request, response) => {
               }
             }
           })
+
           deal_inst_prom = deal_inst_prom / agency.instalations_audit_details.length
           total_dealership_inst_proms.push(deal_inst_prom)
         }
       })
 
-      const sum_deal_inst_prom = total_dealership_inst_proms?.reduce((a, b) => a + b, 0)
-      const dealerships_prom = total_dealership_inst_proms.length > 0 ? sum_deal_inst_prom / total_dealership_inst_proms.length : 0
+      const sum_deal_inst_prom = dealership_details?.reduce((a, b) => a + b, 0)
+      const dealerships_prom = dealership_details.length > 0 ? sum_deal_inst_prom / dealership_details.length : 0
 
       const data = {
         auditId: audit_id,
