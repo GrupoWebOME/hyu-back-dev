@@ -3368,10 +3368,17 @@ const getDataForAudit = async(request, response) => {
       let installation_details = []
       let total_dealership_inst_proms = []
 
-      let dealership_details = []
+      let dealership_details_total = []
+      let percentage_audit_electric_total = []
+      let percentage_audit_img_total = []
+      let percentage_audit_hme_total = []
+
       auditAgencies.forEach((agency) => {
         const findedDeal = dealershipsInactives.includes(agency.dealership_details?._id?.toString())
-        dealership_details = [...dealership_details, agency?.agency_by_types?.total_agency]  
+        dealership_details_total = [...dealership_details_total, agency?.agency_by_types?.total_agency] 
+        percentage_audit_electric_total = [...percentage_audit_electric_total, agency?.agency_by_types?.electric_perc]  
+        percentage_audit_img_total = [...percentage_audit_img_total, agency?.agency_by_types?.img_perc]  
+        percentage_audit_hme_total = [...percentage_audit_hme_total, agency?.agency_by_types?.hme_perc]  
         if(!findedDeal){
           let deal_inst_prom = 0
           agency.instalations_audit_details.forEach((inst) => {  
@@ -3423,8 +3430,17 @@ const getDataForAudit = async(request, response) => {
         }
       })
 
-      const sum_deal_inst_prom = dealership_details?.reduce((a, b) => a + b, 0)
-      const dealerships_prom = dealership_details.length > 0 ? sum_deal_inst_prom / dealership_details.length : 0
+      const sum_deal_inst_prom = dealership_details_total?.reduce((a, b) => a + b, 0)
+      const dealerships_prom = dealership_details_total.length > 0 ? sum_deal_inst_prom / dealership_details_total.length : 0
+
+      const sum_deal_electric_prom = percentage_audit_electric_total?.reduce((a, b) => a + b, 0)
+      const dealerships_electric_prom = percentage_audit_electric_total.length > 0 ? sum_deal_electric_prom / percentage_audit_electric_total.length : 0
+
+      const sum_deal_img_prom = percentage_audit_img_total?.reduce((a, b) => a + b, 0)
+      const dealerships_img_prom = percentage_audit_img_total.length > 0 ? sum_deal_img_prom / percentage_audit_img_total.length : 0
+
+      const sum_deal_hme_prom = percentage_audit_hme_total?.reduce((a, b) => a + b, 0)
+      const dealerships_hme_prom = percentage_audit_hme_total.length > 0 ? sum_deal_hme_prom / percentage_audit_hme_total.length : 0
 
       const data = {
         auditId: audit_id,
@@ -3436,6 +3452,9 @@ const getDataForAudit = async(request, response) => {
         electric_inst: (cant_electric_inst === 0)? null: electric_inst/cant_electric_inst,
         total_dealership: (cant_total_dealership === 0)? null: total_dealership/cant_total_dealership ,
         dealerships_prom,
+        dealerships_electric_prom,
+        dealerships_img_prom,
+        dealerships_hme_prom,
         total_inst: (cant_total_inst === 0)? null: total_inst/cant_total_inst,
         total: (total_dealership + total_inst)/(cant_total_dealership + cant_total_inst),
         instalations_detail: installation_details,
