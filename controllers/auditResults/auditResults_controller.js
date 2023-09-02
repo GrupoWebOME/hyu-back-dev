@@ -3469,4 +3469,46 @@ const getDataForAudit = async(request, response) => {
   }
 }
 
-module.exports = {createAuditResults, updateAuditResults, deleteAuditResults, getDataForTables, getAuditResByAuditIDAndInstallationID, getAuditResByAuditID, getDataForAudit, getDataForFullAudit, updateTest, getDataForFullAuditTest, createAuditResultsTest, tablesTest}
+const getDataInstForAudit = async(request, response) => {
+  try {  
+    const {audit_id} = request.params
+    
+    if(!ObjectId.isValid(audit_id)){
+      return response.status(400).json(
+        {errors: [{code: 400, 
+          msg: 'invalid audit_id', 
+          detail: `${audit_id} is not an ObjectId`}]})
+    }
+
+    const installationsAudit = await AuditResults.find({ audit_id: audit_id })
+      .select('installation_id instalations_audit_details.categories instalations_audit_details.instalation_audit_types')
+      .populate({
+        path: 'installation_id',
+        select: 'code name installation_type dealership postal_code province address autonomous_community population isSale isPostSale isHP',
+        populate: {
+          path: 'installation_type dealership',
+          select: 'code name'
+        }
+      })
+
+    return response.status(200).json({data: installationsAudit})
+  }
+  catch(error) {
+    return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
+  }
+}
+
+module.exports = {
+  createAuditResults,
+  updateAuditResults,
+  deleteAuditResults,
+  getDataForTables,
+  getAuditResByAuditIDAndInstallationID,
+  getAuditResByAuditID,
+  getDataForAudit,
+  getDataForFullAudit,
+  updateTest,
+  getDataForFullAuditTest,
+  getDataInstForAudit,
+  createAuditResultsTest,
+  tablesTest}
