@@ -392,6 +392,8 @@ api.get('/tables/audit/:audit_id/details', AuditResults.getDataForFullAudit)
 
 api.get('/tables/audit/:audit_id/details2', AuditResults.getDataForFullAuditTest)
 
+api.get('/tables/audit/:audit_id/inst_details', AuditResults.getDataInstForAudit)
+
 api.get('/audit/:auditid/installation/:installationid', AuditResults.getAuditResByAuditIDAndInstallationID)
 
 api.get('/audit/:auditid', AuditResults.getAuditResByAuditID)
