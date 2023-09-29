@@ -30,21 +30,20 @@ const reviewMailContent = (installation, audit) => { return `
         Estimado concesionario,
     </p> 
     <p>
-        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación <b>${installation}</b> se encuentra en Pendiente revisar
-        concesión como se ha informado en la circular <b>7569</b>  
+        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación <b>${installation}</b> está finalizada por parte del
+        auditor y se encuentra en Pendiente revisar concesión. 
     </p> 
     <p>
-      Aquí volvéis a tener la posibilidad de revisar aquellos incumplimientos que
-      consideres puedan ser susceptibles de haber sido auditado incorrectamente,
-      emitir alegaciones o realizar plan de acción por tu parte. En caso de que
-      compruebes, que efectivamente, existe una justificación razonable para
-      alegar un incumplimiento o debas realizar un plan de acción, podrás
-      realizarlo incluyendo toda aquella información que consideréis necesaria,
-      fotos/ documentos Office y/o comentarios.
+      Antes de publicar los resultados definitivos, queremos ofrecerte la
+      posibilidad de revisar aquellos incumplimientos que consideres puedan ser
+      susceptibles de emitir alegaciones para ser revisadas por HMES. En caso de
+      que compruebes, que efectivamente, existe una justificación razonable para
+      alegar un incumplimiento, podrás realizar la alegación incluyendo toda
+      aquella información que consideréis necesaria, fotos y/o comentarios.
     </p> 
     <p>
-        <b>El plazo de alegaciones/ plan de acción será hasta el día 15/09/2023
-        inclusive.</b>
+        <b>El plazo de alegaciones será de una semana contando a partir del día de
+        hoy.</b>
     </p>
     <p>
       Esta información se encuentra accesible a través de la aplicación Hyundai
