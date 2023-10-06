@@ -6,7 +6,7 @@ var ObjectId = require('mongodb').ObjectId
 
 const getAllInstallation = async(request, response) => {
   try{
-    const {name, code, dealership, installation_type, phone, province, country, email, pageReq} = request.body
+    const {name, code, hme_code, dealership, installation_type, phone, province, country, email, pageReq} = request.body
     const page = !pageReq ? 0 : pageReq
     let skip = (page - 1) * 10
     const filter = {}
@@ -14,6 +14,8 @@ const getAllInstallation = async(request, response) => {
       filter['name'] = { $regex : new RegExp(name, 'i') } 
     if(code)
       filter['code'] = { $regex : new RegExp(code, 'i') } 
+    if(hme_code)
+      filter['hme_code'] = { $regex : new RegExp(hme_code, 'i') } 
     if(province)
       filter['province'] = { $regex : new RegExp(province, 'i') } 
     if(country)
