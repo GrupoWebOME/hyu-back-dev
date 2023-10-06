@@ -64,7 +64,7 @@ const getAllInstallation = async(request, response) => {
 
 const createInstallation = async(request, response) => {
   try{
-    const {name, autonomous_community, code, address, dealership, installation_type, population, postal_code, phone, active, province, email, refer_value,
+    const {name, autonomous_community, code, hme_code, address, dealership, installation_type, population, postal_code, phone, active, province, email, refer_value,
       latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, contacts, sales_weight_per_installation, post_sale_weight_per_installation, num_exhibitions } = request.body
     let errors = []
     if(contacts && Array.isArray(contacts)){
@@ -243,6 +243,7 @@ const createInstallation = async(request, response) => {
       name, 
       autonomous_community, 
       code, 
+      hme_code,
       address, 
       dealership, 
       installation_type, 
