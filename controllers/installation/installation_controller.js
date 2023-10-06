@@ -313,7 +313,7 @@ const getInstallation = async(request, response) => {
 
 const updateInstallation = async(request, response) => {
   try{
-    const {name, autonomous_community, code, address, dealership, installation_type, population, postal_code, phone, active, province, email, refer_value,
+    const {name, autonomous_community, code, hme_code, address, dealership, installation_type, population, postal_code, phone, active, province, email, refer_value,
       latitude, length, isSale, isPostSale, isHP, m2Exp, m2PostSale, m2Rec, sales_weight_per_installation, post_sale_weight_per_installation, contacts, num_exhibitions } = request.body
     const {id} = request.params
     let errors = []
@@ -522,6 +522,8 @@ const updateInstallation = async(request, response) => {
       updatedFields['autonomous_community'] = autonomous_community
     if(code)
       updatedFields['code'] = code
+    if(hme_code)
+      updatedFields['hme_code'] = hme_code
     if(num_exhibitions)
       updatedFields['num_exhibitions'] = num_exhibitions
     if(dealership){
