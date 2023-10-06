@@ -9,6 +9,8 @@ const installationSchema = new Schema({
     default: null},
   code: {type: String,
     required: true },
+  hme_code: {type: String,
+    default: null },
   address: {type: String,
     required: true},
   dealership: {type: Schema.Types.ObjectId,
