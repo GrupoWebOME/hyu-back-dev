@@ -9,12 +9,11 @@ const plannedMailContent = (installation, audit) => { return `
         Estimado concesionario,
     </p> 
     <p>
-        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación <b>${installation}</b> ya se encuentra con fecha asignada para auditar. 
-        <b>Dispones de un plazo de 48h para solicitar de forma justificada un cambio de fecha.</b>
+        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación <b>${installation}</b> ya se encuentra con fecha/ hora asignada para auditar. 
     </p> 
     <p>
-        Esta informacion se encuentra accesible a través de la aplicación Hyundai Standars Application
-        (HSA). Para cualquier duda contactar con Elena Drandar: 
+        Esta información se encuentra accesible a través de la aplicación Hyundai Standards Application (HSA) en el apartado Auditorías/ Alegaciones.
+        Para cualquier duda contactar con Elena Drandar: 
         <span>estandares@redhyundai.com</span>.
     </p> 
     <p>
