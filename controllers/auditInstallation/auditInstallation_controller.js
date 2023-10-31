@@ -275,6 +275,7 @@ const getAllAuditInstallation = async(request, response) => {
           audit_date: auditIns.audit_date,
           dealership_id: auditIns.dealership_id._id,
           dealership_name: auditIns.dealership_id.name,
+          comment: auditIns.comment,
           createdAt: auditIns.createdAt,
           updatedAt: auditIns.updatedAt
         }
@@ -307,6 +308,7 @@ const getAllAuditInstallation = async(request, response) => {
         audit_date: auditIns.audit_date,
         dealership_id: auditIns.dealership_id._id,
         dealership_name: auditIns.dealership_id.name,
+        comment: auditIns.comment,
         createdAt: auditIns.createdAt,
         updatedAt: auditIns.updatedAt
       }
