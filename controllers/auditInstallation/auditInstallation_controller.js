@@ -115,7 +115,7 @@ const updateAuditInstallation = async(request, response) => {
   try{
     const {id} = request.params
     const {comment, audit_status, audit_date, photo, auditor_id} = request.body
-    const regexDate = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/
+    const regexDate = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/
 
     let errors = []
     
