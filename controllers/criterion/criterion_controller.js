@@ -870,6 +870,9 @@ const getCalculatesCrit = async(installation_id) => {
   const num_exhibitions = installationFind.num_exhibitions
   const dealer_ioniq5 = dealershipFind.dealer_ioniq5
 
+  const magic_number_1 = 277.2 // 222
+  const magic_number_2 = 2 // 1
+
   const parking = sizingTableFind.find((sizingTable) => {
     return sizingTable._id.toString() === sizingTablesValues.PARKING
   })
@@ -891,7 +894,7 @@ const getCalculatesCrit = async(installation_id) => {
   })
 
   const sales_x_referencial = (sales_weight_per_installation) * referential_sales
-  const number_x_referencial = Math.round(parseFloat((sales_weight_per_installation_number) / 222))
+  const number_x_referencial = Math.round(parseFloat((sales_weight_per_installation_number) / magic_number_1))
   const fact_x_referencial = (post_sale_spare_parts_previous_year) * sales_weight_per_installation
 
   let arrayCalcCrit = []
@@ -901,12 +904,12 @@ const getCalculatesCrit = async(installation_id) => {
   arrayCalcCrit = [...arrayCalcCrit, vn_1_2_1_3]
 
   //VN.1.2.3.2
-  const vn_1_2_3_2 = {_id: '62431b00dc9b3d6366d7756f', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? 1: null}
-  arrayCalcCrit = [...arrayCalcCrit, vn_1_2_3_2]
+  const vn_1_2_3_2 = {_id: '62431b00dc9b3d6366d7756f', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? magic_number_2: null}
+  arrayCalcCrit = [...arrayCalcCrit, vn_1_2_3_2] // magic number 2
 
   //VN.1.2.4.1
-  const vn_1_2_4_1 = {_id: '62431dc3dc9b3d6366d775f4', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? 1: null}
-  arrayCalcCrit = [...arrayCalcCrit, vn_1_2_4_1]
+  const vn_1_2_4_1 = {_id: '62431dc3dc9b3d6366d775f4', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? magic_number_2: null}
+  arrayCalcCrit = [...arrayCalcCrit, vn_1_2_4_1] // magic number 2
 
   //VN.1.3.1.1
   let vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: null}
