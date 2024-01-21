@@ -900,15 +900,15 @@ const getCalculatesCrit = async(installation_id) => {
   let arrayCalcCrit = []
 
   //VN.1.2.1.3
-  const vn_1_2_1_3 = {_id: '624310a2dc9b3d6366d773d8', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? getValueFromTable(parking.rows, 1, sales_x_referencial): null}
+  const vn_1_2_1_3 = {_id: '624310a2dc9b3d6366d773d8', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO' || code_type_inst === 'AOH')? getValueFromTable(parking.rows, 1, sales_x_referencial): null}
   arrayCalcCrit = [...arrayCalcCrit, vn_1_2_1_3]
 
   //VN.1.2.3.2
-  const vn_1_2_3_2 = {_id: '62431b00dc9b3d6366d7756f', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? magic_number_2: null}
+  const vn_1_2_3_2 = {_id: '62431b00dc9b3d6366d7756f', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO' || code_type_inst === 'AOH')? magic_number_2: null}
   arrayCalcCrit = [...arrayCalcCrit, vn_1_2_3_2] // magic number 2
 
   //VN.1.2.4.1
-  const vn_1_2_4_1 = {_id: '62431dc3dc9b3d6366d775f4', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO')? magic_number_2: null}
+  const vn_1_2_4_1 = {_id: '62431dc3dc9b3d6366d775f4', value: (code_type_inst === 'IP' || code_type_inst === 'IS' || code_type_inst === 'ECO' || code_type_inst === 'AOH')? magic_number_2: null}
   arrayCalcCrit = [...arrayCalcCrit, vn_1_2_4_1] // magic number 2
 
   //VN.1.3.1.1
@@ -940,7 +940,7 @@ const getCalculatesCrit = async(installation_id) => {
   arrayCalcCrit = [...arrayCalcCrit, vn_1_3_6_1]
 
   //VN.1.3.10.1
-  const vn_1_3_10_1 = {_id: '62440b21e89ecf0ca318637f', value: (code_type_inst === 'IP')? num_exhibitions: null}
+  const vn_1_3_10_1 = {_id: '62440b21e89ecf0ca318637f', value: (code_type_inst === 'IP' || code_type_inst === 'AOH')? num_exhibitions: null}
   arrayCalcCrit = [...arrayCalcCrit, vn_1_3_10_1]
 
   //VN.1.3.10.3
