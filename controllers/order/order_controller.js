@@ -33,7 +33,7 @@ function isValidMaterial(product) {
     return false
   }
 
-  if (typeof product.pricePvpMan !== 'number' || isNaN(product.pricePvpMan)) {
+  if (product.pricePvpMan && typeof product.pricePvpMan !== 'number' || isNaN(product.pricePvpMan)) {
     return false
   }
 
