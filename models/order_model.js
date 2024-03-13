@@ -25,7 +25,7 @@ const orderSchema = new Schema({
       count: {type: Number, required: true},
       price: {type: Number, required: true},
       pricePvpProd: {type: Number, required: true},
-      pricePvpMan: {type: Number, required: true},
+      pricePvpMan: {type: Number, required: false},
       family: {type: String, required: true },
       name: {type: String, required: true },
       photo: {type: String, required: false, default: null}

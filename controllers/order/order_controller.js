@@ -5,7 +5,7 @@ const ObjectId = require('mongodb').ObjectId
 const jwt = require('jsonwebtoken')
 
 function isValidMaterial(product) {
-  if (!('family' in product) || !('name' in product) || !('product' in product) || !('count' in product) || !('price' in product) || !('pricePvpProd' in product) || !('pricePvpMan' in product)) {
+  if (!('family' in product) || !('name' in product) || !('product' in product) || !('count' in product) || !('price' in product) || !('pricePvpProd' in product)) {
     return false
   }
 
@@ -33,7 +33,7 @@ function isValidMaterial(product) {
     return false
   }
 
-  if (product.pricePvpMan && typeof product.pricePvpMan !== 'number' || isNaN(product.pricePvpMan)) {
+  if (product.pricePvpMan !== null && product.pricePvpMan !== undefined && typeof product.pricePvpMan !== 'number' || isNaN(product.pricePvpMan)) {
     return false
   }
 
