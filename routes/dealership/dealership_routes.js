@@ -2,6 +2,8 @@ const express = require('express')
 const api = express.Router()
 const Dealership = require('../../controllers/dealership/dealership_controller')
 
+api.get('/dealershipWithInstallations', Dealership.geatAllDealershipWithInstallations)
+
 /**
  * @swagger
  * components:

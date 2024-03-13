@@ -428,7 +428,6 @@ const getAllPersonal = async(request, response) => {
 }
 
 const getPersonal = async(request, response) => {
-
   try{
     const {id} = request.params
 
@@ -461,7 +460,6 @@ const getPersonal = async(request, response) => {
   catch(error){
     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
   }  
-    
 }
 
 const deletePersonal = async(request, response) => {
