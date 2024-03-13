@@ -2,6 +2,7 @@ const Dealership = require('../../models/dealership_model')
 const Installation = require('../../models/installation_schema')
 const Audit = require('../../models/audit_model')
 const ObjectId = require('mongodb').ObjectId
+const jwt = require('jsonwebtoken')
 
 const getAllDealership= async(request, response) => {
   try{
@@ -497,4 +498,43 @@ const getAllDealershipByAuditID = async(request, response) => {
   return response.status(200).json({data: arrayAgencies})
 }
 
-module.exports = {getAllDealership, createDealership, updateDealership, deleteDealership, getDealership, getAllDealershipByAuditID}
+const geatAllDealershipWithInstallations = async(request, response) => {
+  try {
+    const authHeader = request.headers['authorization']
+    if (authHeader) {
+      const token = authHeader.split(' ')[1]
+      let decodedToken = null
+      await jwt.verify(token, process.env.SECRET, function(err, decoded) {
+        if(err){
+          decodedToken = false
+          return response.status(401).json({error: 'Unauthorized'})
+        }
+        else{
+          decodedToken = decoded
+        }
+      })
+
+      if (decodedToken?.admin?.isMain) {
+        const dealerships = await Dealership.find().select('_id name installations').populate({path: 'installations', select: '_id name'})
+        return response.status(200).json({ data: dealerships })
+      } else if(decodedToken?.admin?.dealership) {
+        const dealerships = await Dealership.find({_id: decodedToken?.admin?.dealership}).select('_id name installations').populate({path: 'installations', select: '_id name'})
+        return response.status(200).json({ data: dealerships })
+      }
+    }
+    const dealerships = await Dealership.find().select('_id name installations').populate({path: 'installations', select: '_id name'})
+    return response.status(200).json({ data: dealerships })
+  }catch(error){
+    return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+  } 
+}
+
+module.exports = {
+  getAllDealership, 
+  createDealership, 
+  updateDealership, 
+  deleteDealership, 
+  getDealership, 
+  getAllDealershipByAuditID,
+  geatAllDealershipWithInstallations
+}
