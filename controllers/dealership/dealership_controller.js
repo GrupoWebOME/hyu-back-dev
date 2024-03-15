@@ -515,14 +515,14 @@ const geatAllDealershipWithInstallations = async(request, response) => {
       })
 
       if (decodedToken?.admin?.isMain) {
-        const dealerships = await Dealership.find().select('_id name installations').populate({path: 'installations', select: '_id name'})
+        const dealerships = await Dealership.find().sort({ name: 'asc' }).select('_id name installations').populate({path: 'installations', select: '_id name'})
         return response.status(200).json({ data: dealerships })
       } else if(decodedToken?.admin?.dealership) {
-        const dealerships = await Dealership.find({_id: decodedToken?.admin?.dealership}).select('_id name installations').populate({path: 'installations', select: '_id name'})
+        const dealerships = await Dealership.find({_id: decodedToken?.admin?.dealership}).sort({ name: 'asc' }).select('_id name installations').populate({path: 'installations', select: '_id name'})
         return response.status(200).json({ data: dealerships })
       }
     }
-    const dealerships = await Dealership.find().select('_id name installations').populate({path: 'installations', select: '_id name'})
+    const dealerships = await Dealership.find().sort({ name: 'asc' }).select('_id name installations').populate({path: 'installations', select: '_id name'})
     return response.status(200).json({ data: dealerships })
   }catch(error){
     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})

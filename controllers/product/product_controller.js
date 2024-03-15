@@ -5,7 +5,7 @@ const ObjectId = require('mongodb').ObjectId
 
 const createProduct = async(request, response) => {
   try {
-    const { name, price, pricePvpProd, pricePvpMan, provider, productFamily, photo, description } = request.body
+    const { name, pricePvpProd, pricePvpMan, provider, productFamily, photo, description } = request.body
     let errors = []
     if(!provider){
       errors.push({code: 400, 
@@ -46,13 +46,6 @@ const createProduct = async(request, response) => {
         })
     }
 
-    if (typeof(price) !== 'number') {
-      errors.push({code: 400, 
-        msg: 'invalid price',
-        detail: 'The price field must be a positive number'
-      })
-    }
-
     if (typeof(pricePvpProd) !== 'number') {
       errors.push({code: 400, 
         msg: 'invalid pricePvpProd',
@@ -70,6 +63,9 @@ const createProduct = async(request, response) => {
     if(errors.length > 0)
       return response.status(400).json({errors: errors})
 
+    const priceMan = (pricePvpMan !== undefined && pricePvpMan !== null) ? pricePvpMan : 0
+    const price = pricePvpProd + priceMan
+  
     const newProduct = new Product({
       name, 
       price, 
@@ -100,7 +96,7 @@ const createProduct = async(request, response) => {
 const updateProduct = async(request, response) => {
   try{
     const {id} = request.params
-    const { name, price, pricePvpProd, pricePvpMan, provider, productFamily, description } = request.body
+    const { name, pricePvpProd, pricePvpMan, provider, productFamily, description } = request.body
 
     let errors = []
 
@@ -161,13 +157,6 @@ const updateProduct = async(request, response) => {
       })
     }
 
-    if (price && typeof(price) !== 'number') {
-      errors.push({code: 400, 
-        msg: 'invalid price',
-        detail: 'The price is required'
-      })
-    }
-
     if (pricePvpProd && typeof(pricePvpProd) !== 'number') {
       errors.push({code: 400, 
         msg: 'invalid pricePvpProd',
@@ -184,10 +173,24 @@ const updateProduct = async(request, response) => {
 
     const updatedFields = {}
 
+    const actualProduct = await Product.findById(id)
+
+    if (pricePvpMan && pricePvpProd) {
+      const priceMan = (pricePvpMan !== undefined && pricePvpMan !== null) ? pricePvpMan : 0
+      const price = pricePvpProd + priceMan
+      updatedFields['price'] = price
+    } else if (pricePvpMan && !pricePvpProd) {
+      const priceMan = (pricePvpMan !== undefined && pricePvpMan !== null) ? pricePvpMan : 0
+      const price = actualProduct.pricePvpProd + priceMan
+      updatedFields['price'] = price
+    } else if (!pricePvpMan && pricePvpProd) {
+      const priceMan = (actualProduct.pricePvpMan !== undefined && actualProduct.pricePvpMan !== null) ? actualProduct.pricePvpMan : 0
+      const price = pricePvpProd + priceMan
+      updatedFields['price'] = price
+    }
+
     if(name)
       updatedFields['name'] = name
-    if(price)
-      updatedFields['price'] = price
     if(pricePvpProd)
       updatedFields['pricePvpProd'] = pricePvpProd
     if(pricePvpMan)

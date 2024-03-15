@@ -40,6 +40,14 @@ function isValidMaterial(product) {
   return true
 }
 
+function nextCode(actualCode) {
+  const actual = parseInt(actualCode.substring(4))
+  const nextNumber = actual + 1
+  const formatedNumber = String(nextNumber).padStart(6, '0')
+  const newCode = 'PED-' + formatedNumber
+  return newCode
+}
+
 const createOrder = async(request, response) => {
   try {
     const { dealership, installation, products, observations, orderNote } = request.body
@@ -99,6 +107,8 @@ const createOrder = async(request, response) => {
     if(errors.length > 0)
       return response.status(400).json({errors: errors})
 
+    const lastCreatedOrder = await Order.findOne().sort({ createdAt: -1 })
+    const number = lastCreatedOrder?.number? nextCode(lastCreatedOrder?.number) : 'PED-000001'
     const newOrder = new Order({
       dealership, 
       installation, 
@@ -108,7 +118,7 @@ const createOrder = async(request, response) => {
       state: 'Abierto'
     })
 
-    newOrder.number = `HMES-${newOrder?._id?.toString().toUpperCase()}`
+    newOrder.number = `${number}`
 
     await newOrder.save()
       .catch(error => {        
@@ -339,7 +349,12 @@ const getAllOrders = async(request, response) => {
         })
 
       const orderData = order.map((order) => {
-        return {...order._doc, dealershipName: order.dealership.name, installationName: order.installation.name }
+        return {
+          ...order._doc, 
+          dealershipName: order.dealership.name, 
+          installationName: order.installation.name,
+          createdProductDate: order.createdAt
+        }
       })
 
       const data = {
@@ -371,7 +386,12 @@ const getAllOrders = async(request, response) => {
       })
 
     const orderData = order.map((order) => {
-      return {...order._doc, dealershipName: order.dealership.name, installationName: order.installation.name }
+      return {
+        ...order._doc, 
+        dealershipName: order.dealership.name, 
+        installationName: order.installation.name,
+        createdProductDate: order.createdAt
+      }
     })
 
     const data = {

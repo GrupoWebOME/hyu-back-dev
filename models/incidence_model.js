@@ -2,6 +2,10 @@ const {Schema, model} = require('mongoose')
 const uniqueValidator = require('mongoose-unique-validator')
 
 const incidenceSchema = new Schema({
+  number: {
+    type: String,
+    required: true,
+  },
   name: {
     type: String,
     required: true

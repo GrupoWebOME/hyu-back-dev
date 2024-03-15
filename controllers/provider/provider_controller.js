@@ -4,7 +4,7 @@ const ObjectId = require('mongodb').ObjectId
 
 const createProvider = async(request, response) => {
   try {
-    const { name, description, nameP1, nameP2, addressP1, addressP2, emailP1, emailP2, phone, withNotifications } = request.body
+    const { name, description, nameP1, nameP2, emailP1, emailP2, phone, withNotifications } = request.body
     let errors = []
 
     if(!emailP1 || !emailP1.match(regExPatternEmailAddress))
@@ -41,13 +41,6 @@ const createProvider = async(request, response) => {
       })
     }
 
-    if (!addressP1) {
-      errors.push({code: 400, 
-        msg: 'invalid addressP1',
-        detail: 'addressP1 is a required field'
-      })
-    }
-
     if(errors.length > 0)
       return response.status(400).json({errors: errors})
 
@@ -56,8 +49,6 @@ const createProvider = async(request, response) => {
       description, 
       nameP1, 
       nameP2, 
-      addressP1,
-      addressP2, 
       emailP1, 
       emailP2, 
       phone, 
@@ -83,7 +74,7 @@ const createProvider = async(request, response) => {
 const updateProvider = async(request, response) => {
   try{
     const {id} = request.params
-    const { name, description, nameP1, nameP2, addressP1, addressP2, emailP1, emailP2, phone, withNotifications } = request.body
+    const { name, description, nameP1, nameP2, emailP1, emailP2, phone, withNotifications } = request.body
 
     let errors = []
 
@@ -140,10 +131,6 @@ const updateProvider = async(request, response) => {
       updatedFields['nameP1'] = nameP1
     if(nameP2)
       updatedFields['nameP2'] = nameP2
-    if(addressP1)
-      updatedFields['addressP1'] = addressP1
-    if(addressP2)
-      updatedFields['addressP2'] = addressP2
     if(emailP1)
       updatedFields['emailP1'] = emailP1
     if(emailP2)

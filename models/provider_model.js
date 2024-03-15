@@ -24,10 +24,6 @@ const providerSchema = new Schema({
     required: true,
     lowercase: true    
   },
-  addressP1: {
-    type: String, 
-    required: true
-  },
   nameP2: {
     type: String, 
     required: false
@@ -36,10 +32,6 @@ const providerSchema = new Schema({
     type: String,
     required: false,
     lowercase: true    
-  },
-  addressP2: {
-    type: String, 
-    required: false
   },
   withNotifications: {
     type: Boolean,

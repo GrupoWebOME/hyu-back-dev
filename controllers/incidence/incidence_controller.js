@@ -6,6 +6,14 @@ const IncidenceType = require('../../models/incidence_type_model')
 const ObjectId = require('mongodb').ObjectId
 const jwt = require('jsonwebtoken')
 
+function nextCode(actualCode) {
+  const actual = parseInt(actualCode.substring(6))
+  const nextNumber = actual + 1
+  const formatedNumber = String(nextNumber).padStart(6, '0')
+  const newCode = 'INCID-' + formatedNumber
+  return newCode
+}
+
 const createIncidence = async(request, response) => {
   try {
     const { name, description, dealership, installation, photo, incidenceType } = request.body
@@ -74,6 +82,9 @@ const createIncidence = async(request, response) => {
     if(errors.length > 0)
       return response.status(400).json({errors: errors})
 
+    const lastCreatedOrder = await Incidence.findOne().sort({ createdAt: -1 })
+    const number = lastCreatedOrder?.number? nextCode(lastCreatedOrder?.number) : 'PED-000001'
+
     const newIncidence = new Incidence({
       name, 
       photo, 
@@ -81,7 +92,8 @@ const createIncidence = async(request, response) => {
       dealership,
       installation,
       status: 'Abierta',
-      incidenceType
+      incidenceType,
+      number
     })
 
     await newIncidence.save()
@@ -176,10 +188,10 @@ const updateIncidence = async(request, response) => {
       })
     }
 
-    if (status && !['Abierta', 'Cerrada', 'Cancelada'].includes(status)) {
+    if (status && !['Abierta', 'Cerrada', 'Cancelada', 'En trámite'].includes(status)) {
       errors.push({code: 400, 
         msg: 'invalid status',
-        detail: 'The status field must be "Abierta, "Cerrada", "Cancelada"'
+        detail: 'The status field must be "Abierta, "Cerrada", "Cancelada", "En trámite'
       })
     }
 
@@ -338,7 +350,13 @@ const getAllIncidences = async(request, response) => {
           return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
         })
       const incidenceData = incidence.map((incidence) => {
-        return {...incidence._doc, dealershipName: incidence.dealership.name, installationName: incidence.installation.name, incidenceTypeName: incidence.incidenceType.name }
+        return {
+          ...incidence._doc, 
+          dealershipName: incidence.dealership.name, 
+          installationName: incidence.installation.name, 
+          incidenceTypeName: incidence.incidenceType.name,
+          createdIncidenceDate: incidence.createdAt
+        }
       })
 
       const data = {
@@ -370,7 +388,13 @@ const getAllIncidences = async(request, response) => {
       })
 
     const incidenceData = incidence.map((incidence) => {
-      return {...incidence._doc, dealershipName: incidence.dealership.name, installationName: incidence.installation.name, incidenceTypeName: incidence.incidenceType.name }
+      return {
+        ...incidence._doc, 
+        dealershipName: incidence.dealership.name, 
+        installationName: incidence.installation.name, 
+        incidenceTypeName: incidence.incidenceType.name,
+        createdIncidenceDate: incidence.createdAt
+      }
     })
 
     const data = {
