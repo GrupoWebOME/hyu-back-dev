@@ -353,7 +353,8 @@ const getAllOrders = async(request, response) => {
           ...order._doc, 
           dealershipName: order.dealership.name, 
           installationName: order.installation.name,
-          createdProductDate: order.createdAt
+          createdProductDate: order.createdAt,
+          orderNumber: order.number
         }
       })
 
@@ -390,7 +391,8 @@ const getAllOrders = async(request, response) => {
         ...order._doc, 
         dealershipName: order.dealership.name, 
         installationName: order.installation.name,
-        createdProductDate: order.createdAt
+        createdProductDate: order.createdAt,
+        orderNumber: order.number
       }
     })
 

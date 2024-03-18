@@ -30,11 +30,11 @@ const incidenceSchema = new Schema({
     type: String,
     required: true
   },
-  photo: {
+  photo: [{
     type: String,
     required: false,
     default: null
-  },
+  }],
   createdAt: {
     type: Date,
     default: Date.now

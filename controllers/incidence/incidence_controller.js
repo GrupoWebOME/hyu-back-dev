@@ -83,7 +83,7 @@ const createIncidence = async(request, response) => {
       return response.status(400).json({errors: errors})
 
     const lastCreatedOrder = await Incidence.findOne().sort({ createdAt: -1 })
-    const number = lastCreatedOrder?.number? nextCode(lastCreatedOrder?.number) : 'PED-000001'
+    const number = lastCreatedOrder?.number? nextCode(lastCreatedOrder?.number) : 'INCID-000001'
 
     const newIncidence = new Incidence({
       name, 

@@ -96,7 +96,7 @@ const createProduct = async(request, response) => {
 const updateProduct = async(request, response) => {
   try{
     const {id} = request.params
-    const { name, pricePvpProd, pricePvpMan, provider, productFamily, description } = request.body
+    const { name, pricePvpProd, pricePvpMan, provider, productFamily, description, photo } = request.body
 
     let errors = []
 
@@ -203,6 +203,7 @@ const updateProduct = async(request, response) => {
       updatedFields['productFamily'] = productFamily
     if(description)
       updatedFields['description'] = description
+    updatedFields['photo'] = photo
     updatedFields['updatedAt'] = Date.now()
 
     const updatedProduct = await Product.findByIdAndUpdate(id, updatedFields, {new: true})
