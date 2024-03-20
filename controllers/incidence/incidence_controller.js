@@ -355,6 +355,7 @@ const getAllIncidences = async(request, response) => {
           dealershipName: incidence.dealership.name, 
           installationName: incidence.installation.name, 
           incidenceTypeName: incidence.incidenceType.name,
+          incidenceNumber: incidence.number,
           createdIncidenceDate: incidence.createdAt
         }
       })
@@ -393,6 +394,7 @@ const getAllIncidences = async(request, response) => {
         dealershipName: incidence.dealership.name, 
         installationName: incidence.installation.name, 
         incidenceTypeName: incidence.incidenceType.name,
+        incidenceNumber: incidence.number,
         createdIncidenceDate: incidence.createdAt
       }
     })
