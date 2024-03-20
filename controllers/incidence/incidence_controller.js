@@ -352,9 +352,9 @@ const getAllIncidences = async(request, response) => {
       const incidenceData = incidence.map((incidence) => {
         return {
           ...incidence._doc, 
-          dealershipName: incidence.dealership.name, 
-          installationName: incidence.installation.name, 
-          incidenceTypeName: incidence.incidenceType.name,
+          dealershipName: incidence.dealership?.name, 
+          installationName: incidence.installation?.name, 
+          incidenceTypeName: incidence.incidenceType?.name,
           incidenceNumber: incidence.number,
           createdIncidenceDate: incidence.createdAt
         }
@@ -391,9 +391,9 @@ const getAllIncidences = async(request, response) => {
     const incidenceData = incidence.map((incidence) => {
       return {
         ...incidence._doc, 
-        dealershipName: incidence.dealership.name, 
-        installationName: incidence.installation.name, 
-        incidenceTypeName: incidence.incidenceType.name,
+        dealershipName: incidence.dealership?.name, 
+        installationName: incidence.installation?.name, 
+        incidenceTypeName: incidence.incidenceType?.name,
         incidenceNumber: incidence.number,
         createdIncidenceDate: incidence.createdAt
       }
