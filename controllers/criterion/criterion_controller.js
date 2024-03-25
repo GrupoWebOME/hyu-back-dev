@@ -915,13 +915,13 @@ const getCalculatesCrit = async(installation_id) => {
   let vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: null}
 
   if(code_type_inst === 'IP'){
-    vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: getValueFromTable(m2vn.rows, 2, sales_x_referencial)}
+    vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: getValueFromTable(m2vn?.rows, 2, sales_x_referencial)}
   } else if(code_type_inst === 'IS'){
-    vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: getValueFromTable(m2vn.rows, 3, sales_x_referencial)}
+    vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: getValueFromTable(m2vn?.rows, 3, sales_x_referencial)}
   } else if(code_type_inst === 'ECO'){
-    vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: getValueFromTable(m2vn.rows, 4, sales_x_referencial)}
+    vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: getValueFromTable(m2vn?.rows, 4, sales_x_referencial)}
   }  else if(code_type_inst === 'AOH'){
-    vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: getValueFromTable(m2vn.rows, 5, sales_x_referencial)}
+    vn_1_3_1_1 = {_id: '624322fadc9b3d6366d776dd', value: getValueFromTable(m2vn?.rows, 5, sales_x_referencial)}
   }
   arrayCalcCrit = [...arrayCalcCrit, vn_1_3_1_1]
 
@@ -1020,7 +1020,7 @@ const calculates = async(request, response) => {
       .catch(error => {        
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
-                        
+ 
     const calculables = await getCalculatesCrit(installation_id)
 
     let criterionsFilter = []
