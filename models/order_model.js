@@ -28,7 +28,8 @@ const orderSchema = new Schema({
       pricePvpMan: {type: Number, required: false},
       family: {type: String, required: true },
       name: {type: String, required: true },
-      photo: {type: String, required: false, default: null}
+      photo: {type: String, required: false, default: null},
+      isDelivered: {type: Boolean, required: false, default: false},
     }
   ],
   observations: {

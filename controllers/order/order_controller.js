@@ -191,10 +191,10 @@ const updateOrder = async(request, response) => {
         })
     }
 
-    if (state && state !== 'Solicitado' && state !== 'Cancelado' && state !== 'Entregado') {
+    if (state && state !== 'Solicitado' && state !== 'Cancelado' && state !== 'Entregado' && state !== 'En trámite' && state !== 'Abierto') {
       errors.push({code: 400, 
         msg: 'invalid state',
-        detail: 'The state must be Solicitado, Entregado or Cancelado'
+        detail: 'The state must be Abierto, Solicitado, Entregado, En trámite or Cancelado'
       })
     }
 
