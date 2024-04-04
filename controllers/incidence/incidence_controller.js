@@ -59,6 +59,13 @@ const createIncidence = async(request, response) => {
         })
     }
 
+    if (!photo || photo.length === 0) {
+      errors.push({code: 400, 
+        msg: 'invalid photo',
+        detail: 'photo incidence is required'
+      })
+    }
+
     if(!incidenceType){
       errors.push({code: 400, 
         msg: 'invalid incidenceType',
@@ -188,12 +195,22 @@ const updateIncidence = async(request, response) => {
       })
     }
 
+    if (photo && photo.length === 0) {
+      errors.push({code: 400, 
+        msg: 'invalid photo',
+        detail: 'photo incidence is required'
+      })
+    }
+
     if (status && !['Abierta', 'Cerrada', 'Cancelada', 'En trámite'].includes(status)) {
       errors.push({code: 400, 
         msg: 'invalid status',
         detail: 'The status field must be "Abierta, "Cerrada", "Cancelada", "En trámite'
       })
     }
+
+    if(errors.length > 0)
+      return response.status(400).json({errors: errors})
 
     const updatedFields = {}
 
