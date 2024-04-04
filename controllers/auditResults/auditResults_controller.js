@@ -3329,7 +3329,10 @@ const getDataForAudit = async(request, response) => {
         }
       })
 
+      const auditFinded = await Audit.findById(audit_id)
+
       const data = {
+        name: auditFinded?.name,
         auditId: audit_id,
         hmes_dealership: (cant_hmes_dealership === 0)? null: hmes_dealership/cant_hmes_dealership,
         img_dealership: (cant_img_dealership === 0)? null: img_dealership/cant_img_dealership,
@@ -3442,7 +3445,10 @@ const getDataForAudit = async(request, response) => {
       const sum_deal_hme_prom = percentage_audit_hme_total?.reduce((a, b) => a + b, 0)
       const dealerships_hme_prom = percentage_audit_hme_total.length > 0 ? sum_deal_hme_prom / percentage_audit_hme_total.length : 0
 
+      const auditFinded = await Audit.findById(audit_id)
+
       const data = {
+        name: auditFinded?.name,
         auditId: audit_id,
         hmes_dealership: (cant_hmes_dealership === 0)? null: hmes_dealership/cant_hmes_dealership,
         img_dealership: (cant_img_dealership === 0)? null: img_dealership/cant_img_dealership,
