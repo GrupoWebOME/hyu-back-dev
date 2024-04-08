@@ -175,7 +175,7 @@ const updateProduct = async(request, response) => {
 
     const actualProduct = await Product.findById(id)
 
-    if (pricePvpMan && pricePvpProd) {
+    if (pricePvpMan !== undefined && pricePvpMan !== null && pricePvpProd !== undefined && pricePvpProd !== null) {
       const priceMan = (pricePvpMan !== undefined && pricePvpMan !== null) ? pricePvpMan : 0
       const price = pricePvpProd + priceMan
       updatedFields['price'] = price
@@ -193,7 +193,7 @@ const updateProduct = async(request, response) => {
       updatedFields['name'] = name
     if(pricePvpProd)
       updatedFields['pricePvpProd'] = pricePvpProd
-    if(pricePvpMan)
+    if(pricePvpMan !== undefined && pricePvpMan !== null)
       updatedFields['pricePvpMan'] = pricePvpMan
     if(provider)
       updatedFields['provider'] = provider
