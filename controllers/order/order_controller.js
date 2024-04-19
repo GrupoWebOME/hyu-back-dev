@@ -42,7 +42,7 @@ const mailCreateBody = ({ number, dealershipName, installationName, createdAt, p
 
   return `
     <p>
-      Estimado concesionario,
+      Estimado proveedor,
     </p> 
     <p>
       Paso a comunicarte un nuevo pedido de material:
@@ -101,7 +101,7 @@ const mailCancelBody = ({ number, dealershipName, installationName, createdAt, p
 
   return `
     <p>
-      Estimado concesionario,
+      Estimado proveedor,
     </p> 
     <p>
       Paso a comunicarte que se ha CANCELADO el siguiente pedido de material:

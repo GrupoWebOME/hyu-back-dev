@@ -10,7 +10,7 @@ const nodemailer = require('nodemailer')
 const mailCreateBody = ({ number, dealershipName, installationName, createdAt, description }) => { 
   return `
     <p>
-      Estimado concesionario,
+      Estimado proveedor,
     </p> 
     <p>
       Paso a comunicarte una nueva incidencia:
@@ -40,7 +40,7 @@ const mailCreateBody = ({ number, dealershipName, installationName, createdAt, d
 const mailCancelBody = ({ number, dealershipName, installationName, createdAt, description }) => { 
   return `
     <p>
-      Estimado concesionario,
+      Estimado proveedor,
     </p> 
     <p>
       Paso a comunicarte que se ha CANCELADO la incidencia:
