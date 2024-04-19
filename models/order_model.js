@@ -16,6 +16,10 @@ const orderSchema = new Schema({
     type: Schema.Types.ObjectId, 
     ref: 'Installation'
   },
+  provider: {
+    type: Schema.Types.ObjectId, 
+    ref: 'Provider'
+  },
   products: [
     {
       product: {

@@ -1,8 +1,177 @@
 const Order = require('../../models/order_model')
+const Provider = require('../../models/provider_model')
 const Dealership = require('../../models/dealership_model')
 const Installation = require('../../models/installation_schema')
 const ObjectId = require('mongodb').ObjectId
 const jwt = require('jsonwebtoken')
+const nodemailer = require('nodemailer')
+
+function getEuroFormat(price) {
+  return price
+    .toLocaleString('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2,
+    })
+    .replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
+const mailCreateBody = ({ number, dealershipName, installationName, createdAt, products }) => { 
+  let productsHtml = ''
+  let totalPrice = 0
+  products?.forEach(element => {
+    totalPrice = totalPrice + (element.price * element.count)
+    productsHtml += `
+      <div style="width: 100%; max-width: 30rem; padding-bottom: 1rem; border-bottom: solid 1px gainsboro">
+        <p><span style="font-weight: 800">Item: </span> ${element.name}</p>
+        <p><span style="font-weight: 800">Unidades: </span> ${element.count}</p>
+        <p><span style="font-weight: 800">Precio Unidad: </span> ${getEuroFormat(element.price)}</p>
+        <p><span style="font-weight: 800">Precio Total: </span> ${getEuroFormat(element.price * element.count)}</p>
+      </div>
+    `
+  })
+
+  const totalsHtml = `
+    <div>
+      <p><span style="font-weight: 800; font-size: 1.1rem; color: #3b82f6">Subtotal: </span>${getEuroFormat(totalPrice)}</p>
+      <p><span style="font-weight: 800; font-size: 0.85rem;  color: #3b82f6">Gastos de Envío: </span>350,00 €</p>
+      <p><span style="font-weight: 800; font-size: 0.85rem;  color: #3b82f6">IVA: </span>${getEuroFormat((totalPrice + 350) * 0.21)}</p>
+      <p><span style="font-weight: 800; font-size: 1.1rem;  color: #3b82f6">Total: </span>${getEuroFormat(((totalPrice + 350) * 0.21) + 350 + totalPrice)}</p>
+    </div>
+  `
+
+  return `
+    <p>
+      Estimado concesionario,
+    </p> 
+    <p>
+      Paso a comunicarte un nuevo pedido de material:
+    </p> 
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Nº pedido HMES: </span> ${number}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Concesión: </span>${dealershipName}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Instalación: </span>${installationName}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Fecha del Pedido: </span>${createdAt}
+    </p>
+    <p style="text-decoration: underline; margin-bottom: 1rem; font-size: 1rem; font-weight: 600">
+      Material solicitado:
+    </p>
+    <div>
+      ${productsHtml}
+    </div>
+    <div>
+      ${totalsHtml}
+    </div>
+    <p>Para cualquier duda contactar con Hyundai Motor España.</p>
+    <p>Recibe un cordial saludo,</p>
+    <div style="margin-top: 1.2rem">
+      <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
+    </div>
+`}
+
+const mailCancelBody = ({ number, dealershipName, installationName, createdAt, products }) => { 
+  let productsHtml = ''
+  let totalPrice = 0
+  products?.forEach(element => {
+    totalPrice = totalPrice + (element.price * element.count)
+    productsHtml += `
+      <div style="width: 100%; max-width: 30rem; padding-bottom: 1rem; border-bottom: solid 1px gainsboro">
+        <p><span style="font-weight: 800">Item: </span> ${element.name}</p>
+        <p><span style="font-weight: 800">Unidades: </span> ${element.count}</p>
+        <p><span style="font-weight: 800">Precio Unidad: </span> ${getEuroFormat(element.price)}</p>
+        <p><span style="font-weight: 800">Precio Total: </span> ${getEuroFormat(element.price * element.count)}</p>
+      </div>
+    `
+  })
+
+  const totalsHtml = `
+    <div>
+      <p><span style="font-weight: 800; font-size: 1.1rem; color: #3b82f6">Subtotal: </span>${getEuroFormat(totalPrice)}</p>
+      <p><span style="font-weight: 800; font-size: 0.85rem;  color: #3b82f6">Gastos de Envío: </span>350,00 €</p>
+      <p><span style="font-weight: 800; font-size: 0.85rem;  color: #3b82f6">IVA: </span>${getEuroFormat((totalPrice + 350) * 0.21)}</p>
+      <p><span style="font-weight: 800; font-size: 1.1rem;  color: #3b82f6">Total: </span>${getEuroFormat(((totalPrice + 350) * 0.21) + 350 + totalPrice)}</p>
+    </div>
+  `
+
+  return `
+    <p>
+      Estimado concesionario,
+    </p> 
+    <p>
+      Paso a comunicarte que se ha CANCELADO el siguiente pedido de material:
+    </p> 
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Nº pedido HMES: </span> ${number}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Concesión: </span>${dealershipName}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Instalación: </span>${installationName}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Fecha del Pedido: </span>${createdAt}
+    </p>
+    <p style="text-decoration: underline; margin-bottom: 1rem; font-size: 1rem; font-weight: 600">
+      Material solicitado:
+    </p>
+    <div>
+      ${productsHtml}
+    </div>
+    <div>
+      ${totalsHtml}
+    </div>
+    <p>Para cualquier duda contactar con Hyundai Motor España.</p>
+    <p>Recibe un cordial saludo,</p>
+    <div style="margin-top: 1.2rem">
+      <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
+    </div>
+`}
+
+const sendMail = async(subject, content, recipients) => {    
+  try{
+    if(!process.env.EMAIL_SENDER || !process.env.EMAIL_PASSWORD){
+      return
+    }
+
+    var transporter = nodemailer.createTransport({
+      host: 'smtp.hornet.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_SENDER,
+        pass: process.env.EMAIL_PASSWORD
+      }
+    })
+          
+    var mailOptions = {
+      from: process.env.EMAIL_SENDER,
+      to: recipients.join(', '),
+      bcc: process.env.EMAIL_SENDER,
+      subject: subject,
+      html: content
+    }
+          
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log('error: ', error)
+      } else {
+        console.log('Email sent: ' + info.response)
+      }
+    })
+
+    return
+  }
+  catch(error){
+    console.log('err: ', error)
+  }
+}
 
 function isValidMaterial(product) {
   if (!('family' in product) || !('name' in product) || !('product' in product) || !('count' in product) || !('price' in product) || !('pricePvpProd' in product)) {
@@ -50,8 +219,11 @@ function nextCode(actualCode) {
 
 const createOrder = async(request, response) => {
   try {
-    const { dealership, installation, products, observations, orderNote } = request.body
+    const { dealership, installation, products, observations, orderNote, provider } = request.body
     let errors = []
+    let dealershipExist = null
+    let installationExist = null
+    let providerExist = null
 
     if(!dealership){
       errors.push({code: 400, 
@@ -63,7 +235,7 @@ const createOrder = async(request, response) => {
         msg: 'invalid dealership',
         detail: 'dealership should be an objectId'})
     } else if(dealership){
-      const dealershipExist = await Dealership.findById(dealership)
+      dealershipExist = await Dealership.findById(dealership)
       if(!dealershipExist)
         errors.push({code: 400, 
           msg: 'invalid dealership',
@@ -80,7 +252,7 @@ const createOrder = async(request, response) => {
         msg: 'invalid installation',
         detail: 'installation should be an objectId'})
     } else if(installation){
-      const installationExist = await Installation.findById(installation)
+      installationExist = await Installation.findById(installation)
       if(!installationExist)
         errors.push({code: 400, 
           msg: 'invalid installation',
@@ -104,6 +276,26 @@ const createOrder = async(request, response) => {
       }
     }
 
+    if(!provider){
+      errors.push({code: 400, 
+        msg: 'invalid provider',
+        detail: 'provider is required'
+      })
+    }
+    else if(provider && !ObjectId.isValid(provider)) {
+      return response.status(400).json({ errors: [{code: 400,
+        msg: 'invalid provider',
+        detail: 'provider should be an objectId'}]})
+    }
+    else if(provider){
+      providerExist = await Provider.findById(provider)
+      if(!providerExist)
+        errors.push({code: 400, 
+          msg: 'invalid provider',
+          detail: `${provider} not found`
+        })
+    }
+
     if(errors.length > 0)
       return response.status(400).json({errors: errors})
 
@@ -115,6 +307,7 @@ const createOrder = async(request, response) => {
       products, 
       observations, 
       orderNote, 
+      provider,
       state: 'Abierto'
     })
 
@@ -125,6 +318,30 @@ const createOrder = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
 
+    const content = mailCreateBody({ 
+      number, 
+      dealershipName: dealershipExist?.name, 
+      installationName: installationExist?.name, 
+      createdAt: newOrder?.createdAt?.toString().substring(0, 10), 
+      products 
+    })
+
+    const emailsArr = ['estandares-hyundai@redhyundai.com']
+
+    if (providerExist?.emailP1?.length) {
+      emailsArr.push(providerExist?.emailP1)
+    }
+
+    if (providerExist?.emailP2?.length) {
+      emailsArr.push(providerExist?.emailP2)
+    }
+
+    if (dealershipExist?.email?.length) {
+      emailsArr.push(dealershipExist?.email)
+    }
+
+    await sendMail(`Nuevo pedido material HMES ${number}`, content, emailsArr)
+   
     response.status(201).json({
       code: 201,
       msg: 'the Order has been created successfully',
@@ -139,8 +356,11 @@ const createOrder = async(request, response) => {
 const updateOrder = async(request, response) => {
   try{
     const {id} = request.params
-    const { dealership, installation, products, observations, orderNote, state } = request.body
-
+    const { dealership, installation, products, observations, orderNote, state, provider } = request.body
+    let dealershipExist = null
+    let installationExist = null
+    let providerExist = null
+    
     let errors = []
 
     if(id && ObjectId.isValid(id)){
@@ -169,7 +389,7 @@ const updateOrder = async(request, response) => {
         detail: 'dealership should be an objectId'})
     }
     else if(dealership){
-      const dealershipExist = await Dealership.findById(dealership)
+      dealershipExist = await Dealership.findById(dealership)
       if(!dealershipExist)
         errors.push({code: 400, 
           msg: 'invalid dealership',
@@ -183,11 +403,25 @@ const updateOrder = async(request, response) => {
         detail: 'installation should be an objectId'})
     }
     else if(installation){
-      const installationExist = await Installation.findById(installation)
+      installationExist = await Installation.findById(installation)
       if(!installationExist)
         errors.push({code: 400, 
           msg: 'invalid installation',
           detail: `${installation} not found`
+        })
+    }
+
+    if(provider && !ObjectId.isValid(provider)) {
+      return response.status(400).json({ errors: [{code: 400,
+        msg: 'invalid provider',
+        detail: 'provider should be an objectId'}]})
+    }
+    else if(provider){
+      providerExist = await Provider.findById(provider)
+      if(!providerExist)
+        errors.push({code: 400, 
+          msg: 'invalid provider',
+          detail: `${provider} not found`
         })
     }
 
@@ -212,12 +446,40 @@ const updateOrder = async(request, response) => {
       updatedFields['orderNote'] = orderNote
     if(state)
       updatedFields['state'] = state
+    if(provider)
+      updatedFields['provider'] = provider
     updatedFields['updatedAt'] = Date.now()
+
+    const emailsArr = ['estandares-hyundai@redhyundai.com']
+
+    if (providerExist?.emailP1?.length) {
+      emailsArr.push(providerExist?.emailP1)
+    }
+
+    if (providerExist?.emailP2?.length) {
+      emailsArr.push(providerExist?.emailP2)
+    }
+
+    if (dealershipExist?.email?.length) {
+      emailsArr.push(dealershipExist?.email)
+    }
 
     const updatedOrder = await Order.findByIdAndUpdate(id, updatedFields, {new: true})
       .catch(error => {        
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
+
+    if (state === 'Cancelado') {
+      const content = mailCancelBody({ 
+        number: updatedOrder?.number, 
+        dealershipName: dealershipExist?.name, 
+        installationName: installationExist?.name, 
+        createdAt: updatedOrder?.createdAt?.toString().substring(0, 10), 
+        products : updatedOrder?.products
+      })
+  
+      await sendMail(`CANCELACIÓN Pedido material HMES ${updatedOrder?.number}`, content, emailsArr)
+    }
 
     response.status(201).json({
       code: 200,
@@ -341,7 +603,7 @@ const getAllOrders = async(request, response) => {
 
     if(page === 0){
       const order = await Order.find(filter).populate({
-        path: 'dealership installation',
+        path: 'dealership installation provider',
         select: '_id name'
       })
         .catch(error => {        
@@ -349,12 +611,19 @@ const getAllOrders = async(request, response) => {
         })
 
       const orderData = order.map((order) => {
+        const createdAt = new Date(order.createdAt)
+        const currentDate = new Date()
+        const differenceMs = currentDate - createdAt
+        const differenceDays = differenceMs / (1000 * 60 * 60 * 24)
+
         return {
           ...order._doc, 
           dealershipName: order.dealership.name, 
           installationName: order.installation.name,
           createdProductDate: order.createdAt,
-          orderNumber: order.number
+          orderNumber: order.number,
+          providerName: order.provider?.name,
+          backgroundColor: differenceDays > 30? 'red' : order.state === 'Abierto' ? 'green' : 'transparent'
         }
       })
 
@@ -379,7 +648,7 @@ const getAllOrders = async(request, response) => {
       return response.status(400).json({code: 400, msg: 'invalid page', detail: `totalPages: ${countPage}`})
 
     const order = await Order.find(filter).populate({
-      path: 'dealership installation',
+      path: 'dealership installation provider',
       select: '_id name'
     }).skip(skip).limit(10)
       .catch(error => {        
@@ -387,12 +656,19 @@ const getAllOrders = async(request, response) => {
       })
 
     const orderData = order.map((order) => {
+      const createdAt = new Date(order.createdAt)
+      const currentDate = new Date()
+      const differenceMs = currentDate - createdAt
+      const differenceDays = differenceMs / (1000 * 60 * 60 * 24)
+      
       return {
         ...order._doc, 
         dealershipName: order.dealership.name, 
         installationName: order.installation.name,
         createdProductDate: order.createdAt,
-        orderNumber: order.number
+        orderNumber: order.number,
+        providerName: order.provider?.name,
+        backgroundColor: differenceDays > 30? 'red' : order.state === 'Abierto' ? 'green' : 'transparent'
       }
     })
 

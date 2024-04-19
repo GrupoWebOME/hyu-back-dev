@@ -367,13 +367,19 @@ const getAllIncidences = async(request, response) => {
           return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
         })
       const incidenceData = incidence.map((incidence) => {
+        const createdAt = new Date(incidence.createdAt)
+        const currentDate = new Date()
+        const differenceMs = currentDate - createdAt
+        const differenceDays = differenceMs / (1000 * 60 * 60 * 24)
+        console.log(incidence)
         return {
           ...incidence._doc, 
           dealershipName: incidence.dealership?.name, 
           installationName: incidence.installation?.name, 
           incidenceTypeName: incidence.incidenceType?.name,
           incidenceNumber: incidence.number,
-          createdIncidenceDate: incidence.createdAt
+          createdIncidenceDate: incidence.createdAt,
+          backgroundColor: differenceDays > 30? 'red' : incidence.status === 'Abierta' ? 'green' : 'transparent'
         }
       })
 
@@ -406,13 +412,18 @@ const getAllIncidences = async(request, response) => {
       })
 
     const incidenceData = incidence.map((incidence) => {
+      const createdAt = new Date(incidence.createdAt)
+      const currentDate = new Date()
+      const differenceMs = currentDate - createdAt
+      const differenceDays = differenceMs / (1000 * 60 * 60 * 24)
       return {
         ...incidence._doc, 
         dealershipName: incidence.dealership?.name, 
         installationName: incidence.installation?.name, 
         incidenceTypeName: incidence.incidenceType?.name,
         incidenceNumber: incidence.number,
-        createdIncidenceDate: incidence.createdAt
+        createdIncidenceDate: incidence.createdAt,
+        backgroundColor: differenceDays > 30? 'red' : incidence.status === 'Abierta' ? 'green' : 'transparent'
       }
     })
 
