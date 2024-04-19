@@ -6,6 +6,10 @@ const productFamilySchema = new Schema({
     type: String,
     required: true
   },
+  provider: {
+    type: Schema.Types.ObjectId, 
+    ref: 'Provider'
+  },
   createdAt: {
     type: Date,
     default: Date.now

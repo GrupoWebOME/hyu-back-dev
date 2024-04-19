@@ -16,9 +16,9 @@ const orderSchema = new Schema({
     type: Schema.Types.ObjectId, 
     ref: 'Installation'
   },
-  provider: {
+  productFamily: {
     type: Schema.Types.ObjectId, 
-    ref: 'Provider'
+    ref: 'ProductFamily'
   },
   products: [
     {

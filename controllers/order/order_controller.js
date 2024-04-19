@@ -1,5 +1,5 @@
 const Order = require('../../models/order_model')
-const Provider = require('../../models/provider_model')
+const ProductFamily = require('../../models/product_family_model')
 const Dealership = require('../../models/dealership_model')
 const Installation = require('../../models/installation_schema')
 const ObjectId = require('mongodb').ObjectId
@@ -219,11 +219,11 @@ function nextCode(actualCode) {
 
 const createOrder = async(request, response) => {
   try {
-    const { dealership, installation, products, observations, orderNote, provider } = request.body
+    const { dealership, installation, products, observations, orderNote, productFamily } = request.body
     let errors = []
     let dealershipExist = null
     let installationExist = null
-    let providerExist = null
+    let productFamilyExist = null
 
     if(!dealership){
       errors.push({code: 400, 
@@ -276,23 +276,23 @@ const createOrder = async(request, response) => {
       }
     }
 
-    if(!provider){
+    if(!productFamily){
       errors.push({code: 400, 
-        msg: 'invalid provider',
-        detail: 'provider is required'
+        msg: 'invalid productFamily',
+        detail: 'productFamily is required'
       })
     }
-    else if(provider && !ObjectId.isValid(provider)) {
+    else if(productFamily && !ObjectId.isValid(productFamily)) {
       return response.status(400).json({ errors: [{code: 400,
-        msg: 'invalid provider',
-        detail: 'provider should be an objectId'}]})
+        msg: 'invalid productFamily',
+        detail: 'productFamily should be an objectId'}]})
     }
-    else if(provider){
-      providerExist = await Provider.findById(provider)
-      if(!providerExist)
+    else if(productFamily){
+      productFamilyExist = await ProductFamily.findById(productFamily).populate('provider')
+      if(!productFamilyExist)
         errors.push({code: 400, 
-          msg: 'invalid provider',
-          detail: `${provider} not found`
+          msg: 'invalid productFamily',
+          detail: `${productFamily} not found`
         })
     }
 
@@ -307,7 +307,7 @@ const createOrder = async(request, response) => {
       products, 
       observations, 
       orderNote, 
-      provider,
+      productFamily,
       state: 'Abierto'
     })
 
@@ -318,22 +318,28 @@ const createOrder = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
 
+    const fechaMongo = new Date(newOrder?.createdAt)
+    const dia = fechaMongo.getDate().toString().padStart(2, '0')
+    const mes = (fechaMongo.getMonth() + 1).toString().padStart(2, '0')
+    const anio = fechaMongo.getFullYear()
+    const fechaFormateada = `${dia}-${mes}-${anio}`
+
     const content = mailCreateBody({ 
       number, 
       dealershipName: dealershipExist?.name, 
       installationName: installationExist?.name, 
-      createdAt: newOrder?.createdAt?.toString().substring(0, 10), 
+      createdAt: fechaFormateada, 
       products 
     })
 
     const emailsArr = ['estandares-hyundai@redhyundai.com']
 
-    if (providerExist?.emailP1?.length) {
-      emailsArr.push(providerExist?.emailP1)
+    if (productFamilyExist?.provider?.emailP1?.length) {
+      emailsArr.push(productFamilyExist?.provider?.emailP1)
     }
 
-    if (providerExist?.emailP2?.length) {
-      emailsArr.push(providerExist?.emailP2)
+    if (productFamilyExist?.provider?.emailP2?.length) {
+      emailsArr.push(productFamilyExist?.provider?.emailP2)
     }
 
     if (dealershipExist?.email?.length) {
@@ -341,7 +347,7 @@ const createOrder = async(request, response) => {
     }
 
     await sendMail(`Nuevo pedido material HMES ${number}`, content, emailsArr)
-   
+
     response.status(201).json({
       code: 201,
       msg: 'the Order has been created successfully',
@@ -356,15 +362,21 @@ const createOrder = async(request, response) => {
 const updateOrder = async(request, response) => {
   try{
     const {id} = request.params
-    const { dealership, installation, products, observations, orderNote, state, provider } = request.body
+    const { dealership, installation, products, observations, orderNote, state, productFamily } = request.body
     let dealershipExist = null
     let installationExist = null
-    let providerExist = null
-    
+    let productFamilyExist = null
+    let existId = null
+
     let errors = []
 
     if(id && ObjectId.isValid(id)){
-      const existId = await Order.findById(id)
+      existId = await Order.findById(id).populate({
+        path: 'productFamily',
+        populate: {
+          path: 'provider',
+        }
+      })
         .catch(error => {return response.status(400).json({code: 500, 
           msg: 'error id',
           detail: error.message
@@ -411,17 +423,17 @@ const updateOrder = async(request, response) => {
         })
     }
 
-    if(provider && !ObjectId.isValid(provider)) {
+    if(productFamily && !ObjectId.isValid(productFamily)) {
       return response.status(400).json({ errors: [{code: 400,
-        msg: 'invalid provider',
-        detail: 'provider should be an objectId'}]})
+        msg: 'invalid productFamily',
+        detail: 'productFamily should be an objectId'}]})
     }
-    else if(provider){
-      providerExist = await Provider.findById(provider)
-      if(!providerExist)
+    else if(productFamily){
+      productFamilyExist = await ProductFamily.findById(productFamily)
+      if(!productFamilyExist)
         errors.push({code: 400, 
-          msg: 'invalid provider',
-          detail: `${provider} not found`
+          msg: 'invalid productFamily',
+          detail: `${productFamily} not found`
         })
     }
 
@@ -446,18 +458,18 @@ const updateOrder = async(request, response) => {
       updatedFields['orderNote'] = orderNote
     if(state)
       updatedFields['state'] = state
-    if(provider)
-      updatedFields['provider'] = provider
+    if(productFamily)
+      updatedFields['productFamily'] = productFamily
     updatedFields['updatedAt'] = Date.now()
 
     const emailsArr = ['estandares-hyundai@redhyundai.com']
 
-    if (providerExist?.emailP1?.length) {
-      emailsArr.push(providerExist?.emailP1)
+    if (existId?.productFamily?.provider?.emailP1?.length) {
+      emailsArr.push(existId?.productFamily?.provider?.emailP1)
     }
 
-    if (providerExist?.emailP2?.length) {
-      emailsArr.push(providerExist?.emailP2)
+    if (existId?.productFamily?.provider?.emailP2?.length) {
+      emailsArr.push(existId?.productFamily?.provider?.emailP2)
     }
 
     if (dealershipExist?.email?.length) {
@@ -469,15 +481,21 @@ const updateOrder = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
 
-    if (state === 'Cancelado') {
+    if (state === 'Cancelado' && existId?.state !== 'Cancelado') {
+      const fechaMongo = new Date(updatedOrder?.createdAt)
+      const dia = fechaMongo.getDate().toString().padStart(2, '0')
+      const mes = (fechaMongo.getMonth() + 1).toString().padStart(2, '0')
+      const anio = fechaMongo.getFullYear()
+      const fechaFormateada = `${dia}-${mes}-${anio}`
+
       const content = mailCancelBody({ 
         number: updatedOrder?.number, 
         dealershipName: dealershipExist?.name, 
         installationName: installationExist?.name, 
-        createdAt: updatedOrder?.createdAt?.toString().substring(0, 10), 
+        createdAt: fechaFormateada, 
         products : updatedOrder?.products
       })
-  
+      
       await sendMail(`CANCELACIÓN Pedido material HMES ${updatedOrder?.number}`, content, emailsArr)
     }
 
@@ -603,7 +621,7 @@ const getAllOrders = async(request, response) => {
 
     if(page === 0){
       const order = await Order.find(filter).populate({
-        path: 'dealership installation provider',
+        path: 'dealership installation productFamily',
         select: '_id name'
       })
         .catch(error => {        
@@ -622,7 +640,7 @@ const getAllOrders = async(request, response) => {
           installationName: order.installation.name,
           createdProductDate: order.createdAt,
           orderNumber: order.number,
-          providerName: order.provider?.name,
+          productFamilyName: order.productFamily?.name,
           backgroundColor: differenceDays > 30? 'red' : order.state === 'Abierto' ? 'green' : 'transparent'
         }
       })
@@ -648,7 +666,7 @@ const getAllOrders = async(request, response) => {
       return response.status(400).json({code: 400, msg: 'invalid page', detail: `totalPages: ${countPage}`})
 
     const order = await Order.find(filter).populate({
-      path: 'dealership installation provider',
+      path: 'dealership installation productFamily',
       select: '_id name'
     }).skip(skip).limit(10)
       .catch(error => {        
@@ -667,7 +685,7 @@ const getAllOrders = async(request, response) => {
         installationName: order.installation.name,
         createdProductDate: order.createdAt,
         orderNumber: order.number,
-        providerName: order.provider?.name,
+        productFamilyName: order.productFamily?.name,
         backgroundColor: differenceDays > 30? 'red' : order.state === 'Abierto' ? 'green' : 'transparent'
       }
     })

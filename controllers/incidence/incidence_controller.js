@@ -5,6 +5,106 @@ const Incidence = require('../../models/incidence_model')
 const IncidenceType = require('../../models/incidence_type_model')
 const ObjectId = require('mongodb').ObjectId
 const jwt = require('jsonwebtoken')
+const nodemailer = require('nodemailer')
+
+const mailCreateBody = ({ number, dealershipName, installationName, createdAt, description }) => { 
+  return `
+    <p>
+      Estimado concesionario,
+    </p> 
+    <p>
+      Paso a comunicarte una nueva incidencia:
+    </p> 
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Nº Incidencia HMES: </span> ${number}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Concesión: </span>${dealershipName}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Instalación: </span>${installationName}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Fecha del Pedido: </span>${createdAt}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Detalle: </span>${description}
+    </p>
+    <p>Para cualquier duda contactar con Hyundai Motor España.</p>
+    <p>Recibe un cordial saludo,</p>
+    <div style="margin-top: 1.2rem">
+      <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
+    </div>
+`}
+
+const mailCancelBody = ({ number, dealershipName, installationName, createdAt, description }) => { 
+  return `
+    <p>
+      Estimado concesionario,
+    </p> 
+    <p>
+      Paso a comunicarte que se ha CANCELADO la incidencia:
+    </p> 
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Nº Incidencia HMES: </span> ${number}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Concesión: </span>${dealershipName}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Instalación: </span>${installationName}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Fecha del Pedido: </span>${createdAt}
+    </p>
+    <p style="font-size: 1rem">
+      <span style="font-weight: 600">Detalle: </span>${description}
+    </p>
+    <p>Para cualquier duda contactar con Hyundai Motor España.</p>
+    <p>Recibe un cordial saludo,</p>
+    <div style="margin-top: 1.2rem">
+      <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
+    </div>
+`}
+
+const sendMail = async(subject, content, recipients) => {    
+  try{
+    if(!process.env.EMAIL_SENDER || !process.env.EMAIL_PASSWORD){
+      return
+    }
+
+    var transporter = nodemailer.createTransport({
+      host: 'smtp.hornet.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_SENDER,
+        pass: process.env.EMAIL_PASSWORD
+      }
+    })
+          
+    var mailOptions = {
+      from: process.env.EMAIL_SENDER,
+      to: recipients.join(', '),
+      bcc: process.env.EMAIL_SENDER,
+      subject: subject,
+      html: content
+    }
+          
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log('error: ', error)
+      } else {
+        console.log('Email sent: ' + info.response)
+      }
+    })
+
+    return
+  }
+  catch(error){
+    console.log('err: ', error)
+  }
+}
 
 function nextCode(actualCode) {
   const actual = parseInt(actualCode.substring(6))
@@ -18,6 +118,9 @@ const createIncidence = async(request, response) => {
   try {
     const { name, description, dealership, installation, photo, incidenceType } = request.body
     let errors = []
+    let dealershipExist = null
+    let installationExist = null
+    let incidenceTypeExist = null
 
     if(!dealership){
       errors.push({code: 400, 
@@ -31,7 +134,7 @@ const createIncidence = async(request, response) => {
         detail: 'dealership should be an objectId'}]})
     }
     else if(dealership){
-      const dealershipExist = await Dealership.findById(dealership)
+      dealershipExist = await Dealership.findById(dealership)
       if(!dealershipExist)
         errors.push({code: 400, 
           msg: 'invalid dealership',
@@ -51,7 +154,7 @@ const createIncidence = async(request, response) => {
         detail: 'installation should be an objectId'}]})
     }
     else if(installation){
-      const installationExist = await Installation.findById(installation)
+      installationExist = await Installation.findById(installation)
       if(!installationExist)
         errors.push({code: 400, 
           msg: 'invalid installation',
@@ -78,7 +181,7 @@ const createIncidence = async(request, response) => {
         detail: 'incidenceType should be an objectId'}]})
     }
     else if(incidenceType){
-      const incidenceTypeExist = await IncidenceType.findById(incidenceType)
+      incidenceTypeExist = await IncidenceType.findById(incidenceType).populate('provider')
       if(!incidenceTypeExist)
         errors.push({code: 400, 
           msg: 'invalid incidenceType',
@@ -108,6 +211,36 @@ const createIncidence = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
 
+    const fechaMongo = new Date(newIncidence?.createdAt)
+    const dia = fechaMongo.getDate().toString().padStart(2, '0')
+    const mes = (fechaMongo.getMonth() + 1).toString().padStart(2, '0')
+    const anio = fechaMongo.getFullYear()
+    const fechaFormateada = `${dia}-${mes}-${anio}`
+
+    const content = mailCreateBody({ 
+      number, 
+      dealershipName: dealershipExist?.name, 
+      installationName: installationExist?.name, 
+      createdAt: fechaFormateada, 
+      description 
+    })
+    
+    const emailsArr = ['estandares-hyundai@redhyundai.com']
+
+    if (incidenceTypeExist?.provider?.emailP1?.length) {
+      emailsArr.push(incidenceTypeExist?.provider?.emailP1)
+    }
+
+    if (incidenceTypeExist?.provider?.emailP2?.length) {
+      emailsArr.push(incidenceTypeExist?.provider?.emailP2)
+    }
+
+    if (dealershipExist?.email?.length) {
+      emailsArr.push(dealershipExist?.email)
+    }
+
+    await sendMail(`Nueva incidencia HMES ${number}`, content, emailsArr)
+
     response.status(201).json({
       code: 201,
       msg: 'the Incidence has been created successfully',
@@ -123,11 +256,15 @@ const updateIncidence = async(request, response) => {
   try{
     const {id} = request.params
     const { name, provider, description, photo, installation, dealership, status, incidenceType } = request.body
+    let dealershipExist = null
+    let installationExist = null
+    let incidenceTypeExist = null
+    let existId = null
 
     let errors = []
 
     if(id && ObjectId.isValid(id)){
-      const existId = await Incidence.findById(id)
+      existId = await Incidence.findById(id).populate('installation dealership')
         .catch(error => {return response.status(400).json({code: 500, 
           msg: 'error id',
           detail: error.message
@@ -166,11 +303,25 @@ const updateIncidence = async(request, response) => {
         detail: 'dealership should be an objectId'}]})
     }
     else if(dealership){
-      const dealershipExist = await Dealership.findById(dealership)
+      dealershipExist = await Dealership.findById(dealership)
       if(!dealershipExist)
         errors.push({code: 400, 
           msg: 'invalid dealership',
           detail: `${dealership} not found`
+        })
+    }
+
+    if(installation && !ObjectId.isValid(installation)) {
+      return response.status(400).json({ errors: [{code: 400,
+        msg: 'invalid installation',
+        detail: 'installation should be an objectId'}]})
+    }
+    else if(installation){
+      installationExist = await Installation.findById(installation)
+      if(!installationExist)
+        errors.push({code: 400, 
+          msg: 'invalid installation',
+          detail: `${installation} not found`
         })
     }
 
@@ -180,7 +331,7 @@ const updateIncidence = async(request, response) => {
         detail: 'incidenceType should be an objectId'}]})
     }
     else if(incidenceType){
-      const incidenceTypeExist = await IncidenceType.findById(incidenceType)
+      incidenceTypeExist = await IncidenceType.findById(incidenceType).populate('provider')
       if(!incidenceTypeExist)
         errors.push({code: 400, 
           msg: 'invalid incidenceType',
@@ -234,6 +385,38 @@ const updateIncidence = async(request, response) => {
       .catch(error => {        
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
+
+    const fechaMongo = new Date(existId?.createdAt)
+    const dia = fechaMongo.getDate().toString().padStart(2, '0')
+    const mes = (fechaMongo.getMonth() + 1).toString().padStart(2, '0')
+    const anio = fechaMongo.getFullYear()
+    const fechaFormateada = `${dia}-${mes}-${anio}`
+
+    const content = mailCancelBody({ 
+      number: existId?.number, 
+      dealershipName: existId?.dealership?.name, 
+      installationName: existId?.installation?.name, 
+      createdAt: fechaFormateada, 
+      description 
+    })
+    
+    const emailsArr = ['estandares-hyundai@redhyundai.com']
+
+    if (incidenceTypeExist?.provider?.emailP1?.length) {
+      emailsArr.push(incidenceTypeExist?.provider?.emailP1)
+    }
+
+    if (incidenceTypeExist?.provider?.emailP2?.length) {
+      emailsArr.push(incidenceTypeExist?.provider?.emailP2)
+    }
+
+    if (existId?.dealership?.email?.length) {
+      emailsArr.push(existId?.dealership?.email)
+    }
+
+    if (status === 'Cancelada' && existId?.status !== 'Cancelada') {
+      await sendMail(`Incidencia cancelada HMES ${existId?.number}`, content, emailsArr)
+    }
 
     response.status(201).json({
       code: 200,
@@ -366,12 +549,12 @@ const getAllIncidences = async(request, response) => {
         .catch(error => {        
           return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
         })
+      
       const incidenceData = incidence.map((incidence) => {
         const createdAt = new Date(incidence.createdAt)
         const currentDate = new Date()
         const differenceMs = currentDate - createdAt
         const differenceDays = differenceMs / (1000 * 60 * 60 * 24)
-        console.log(incidence)
         return {
           ...incidence._doc, 
           dealershipName: incidence.dealership?.name, 
