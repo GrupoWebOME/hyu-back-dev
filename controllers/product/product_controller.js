@@ -321,7 +321,7 @@ const getAllProducts = async(request, response) => {
       })
 
       const productData = product.map((product) => {
-        return {...product._doc, family: product.productFamily.name, providerName: product.provider.name }
+        return {...product._doc, family: product.productFamily?.name, providerName: product.provider?.name }
       })
 
       const data = {
