@@ -6,9 +6,9 @@ const productFamilySchema = new Schema({
     type: String,
     required: true
   },
-  provider: {
-    type: Schema.Types.ObjectId, 
-    ref: 'Provider'
+  isDeleted: {
+    type: Boolean,
+    default: false
   },
   createdAt: {
     type: Date,

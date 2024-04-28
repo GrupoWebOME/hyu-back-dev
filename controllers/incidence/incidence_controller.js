@@ -7,7 +7,11 @@ const ObjectId = require('mongodb').ObjectId
 const jwt = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
 
-const mailCreateBody = ({ number, dealershipName, installationName, createdAt, description }) => { 
+const mailCreateBody = ({ number, dealershipName, installationName, createdAt, description, photo }) => { 
+  const images = photo?.map((image) => {
+    return `<img src=${image} alt="imagen de incidencia" style="width: 350px; height: 350px; object-fit: contain;" />`
+  })
+
   return `
     <p>
       Estimado proveedor,
@@ -30,6 +34,9 @@ const mailCreateBody = ({ number, dealershipName, installationName, createdAt, d
     <p style="font-size: 1rem">
       <span style="font-weight: 600">Detalle: </span>${description}
     </p>
+    <div style="display: flex; flex-direction: column; gap: 1rem; box-sizing: border-box; width: 100%; height: max-content">
+     ${images}
+    </div>
     <p>Para cualquier duda contactar con Hyundai Motor España.</p>
     <p>Recibe un cordial saludo,</p>
     <div style="margin-top: 1.2rem">
@@ -37,7 +44,11 @@ const mailCreateBody = ({ number, dealershipName, installationName, createdAt, d
     </div>
 `}
 
-const mailCancelBody = ({ number, dealershipName, installationName, createdAt, description }) => { 
+const mailCancelBody = ({ number, dealershipName, installationName, createdAt, description, photo }) => { 
+  const images = photo?.map((image) => {
+    return `<img src=${image} alt="imagen de incidencia" style="width: 350px; height: 350px; object-fit: contain;" />`
+  })
+
   return `
     <p>
       Estimado proveedor,
@@ -60,6 +71,9 @@ const mailCancelBody = ({ number, dealershipName, installationName, createdAt, d
     <p style="font-size: 1rem">
       <span style="font-weight: 600">Detalle: </span>${description}
     </p>
+    <div style="display: flex; flex-direction: column; gap: 1rem; box-sizing: border-box; width: 100%; height: max-content">
+     ${images}
+    </div>
     <p>Para cualquier duda contactar con Hyundai Motor España.</p>
     <p>Recibe un cordial saludo,</p>
     <div style="margin-top: 1.2rem">
@@ -222,6 +236,7 @@ const createIncidence = async(request, response) => {
       dealershipName: dealershipExist?.name, 
       installationName: installationExist?.name, 
       createdAt: fechaFormateada, 
+      photo,
       description 
     })
     
@@ -397,6 +412,7 @@ const updateIncidence = async(request, response) => {
       dealershipName: existId?.dealership?.name, 
       installationName: existId?.installation?.name, 
       createdAt: fechaFormateada, 
+      photo: updatedIncidence.photo,
       description 
     })
     

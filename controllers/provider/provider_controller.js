@@ -1,6 +1,7 @@
 const Provider = require('../../models/provider_model')
 const { regExPatternEmailAddress } = require('../../utils/constants/regex')
 const ObjectId = require('mongodb').ObjectId
+const Product = require('../../models/product_model')
 
 const createProvider = async(request, response) => {
   try {
@@ -25,7 +26,7 @@ const createProvider = async(request, response) => {
         detail: 'name is a required field'
       })
     } else {
-      const existName = await Provider.findOne({ name})
+      const existName = await Provider.findOne({ name, isDeleted: false })
       if (existName) {
         errors.push({code: 400, 
           msg: 'invalid name',
@@ -180,14 +181,35 @@ const deleteProvider = async(request, response) => {
       })   
     }
 
+    const updatedFields = {}
+    updatedFields['isDeleted'] = true
+    updatedFields['updatedAt'] = Date.now()
+
+    /*
     const deleteProvider = await Provider.findByIdAndDelete(id)
+      .catch(error => {        
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+      })
+    */
+
+    await Provider.findByIdAndUpdate(id, updatedFields, {new: true})
+      .catch(error => {        
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+      })
+
+      
+    const updatedProductFields = {}
+    updatedProductFields['isDeleted'] = true
+    updatedProductFields['updatedAt'] = Date.now()
+
+    await Product.updateMany({provider: id}, updatedFields, {new: true})
       .catch(error => {        
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
 
     response.status(200).json({code: 200,
       msg: 'the Provider has been deleted successfully',
-      data: deleteProvider })
+      data: '' })
   }
   catch(error){
     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
@@ -236,7 +258,7 @@ const getAllProvider = async(request, response) => {
 
     let skip = (page - 1) * 10
 
-    const filter = {}
+    const filter = { isDeleted: false }
 
     if(name)
       filter['name'] = { $regex : new RegExp(name, 'i') }

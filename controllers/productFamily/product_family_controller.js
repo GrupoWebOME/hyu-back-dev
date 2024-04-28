@@ -1,10 +1,10 @@
 const ProductFamily = require('../../models/product_family_model')
-const Provider = require('../../models/provider_model')
 const ObjectId = require('mongodb').ObjectId
+const Product = require('../../models/product_model')
 
 const createProductFamily = async(request, response) => {
   try {
-    const { name, provider } = request.body
+    const { name } = request.body
     let errors = []
 
     if (!name) {
@@ -13,7 +13,7 @@ const createProductFamily = async(request, response) => {
         detail: 'The name field ir required'
       })
     } else {
-      const existName = await ProductFamily.findOne({ name})
+      const existName = await ProductFamily.findOne({ name, isDeleted: false })
       if (existName) {
         errors.push({code: 400, 
           msg: 'invalid name',
@@ -22,32 +22,11 @@ const createProductFamily = async(request, response) => {
       }
     }
 
-    if(!provider){
-      errors.push({code: 400, 
-        msg: 'invalid provider',
-        detail: 'provider is required'
-      })
-    }
-    else if(provider && !ObjectId.isValid(provider)) {
-      return response.status(400).json({ errors: [{code: 400,
-        msg: 'invalid provider',
-        detail: 'provider should be an objectId'}]})
-    }
-    else if(provider){
-      const providerExist = await Provider.findById(provider)
-      if(!providerExist)
-        errors.push({code: 400, 
-          msg: 'invalid provider',
-          detail: `${provider} not found`
-        })
-    }
-
     if(errors.length > 0)
       return response.status(400).json({errors: errors})
 
     const newProductFamily = new ProductFamily({
       name,
-      provider
     })
 
     await newProductFamily.save()
@@ -99,7 +78,7 @@ const updateProductFamily = async(request, response) => {
         detail: 'The name is required'
       })
     } else {
-      const existName = await ProductFamily.findOne({ name })
+      const existName = await ProductFamily.findOne({ name, isDeleted: false })
       if (existName && (existName?._id?.toString() !== id?.toString())) {
         errors.push({code: 400, 
           msg: 'invalid name',
@@ -168,14 +147,35 @@ const deleteProductFamily = async(request, response) => {
       })   
     }
 
-    const deleteProductFamily = await ProductFamily.findByIdAndDelete(id)
+    const updatedFields = {}
+
+    updatedFields['isDeleted'] = true
+    updatedFields['updatedAt'] = Date.now()
+
+    await ProductFamily.findByIdAndUpdate(id, updatedFields, {new: true})
+      .catch(error => {        
+        return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+      })
+
+    /*
+        const deleteProductFamily = await ProductFamily.findByIdAndDelete(id)
+          .catch(error => {        
+            return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+          })
+    */
+
+    const updatedProductFields = {}
+    updatedProductFields['isDeleted'] = true
+    updatedProductFields['updatedAt'] = Date.now()
+
+    await Product.updateMany({productFamily: id}, updatedFields, {new: true})
       .catch(error => {        
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
 
     response.status(200).json({code: 200,
       msg: 'the ProductFamily has been deleted successfully',
-      data: deleteProductFamily })
+      data: '' })
   }
   catch(error){
     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
@@ -224,26 +224,19 @@ const getAllProductsFamilies = async(request, response) => {
 
     let skip = (page - 1) * 10
 
-    const filter = {}
+    const filter = {isDeleted: false}
 
     if(name)
       filter['name'] = { $regex : new RegExp(name, 'i') }
 
     if(page === 0){
-      const productFamily = await ProductFamily.find(filter).populate({
-        path: 'provider',
-        select: '_id name'
-      })
+      const productFamily = await ProductFamily.find(filter)
         .catch(error => {        
           return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
         })
 
-      const productFamilyData = productFamily.map((incidence) => {
-        return {...incidence._doc, providerName: incidence.provider?.name }
-      })
-
       const data = {
-        productFamily: productFamilyData, 
+        productFamily, 
         totalPages: 1
       }
 
@@ -262,20 +255,13 @@ const getAllProductsFamilies = async(request, response) => {
     if((countPage < page) && page !== 1)
       return response.status(400).json({code: 400, msg: 'invalid page', detail: `totalPages: ${countPage}`})
 
-    const productFamily = await ProductFamily.find(filter).populate({
-      path: 'provider',
-      select: '_id name'
-    }).skip(skip).limit(10)
+    const productFamily = await ProductFamily.find(filter).skip(skip).limit(10)
       .catch(error => {        
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
 
-    const productFamilyData = productFamily.map((incidence) => {
-      return {...incidence._doc, providerName: incidence.provider?.name }
-    })
-
     const data = {
-      productsFamily: productFamilyData, 
+      productFamily, 
       totalPages: countPage
     }
 

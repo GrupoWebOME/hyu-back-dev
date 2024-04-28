@@ -230,7 +230,7 @@ const getAllIncidencesTypes = async(request, response) => {
         })
 
       const incidenceData = incidenceType.map((incidence) => {
-        return {...incidence._doc, providerName: incidence.provider.name }
+        return {...incidence._doc, providerName: incidence.provider?.name }
       })
 
       const data = {

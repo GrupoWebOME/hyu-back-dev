@@ -16,10 +16,6 @@ const orderSchema = new Schema({
     type: Schema.Types.ObjectId, 
     ref: 'Installation'
   },
-  productFamily: {
-    type: Schema.Types.ObjectId, 
-    ref: 'ProductFamily'
-  },
   products: [
     {
       product: {
@@ -33,6 +29,7 @@ const orderSchema = new Schema({
       family: {type: String, required: true },
       name: {type: String, required: true },
       photo: {type: String, required: false, default: null},
+      provider: {},
       isDelivered: {type: Boolean, required: false, default: false},
     }
   ],

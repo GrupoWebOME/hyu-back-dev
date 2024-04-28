@@ -35,6 +35,10 @@ const productSchema = new Schema({
     type: Schema.Types.ObjectId, 
     ref: 'ProductFamily'
   },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
   createdAt: {
     type: Date,
     default: Date.now

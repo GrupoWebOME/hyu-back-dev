@@ -245,14 +245,25 @@ const deleteProduct = async(request, response) => {
       })   
     }
 
-    const deleteProduct = await Product.findByIdAndDelete(id)
+    const updatedFields = {}
+    updatedFields['isDeleted'] = true
+    updatedFields['updatedAt'] = Date.now()
+
+    /*
+      const deleteProduct = await Product.findByIdAndDelete(id)
+        .catch(error => {        
+          return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
+        })
+    */
+
+    await Product.findByIdAndUpdate(id, updatedFields, {new: true})
       .catch(error => {        
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
 
     response.status(200).json({code: 200,
       msg: 'the Product has been deleted successfully',
-      data: deleteProduct })
+      data: '' })
   }
   catch(error){
     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message,}]})
@@ -301,7 +312,7 @@ const getAllProducts = async(request, response) => {
 
     let skip = (page - 1) * 10
 
-    const filter = {}
+    const filter = { isDeleted: false }
 
     if(productFamily)
       filter['productFamily'] = productFamily
