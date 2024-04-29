@@ -29,7 +29,7 @@ const mailCreateBody = ({ number, dealershipName, installationName, createdAt, d
       <span style="font-weight: 600">Instalación: </span>${installationName}
     </p>
     <p style="font-size: 1rem">
-      <span style="font-weight: 600">Fecha del Pedido: </span>${createdAt}
+      <span style="font-weight: 600">Fecha de la incidencia: </span>${createdAt}
     </p>
     <p style="font-size: 1rem">
       <span style="font-weight: 600">Detalle: </span>${description}
@@ -66,7 +66,7 @@ const mailCancelBody = ({ number, dealershipName, installationName, createdAt, d
       <span style="font-weight: 600">Instalación: </span>${installationName}
     </p>
     <p style="font-size: 1rem">
-      <span style="font-weight: 600">Fecha del Pedido: </span>${createdAt}
+      <span style="font-weight: 600">Fecha de la incidencia: </span>${createdAt}
     </p>
     <p style="font-size: 1rem">
       <span style="font-weight: 600">Detalle: </span>${description}
@@ -413,7 +413,7 @@ const updateIncidence = async(request, response) => {
       installationName: existId?.installation?.name, 
       createdAt: fechaFormateada, 
       photo: updatedIncidence.photo,
-      description 
+      description
     })
     
     const emailsArr = ['estandares-hyundai@redhyundai.com']
