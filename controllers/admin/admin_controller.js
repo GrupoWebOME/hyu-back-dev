@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const Admin = require('../../models/admin_model')
 const Dealership = require('../../models/dealership_model')
+const PopUpMessage = require('../../models/popup_message_model')
 var ObjectId = require('mongodb').ObjectId
 
 const createAdmin = async(request, response) => {
@@ -137,6 +138,8 @@ const loginAdmin = async(request, response) => {
 
     const admin = await Admin.findOne({$or: [{userName: user},{emailAddress: user}]})
 
+    const popup = await PopUpMessage.findOne({ name: admin.role })
+
     if (!admin)
       return response.status(401).json({errors: [{code: 401, msg: 'unauthorized access', detail: 'invalid credentials'}]})
 
@@ -158,7 +161,8 @@ const loginAdmin = async(request, response) => {
       userName: admin.userName,
       role: admin.role,
       dealership: admin.dealership,
-      isMain: admin.isMain
+      isMain: admin.isMain,
+      message: popup.message
     }
 
     const token = await jwt.sign({admin: adminAux},
@@ -170,7 +174,7 @@ const loginAdmin = async(request, response) => {
 
     response.cookie('token', token, {httpOnly: true, maxAge: 24 * 60 * 60 * 1000})
 
-    response.status(200).json({code: 200, msg: 'login success', data: {admin: admin, token: token}})
+    response.status(200).json({code: 200, msg: 'login success', data: {admin: admin, message: popup.message, token: token}})
   }
   catch(error){
     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})

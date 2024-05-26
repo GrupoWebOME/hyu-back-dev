@@ -26,6 +26,7 @@ const apiProvider = require('./provider/provider_routes')
 const apiProduct = require('./product/product_routes')
 const apiIncidence = require('./incidence/incidence_routes')
 const apiOrder = require('./order/order_routes')
+const apiPopupMessage = require('./popupMessage/popupmessage_routes')
 const apiIncidenceType = require('./incidenceType/incidence_type_routes')
 const apiSwagger = require('./doc/doc_routes')
 
@@ -60,6 +61,7 @@ api.use('/product', apiProduct)
 api.use('/incidence', apiIncidence)
 api.use('/order', apiOrder)
 api.use('/incidenceType', apiIncidenceType)
+api.use('/popupmessage', apiPopupMessage)
 api.use('/doc', apiSwagger)
 
 module.exports = api
