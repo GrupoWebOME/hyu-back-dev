@@ -68,16 +68,16 @@ const createPopUp = async(request, response) => {
 const updatePopUp = async(request, response) => {
   try{
     const { id } = request.params
-    const { message } = request.body
+    const { message, active } = request.body
 
     let errors = []
 
-    if(!message)
+    console.log('active: ', typeof active)
+    if(active !== null && active !== undefined && typeof active !== 'boolean')
       errors.push({code: 400, 
-        msg: 'invalid message',
-        detail: 'message is required'
+        msg: 'invalid active field',
+        detail: 'active field is required'
       }) 
-      
         
     if(id && ObjectId.isValid(id)){
       const existId = await PopUpMessage.findById(id)
@@ -107,6 +107,10 @@ const updatePopUp = async(request, response) => {
     if(message)
       updatedFields['message'] = message
     
+    if(active !== null && active !== undefined) {
+      updatedFields['active'] = active
+    }
+
     updatedFields['updatedAt'] = Date.now()
 
     const updatedPopUp = await PopUpMessage.findByIdAndUpdate(id, updatedFields, {new: true})

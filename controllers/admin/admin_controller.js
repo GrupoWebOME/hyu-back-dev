@@ -162,7 +162,7 @@ const loginAdmin = async(request, response) => {
       role: admin.role,
       dealership: admin.dealership,
       isMain: admin.isMain,
-      message: popup.message
+      message: popup?.active? popup?.message : null
     }
 
     const token = await jwt.sign({admin: adminAux},
@@ -174,7 +174,7 @@ const loginAdmin = async(request, response) => {
 
     response.cookie('token', token, {httpOnly: true, maxAge: 24 * 60 * 60 * 1000})
 
-    response.status(200).json({code: 200, msg: 'login success', data: {admin: admin, message: popup.message, token: token}})
+    response.status(200).json({code: 200, msg: 'login success', data: {admin: admin, message: popup?.active? popup?.message : null, token: token}})
   }
   catch(error){
     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})

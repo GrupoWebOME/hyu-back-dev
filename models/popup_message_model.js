@@ -9,6 +9,11 @@ const popUpMessageSchema = new Schema({
   message: {type: String,
     trim: true,
     required: true},
+  active: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
   createdAt: {type: Date,
     default: Date.now},
   updatedAt: {type: Date,
