@@ -126,7 +126,7 @@ const createPopUp = async(request, response) => {
       }
     })
 
-    // await sendMail('Notificación HSA', mailCreateBody(message), emailAddresses)
+    // await sendMail('Notificación HSA', mailCreateBody({message}), emailAddresses)
 
     response.status(201).json({code: 201,
       msg: 'the popup message has been created successfully',
@@ -141,7 +141,7 @@ const updatePopUp = async(request, response) => {
   try{
     const { id } = request.params
     const { message, active } = request.body
-
+    let popup = null
     let errors = []
 
     if(active !== null && active !== undefined && typeof active !== 'boolean')
@@ -162,6 +162,8 @@ const updatePopUp = async(request, response) => {
           msg: 'invalid id',
           detail: 'id not found'
         })
+      
+      popup = existId
     }
     else{
       return response.status(400).json({code: 400, 
@@ -188,6 +190,22 @@ const updatePopUp = async(request, response) => {
       .catch(error => {        
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
+
+    if (active === true) {
+      let emailAddresses = []
+      const dealershipArray = await Admin.find({ role: popup.name })
+  
+      dealershipArray.forEach((element) => {
+        if (element.emailAddress) {
+          emailAddresses.push(element.emailAddress)
+        }
+        if (element.secondaryEmailAddress) {
+          emailAddresses.push(element.secondaryEmailAddress)
+        }
+      })
+  
+      // await sendMail('Notificación HSA', mailCreateBody({message: message}), emailAddresses)
+    }
 
     response.status(201).json({code: 200,
       msg: 'the PopUp Message has been updated successfully',
