@@ -7,7 +7,7 @@ var ObjectId = require('mongodb').ObjectId
 
 const createAdmin = async(request, response) => {
   try{
-    const {names, surnames, emailAddress, userName, password, role, dealership} = request.body
+    const {names, surnames, emailAddress, userName, password, role, dealership, secondaryEmailAddress} = request.body
     const adminRole = request.jwt.admin.role
 
     let errors = []
@@ -42,6 +42,13 @@ const createAdmin = async(request, response) => {
           })
         }
       }
+    }
+
+    if (secondaryEmailAddress && !secondaryEmailAddress.match(regExPatternEmailAddress)) {
+      errors.push({code: 400, 
+        msg: 'invalid secondaryEmailAddress',
+        detail: `${secondaryEmailAddress} is not valid emailAddress format. The emailAddress field can only contain a valid email, and is required`
+      })
     }
 
     if(!names)
@@ -105,7 +112,8 @@ const createAdmin = async(request, response) => {
       userName: userName,
       password: passwordHash,
       role: role.toLowerCase(),
-      dealership: dealership? dealership: null
+      dealership: dealership? dealership: null,
+      secondaryEmailAddress: secondaryEmailAddress ? secondaryEmailAddress : null
     })
     
     /*
@@ -184,7 +192,7 @@ const loginAdmin = async(request, response) => {
 const updateAdmin = async(request, response) => {
   try{
     const {id} = request.params
-    const {names, surnames, emailAddress, userName, password, role, dealership, audits} = request.body
+    const {names, surnames, emailAddress, userName, password, role, dealership, audits, secondaryEmailAddress} = request.body
     const { adminRole, _id } = request.jwt.admin
     let errors = []
     
@@ -277,6 +285,12 @@ const updateAdmin = async(request, response) => {
         })
       }
     }
+
+    if(secondaryEmailAddress && !secondaryEmailAddress.match(regExPatternEmailAddress))
+      errors.push({code: 400, 
+        msg: 'invalid secondaryEmailAddress',
+        detail: `${secondaryEmailAddress} is not valid emailAddress format. The emailAddress field can only contain a valid email`
+      })
     
     if(emailAddress && !emailAddress.match(regExPatternEmailAddress))
       errors.push({code: 400, 
@@ -334,6 +348,9 @@ const updateAdmin = async(request, response) => {
 
     if(emailAddress)
       editAdmin['emailAddress'] = emailAddress
+
+    if(secondaryEmailAddress)
+      editAdmin['secondaryEmailAddress'] = secondaryEmailAddress
 
     if(userName)
       editAdmin['userName'] = userName

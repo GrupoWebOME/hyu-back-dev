@@ -520,7 +520,6 @@ const getAllIncidences = async(request, response) => {
   try{
     const { dealership, installation, name, type, pageReq } = request.body
     const authHeader = request.headers['authorization']
-
     const page = !pageReq ? 0 : pageReq
 
     let skip = (page - 1) * 10
@@ -558,14 +557,22 @@ const getAllIncidences = async(request, response) => {
     }
 
     if(page === 0){
+      
       const incidence = await Incidence.find(filter).populate({
-        path: 'dealership installation incidenceType',
+        path: 'incidenceType',
+        select: '_id name provider',
+        populate: {
+          path: 'provider',
+          select: 'name' 
+        }
+      }).populate({
+        path: 'installation',
+        select: '_id name'
+      }).populate({
+        path: 'dealership',
         select: '_id name'
       })
-        .catch(error => {        
-          return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-        })
-      
+
       const incidenceData = incidence.map((incidence) => {
         const createdAt = new Date(incidence.createdAt)
         const currentDate = new Date()
@@ -578,7 +585,8 @@ const getAllIncidences = async(request, response) => {
           incidenceTypeName: incidence.incidenceType?.name,
           incidenceNumber: incidence.number,
           createdIncidenceDate: incidence.createdAt,
-          backgroundColor: differenceDays > 30? 'red' : incidence.status === 'Abierta' ? 'green' : 'transparent'
+          backgroundColor: differenceDays > 30? 'red' : incidence.status === 'Abierta' ? 'green' : 'transparent',
+          providerName: incidence?.incidenceType?.provider?.name || null
         }
       })
 

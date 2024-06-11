@@ -15,6 +15,12 @@ const adminSchema = new Schema({
     lowercase: true, 
     trim: true,
     required: true},
+  secondaryEmailAddress: {
+    type: String, 
+    unique: true,
+    lowercase: true, 
+    trim: true,
+    required: true},
   userName: {type: String, 
     lowercase: true, 
     unique: true,

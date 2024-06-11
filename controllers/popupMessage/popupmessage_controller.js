@@ -1,13 +1,70 @@
 /* eslint-disable no-useless-escape */
 const PopUpMessage = require('../../models/popup_message_model')
+const Admin = require('../../models/admin_model')
 const ObjectId = require('mongodb').ObjectId
+const nodemailer = require('nodemailer')
 
 const validUsersArr = ['admin', 'dealership', 'processmanager', 'auditor', 'main']
+
+const mailCreateBody = ({ message }) => { 
+  return `
+    <p>
+      Estimado concesionario,
+    </p> 
+    <p>
+      Se comunica la siguiente notificación:
+    </p> 
+    <div>${message}</div>
+    <p>Esta información se encuentra accesible a través de la aplicación Hyundai Standards Application (HSA). 
+       Para cualquier duda contactar con Elena Drandar: estandares-hyundai@redhyundai.com</p>
+    <p>Recibe un cordial saludo,</p>
+    <div style="margin-top: 1.2rem">
+      <img src="https://res.cloudinary.com/hyundaiesp/image/upload/v1679065791/logos/hsa-firma-email_k3yldt.png" alt="hyundai firma" />
+    </div>
+`}
+
+const sendMail = async(subject, content, recipients) => {    
+  try{
+    if(!process.env.EMAIL_SENDER || !process.env.EMAIL_PASSWORD){
+      return
+    }
+
+    var transporter = nodemailer.createTransport({
+      host: 'smtp.hornet.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_SENDER,
+        pass: process.env.EMAIL_PASSWORD
+      }
+    })
+          
+    var mailOptions = {
+      from: process.env.EMAIL_SENDER,
+      to: recipients.join(', '),
+      bcc: process.env.EMAIL_SENDER,
+      subject: subject,
+      html: content
+    }
+          
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.log('error: ', error)
+      } else {
+        console.log('Email sent: ' + info.response)
+      }
+    })
+
+    return
+  }
+  catch(error){
+    console.log('err: ', error)
+  }
+}
 
 const createPopUp = async(request, response) => {
   try{
     const {name, message} = request.body
-
     let errors = []
         
     if(!name)
@@ -56,6 +113,21 @@ const createPopUp = async(request, response) => {
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
 
+    const dealershipArray = await Admin.find({ role: name })
+
+    let emailAddresses = []
+
+    dealershipArray.forEach((element) => {
+      if (element.emailAddress) {
+        emailAddresses.push(element.emailAddress)
+      }
+      if (element.secondaryEmailAddress) {
+        emailAddresses.push(element.secondaryEmailAddress)
+      }
+    })
+
+    // await sendMail('Notificación HSA', mailCreateBody(message), emailAddresses)
+
     response.status(201).json({code: 201,
       msg: 'the popup message has been created successfully',
       data: newPopUp })
@@ -72,7 +144,6 @@ const updatePopUp = async(request, response) => {
 
     let errors = []
 
-    console.log('active: ', typeof active)
     if(active !== null && active !== undefined && typeof active !== 'boolean')
       errors.push({code: 400, 
         msg: 'invalid active field',
