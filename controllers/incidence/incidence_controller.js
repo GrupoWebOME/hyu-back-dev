@@ -585,7 +585,7 @@ const getAllIncidences = async(request, response) => {
           incidenceTypeName: incidence.incidenceType?.name,
           incidenceNumber: incidence.number,
           createdIncidenceDate: incidence.createdAt,
-          backgroundColor: differenceDays > 30? 'red' : incidence.status === 'Abierta' ? 'green' : 'transparent',
+          backgroundColor: (incidence.status === 'Cerrada' || incidence.status === 'Cancelada') ? 'blue' : differenceDays > 30? 'red' : incidence.status === 'Abierta' ? 'green' : 'transparent',
           providerName: incidence?.incidenceType?.provider?.name || null
         }
       })

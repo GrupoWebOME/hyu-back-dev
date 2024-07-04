@@ -636,7 +636,7 @@ const getAllOrders = async(request, response) => {
           installationName: order.installation.name,
           createdProductDate: order.createdAt,
           orderNumber: order.number,
-          backgroundColor: differenceDays > 30? 'red' : order.state === 'Abierto' ? 'green' : 'transparent'
+          backgroundColor: (order.state === 'Cerrada' || order.state === 'Cancelada') ? 'blue' : differenceDays > 30? 'red' : order.state === 'Abierto' ? 'green' : 'transparent'
         }
       })
 
