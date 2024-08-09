@@ -24,25 +24,28 @@ const plannedMailContent = (installation, audit) => { return `
     </div>
 `}
 
-const reviewMailContent = (installation, audit) => { return `
+const reviewMailContent = (installation) => { return `
     <p>
-        Estimado concesionario,
+      Estimado concesionario,
     </p> 
     <p>
-        Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación <b>${installation}</b> está finalizada por parte del
-        auditor y se encuentra en Pendiente revisar concesión. 
+      Paso a comunicarte que la auditoría Q1 2024 - Auditoría Completa del primer trimestre para la instalación <b>${installation}</b> se encuentra 
+      en Pendiente revisar concesión.
     </p> 
     <p>
-      Antes de publicar los resultados definitivos, queremos ofrecerte la posibilidad de revisar aquellos incumplimientos que consideres puedan ser susceptibles 
-      de emitir alegaciones para ser revisadas por HMES. En caso de que compruebes, que efectivamente, existe una justificación razonable para alegar un 
-      incumplimiento, podrás realizar la alegación incluyendo toda aquella información que consideréis necesaria, fotos y/o comentarios.
-    </p> 
-    <p>
-      <b>El plazo de alegaciones será hasta el día 18/06/2024 inclusive.</b>
+      Aquí volvéis a tener la posibilidad de revisar aquellos incumplimientos que consideres puedan ser susceptibles de haber sido auditado incorrectamente, 
+      emitir alegaciones o realizar plan de acción por tu parte. En caso de que compruebes, que efectivamente, existe una justificación razonable para alegar 
+      un incumplimiento o debas realizar un plan de acción, podrás realizarlo incluyendo toda aquella información que consideréis necesaria, fotos/ documentos 
+      Office y/o comentarios.
     </p>
     <p>
-      Esta información se encuentra accesible a través de la aplicación Hyundai Standards Application (HSA) en el apartado Auditorías/ Alegaciones. 
-      Para cualquier duda contactar con Elena Drandar: estandares-hyundai@redhyundai.com
+      <b>
+        El plazo de alegaciones/ plan de acción será desde el día 12/08/2024 hasta el día 15/09/2024  inclusive.
+      </b>
+    </p>
+    <p>
+        Esta información se encuentra accesible a través de la aplicación Hyundai Standards Application (HSA) en el 
+        apartado Auditorías/ Alegaciones. Para cualquier duda contactar con Elena Drandar: estandares-hyundai@redhyundai.com
     </p>
     <p>
       Recibe un cordial saludo,
