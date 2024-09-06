@@ -130,11 +130,12 @@ function nextCode(actualCode) {
 
 const createIncidence = async(request, response) => {
   try {
-    const { name, description, dealership, installation, photo, incidenceType } = request.body
+    const { name, description, dealership, installation, photo, incidenceType, isOrderIncidence } = request.body
     let errors = []
     let dealershipExist = null
     let installationExist = null
     let incidenceTypeExist = null
+    let isOrderInc = isOrderIncidence ? true : false
 
     if(!dealership){
       errors.push({code: 400, 
@@ -176,7 +177,7 @@ const createIncidence = async(request, response) => {
         })
     }
 
-    if (!photo || photo.length === 0) {
+    if (!photo || photo.length === 0 && !isOrderInc) {
       errors.push({code: 400, 
         msg: 'invalid photo',
         detail: 'photo incidence is required'
@@ -270,12 +271,12 @@ const createIncidence = async(request, response) => {
 const updateIncidence = async(request, response) => {
   try{
     const {id} = request.params
-    const { name, provider, description, photo, installation, dealership, status, incidenceType } = request.body
+    const { name, provider, description, photo, installation, dealership, status, incidenceType, isOrderIncidence } = request.body
     let dealershipExist = null
     let installationExist = null
     let incidenceTypeExist = null
     let existId = null
-
+    let isOrderInc = isOrderIncidence ? true : false
     let errors = []
 
     if(id && ObjectId.isValid(id)){
@@ -361,7 +362,7 @@ const updateIncidence = async(request, response) => {
       })
     }
 
-    if (photo && photo.length === 0) {
+    if (photo && photo.length === 0 && !isOrderInc) {
       errors.push({code: 400, 
         msg: 'invalid photo',
         detail: 'photo incidence is required'
