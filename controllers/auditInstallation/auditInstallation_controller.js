@@ -24,12 +24,12 @@ const plannedMailContent = (installation, audit) => { return `
     </div>
 `}
 
-const reviewMailContent = (installation) => { return `
+const reviewMailContent = (installation, audit) => { return `
     <p>
       Estimado concesionario,
     </p> 
     <p>
-      Paso a comunicarte que la auditoría Q3 2024 - Auditoría Imagen de este trimestre para la instalación <b>${installation}</b> está finalizada por parte del 
+      Paso a comunicarte que la auditoría ${audit} de este trimestre para la instalación <b>${installation}</b> está finalizada por parte del 
       auditor y se encuentra en Pendiente revisar concesión.
     </p> 
     <p>
