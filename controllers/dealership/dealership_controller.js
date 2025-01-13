@@ -1,4 +1,5 @@
 const Dealership = require('../../models/dealership_model')
+const DealershipType = require('../../models/dealership_type_model')
 const Installation = require('../../models/installation_schema')
 const Audit = require('../../models/audit_model')
 const ObjectId = require('mongodb').ObjectId
@@ -17,7 +18,7 @@ const getAllDealership= async(request, response) => {
     if(province)
       filter['province'] = { $regex : new RegExp(province, 'i') }
     if(page === 0){
-      const dealerships = await Dealership.find(filter)
+      const dealerships = await Dealership.find(filter).populate('type')
         .catch(error => {        
           return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
         })
@@ -36,7 +37,7 @@ const getAllDealership= async(request, response) => {
       return response.status(400).json({code: 400, 
         msg: 'invalid page', 
         detail: `totalPages: ${countPage}`})
-    const dealerships = await Dealership.find(filter).skip(skip).limit(10)
+    const dealerships = await Dealership.find(filter).populate('type').skip(skip).limit(10)
       .catch(error => {        
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
@@ -53,9 +54,26 @@ const getAllDealership= async(request, response) => {
 
 const createDealership = async(request, response) => {
   try{
-    const {name, cif, code, address, location, province, postal_code, autonomous_community, phone, email, name_surname_manager, previous_year_sales, referential_sales, 
-      post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income, dealer_ioniq5} = request.body
+    const { name, cif, code, address, location, province, postal_code, autonomous_community, phone, email, name_surname_manager, previous_year_sales, referential_sales, 
+      post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, 
+      post_sale_daily_income, dealer_ioniq5, type, standard_compliance_m2_main_exhibition, exclusive_independent_installation, supernova_fast_charger,
+      standards_result, facade_with_glass_windows, exclusive_service_reception, hmes_value } = request.body
     let errors = []
+    if (type && !ObjectId.isValid(type)) {
+      errors.push({code: 400, 
+        msg: 'invalid type',
+        detail: 'invalid type'
+      })
+    }
+    if (type && ObjectId.isValid(type)) {
+      const typeFinded = await DealershipType.findById(type)
+      if (!typeFinded) {
+        errors.push({code: 400, 
+          msg: 'invalid type',
+          detail: 'invalid type'
+        })
+      }
+    }
     if(!name || name.length < 1)
       errors.push({code: 400, 
         msg: 'invalid name',
@@ -187,7 +205,15 @@ const createDealership = async(request, response) => {
       electric_quaterly_billing, 
       ionic5_quaterly_billing, 
       post_sale_daily_income,
-      dealer_ioniq5: dealer_ioniq5? dealer_ioniq5: null
+      dealer_ioniq5: dealer_ioniq5? dealer_ioniq5: null,
+      type: type ? type : null, 
+      standard_compliance_m2_main_exhibition: standard_compliance_m2_main_exhibition ? standard_compliance_m2_main_exhibition : null, 
+      exclusive_independent_installation: exclusive_independent_installation ? exclusive_independent_installation : null, 
+      supernova_fast_charger: supernova_fast_charger ? supernova_fast_charger : null,
+      standards_result: standards_result ? standards_result: null, 
+      facade_with_glass_windows: facade_with_glass_windows ? facade_with_glass_windows : null, 
+      exclusive_service_reception: exclusive_service_reception ? exclusive_service_reception : null, 
+      hmes_value: hmes_value ? hmes_value : null
     })
     await newDealership.save()
       .catch(error => {        
@@ -204,11 +230,28 @@ const createDealership = async(request, response) => {
 
 const updateDealership = async(request, response) => {
   try{
-    const {name, cif, code, address, autonomous_community, location, province, postal_code, phone, email, name_surname_manager, previous_year_sales, referential_sales, active, 
-      post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, vn_quaterly_billing, electric_quaterly_billing, ionic5_quaterly_billing, post_sale_daily_income, dealer_ioniq5} = request.body
+    const {name, cif, code, address, autonomous_community, location, province, postal_code, phone, email, name_surname_manager, previous_year_sales, 
+      referential_sales, active, post_sale_spare_parts_previous_year, post_sale_referential_spare_parts, vn_quaterly_billing, electric_quaterly_billing, 
+      ionic5_quaterly_billing, post_sale_daily_income, dealer_ioniq5, type, standard_compliance_m2_main_exhibition, exclusive_independent_installation, 
+      supernova_fast_charger, standards_result, facade_with_glass_windows, exclusive_service_reception, hmes_value} = request.body
     const {id} = request.params
     let errors = []
     let dealerById = null
+    if (type && !ObjectId.isValid(type)) {
+      errors.push({code: 400, 
+        msg: 'invalid type',
+        detail: 'invalid type'
+      })
+    }
+    if (type && ObjectId.isValid(type)) {
+      const typeFinded = await DealershipType.findById(type)
+      if (!typeFinded) {
+        errors.push({code: 400, 
+          msg: 'invalid type',
+          detail: 'invalid type'
+        })
+      }
+    }
     if(id && ObjectId.isValid(id)){
       dealerById = await Dealership.findById(id)
         .catch(error => {return response.status(400).json({code: 500, 
@@ -396,6 +439,23 @@ const updateDealership = async(request, response) => {
       updatedFields['ionic5_quaterly_billing'] = ionic5_quaterly_billing
     if(post_sale_daily_income !== null && post_sale_daily_income !== undefined)
       updatedFields['post_sale_daily_income'] = post_sale_daily_income
+    if(type)
+      updatedFields['type'] = type
+    if(standard_compliance_m2_main_exhibition)
+      updatedFields['standard_compliance_m2_main_exhibition'] = standard_compliance_m2_main_exhibition
+    if(exclusive_independent_installation)
+      updatedFields['exclusive_independent_installation'] = exclusive_independent_installation
+    if(supernova_fast_charger)
+      updatedFields['supernova_fast_charger'] = supernova_fast_charger
+    if(standards_result)
+      updatedFields['standards_result'] = standards_result
+    if(facade_with_glass_windows)
+      updatedFields['facade_with_glass_windows'] = facade_with_glass_windows
+    if(exclusive_service_reception)
+      updatedFields['exclusive_service_reception'] = exclusive_service_reception
+    if(hmes_value)
+      updatedFields['hmes_value'] = hmes_value
+
     updatedFields['updatedAt'] = Date.now()
     const updatedDealership = await Dealership.findByIdAndUpdate(id, updatedFields, {new: true})
       .catch(error => {        
@@ -459,7 +519,7 @@ const getDealership = async(request, response) => {
       return response.status(400).json({code: 400,
         msg: 'invalid id',
         detail: 'id should be an objectId'})
-    const block = await Dealership.findById(id)
+    const block = await Dealership.findById(id).populate('type')
       .catch(error => {        
         return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
       })
