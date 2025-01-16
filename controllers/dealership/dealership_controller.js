@@ -207,13 +207,13 @@ const createDealership = async(request, response) => {
       post_sale_daily_income,
       dealer_ioniq5: dealer_ioniq5? dealer_ioniq5: null,
       type: type ? type : null, 
-      standard_compliance_m2_main_exhibition: standard_compliance_m2_main_exhibition ? standard_compliance_m2_main_exhibition : null, 
-      exclusive_independent_installation: exclusive_independent_installation ? exclusive_independent_installation : null, 
-      supernova_fast_charger: supernova_fast_charger ? supernova_fast_charger : null,
-      standards_result: standards_result ? standards_result: null, 
-      facade_with_glass_windows: facade_with_glass_windows ? facade_with_glass_windows : null, 
-      exclusive_service_reception: exclusive_service_reception ? exclusive_service_reception : null, 
-      hmes_value: hmes_value ? hmes_value : null
+      standard_compliance_m2_main_exhibition: standard_compliance_m2_main_exhibition ? standard_compliance_m2_main_exhibition : 0, 
+      exclusive_independent_installation: exclusive_independent_installation ? exclusive_independent_installation : 0, 
+      supernova_fast_charger: supernova_fast_charger ? supernova_fast_charger : 0,
+      standards_result: standards_result ? standards_result: 0, 
+      facade_with_glass_windows: facade_with_glass_windows ? facade_with_glass_windows : 0, 
+      exclusive_service_reception: exclusive_service_reception ? exclusive_service_reception : 0, 
+      hmes_value: hmes_value ? hmes_value : 0
     })
     await newDealership.save()
       .catch(error => {        
@@ -441,20 +441,43 @@ const updateDealership = async(request, response) => {
       updatedFields['post_sale_daily_income'] = post_sale_daily_income
     if(type)
       updatedFields['type'] = type
-    if(standard_compliance_m2_main_exhibition)
+    if(standard_compliance_m2_main_exhibition){
       updatedFields['standard_compliance_m2_main_exhibition'] = standard_compliance_m2_main_exhibition
-    if(exclusive_independent_installation)
+    } else {
+      updatedFields['standard_compliance_m2_main_exhibition'] = 0
+    }
+    if(exclusive_independent_installation){
       updatedFields['exclusive_independent_installation'] = exclusive_independent_installation
-    if(supernova_fast_charger)
+    } else {
+      updatedFields['exclusive_independent_installation'] = 0
+    }
+    if(supernova_fast_charger){
       updatedFields['supernova_fast_charger'] = supernova_fast_charger
-    if(standards_result)
+    }
+    else {
+      updatedFields['supernova_fast_charger'] = 0
+    }
+    if(standards_result){
       updatedFields['standards_result'] = standards_result
-    if(facade_with_glass_windows)
+    }
+    else {
+      updatedFields['standards_result'] = 0
+    }
+    if(facade_with_glass_windows){
       updatedFields['facade_with_glass_windows'] = facade_with_glass_windows
-    if(exclusive_service_reception)
+    } else {
+      updatedFields['facade_with_glass_windows'] = 0
+    }
+    if(exclusive_service_reception){
       updatedFields['exclusive_service_reception'] = exclusive_service_reception
-    if(hmes_value)
+    } else {
+      updatedFields['exclusive_service_reception'] = 0
+    }
+    if(hmes_value){
       updatedFields['hmes_value'] = hmes_value
+    } else {
+      updatedFields['hmes_value'] = 0
+    }
 
     updatedFields['updatedAt'] = Date.now()
     const updatedDealership = await Dealership.findByIdAndUpdate(id, updatedFields, {new: true})
