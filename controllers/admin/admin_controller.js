@@ -9,7 +9,6 @@ const createAdmin = async(request, response) => {
   try{
     const {names, surnames, emailAddress, userName, password, role, dealership, secondaryEmailAddress} = request.body
     const adminRole = request.jwt.admin.role
-
     let errors = []
     
     const regExPatternEmailAddress= /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
@@ -115,7 +114,7 @@ const createAdmin = async(request, response) => {
       dealership: dealership? dealership: null,
       secondaryEmailAddress: secondaryEmailAddress ? secondaryEmailAddress : null
     })
-    
+
     /*
       const token = jwt.sign(
         {admin},
@@ -127,7 +126,7 @@ const createAdmin = async(request, response) => {
     */
     
     await admin.save()
-        
+    console.log('llega')
     response.status(201).json({code: 201,
       msg: 'the administrator has been created successfully',
       data: admin })

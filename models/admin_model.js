@@ -17,7 +17,6 @@ const adminSchema = new Schema({
     required: true},
   secondaryEmailAddress: {
     type: String, 
-    unique: true,
     lowercase: true, 
     trim: true,
     required: false},
