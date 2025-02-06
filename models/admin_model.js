@@ -20,7 +20,7 @@ const adminSchema = new Schema({
     unique: true,
     lowercase: true, 
     trim: true,
-    required: true},
+    required: false},
   userName: {type: String, 
     lowercase: true, 
     unique: true,
