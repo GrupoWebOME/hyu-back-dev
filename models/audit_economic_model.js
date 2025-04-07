@@ -26,6 +26,7 @@ const auditEconomicSchema = new Schema({
   percentageTotal: {type: Number, default: 0},
   percentageElectric: {type: Number, default: 0},
   importeRetenidoAnteriores : {type: Number, default: 0},
+  coef_mult_dealership: {type: Number, default: 1},
   createdAt: {type: Date,
     default: Date.now},
   updatedAt: {type: Date,

@@ -114,9 +114,8 @@ const updateAuditEconomic = async(request, response) => {
     let { electric_quaterly_billing, ionic5_quaterly_billing, vn_quaterly_billing, aCobrarVN, perdidoVN, retenidoVN,
       aCobrarVE, perdidoVE, retenidoVE, variableVNaCobrar, variableVNperdido, variableVNretenido, variableElectricoACobrar, variableElectricoPerdido,
       variableElectricoRetenido, variableIonic5Acobrar, smartDealerPolicy, variableTotalAcobrar, aCobrarIoniq5, percentageTotal, percentageElectric, 
-      importeRetenidoAnteriores } = request.body
+      importeRetenidoAnteriores, coef_mult_dealership } = request.body
     const {id} = request.params
-
     let auditEconomicById = null
     if(id && ObjectId.isValid(id)){
       auditEconomicById = await AuditEconomic.findById(id)
@@ -139,6 +138,8 @@ const updateAuditEconomic = async(request, response) => {
 
     let updatedFields = {}
 
+    if(coef_mult_dealership !== null && coef_mult_dealership !== undefined)
+      updatedFields['coef_mult_dealership'] = coef_mult_dealership
     if(electric_quaterly_billing !== null && electric_quaterly_billing !== undefined)
       updatedFields['electric_quaterly_billing'] = electric_quaterly_billing
     if(ionic5_quaterly_billing !== null && ionic5_quaterly_billing !== undefined)
