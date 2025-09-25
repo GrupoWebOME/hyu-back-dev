@@ -36,7 +36,7 @@ const reviewMailContent = (installation, audit) => { return `
     </p>
     <p>
       <b>
-        El plazo de alegaciones será hasta el día 30/06/2025 inclusive.
+        El plazo de alegaciones será hasta el día 03/10/2025 inclusive.
       </b>
     </p>
     <p>
