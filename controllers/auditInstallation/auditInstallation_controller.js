@@ -29,7 +29,7 @@ const reviewMailContent = (installation, audit) => { return `
       Estimado concesionario,
     </p> 
     <p>
-      Paso a comunicarte que la auditoría ${audit} - Auditoría Completa de este trimestre para la instalación <b>${installation}</b> está finalizada por parte del auditor y se encuentra en Pendiente revisar concesión.
+      Paso a comunicarte que la auditoría ${audit} - de este trimestre para la instalación <b>${installation}</b> está finalizada por parte del auditor y se encuentra en Pendiente revisar concesión.
     </p> 
     <p>
     Antes de publicar los resultados definitivos, queremos ofrecerte la posibilidad de revisar aquellos incumplimientos que consideres puedan ser susceptibles de emitir alegaciones para ser revisadas por HMES. En caso de que compruebes, que efectivamente, existe una justificación razonable para alegar un incumplimiento, podrás realizar la alegación incluyendo toda aquella información que consideréis necesaria, fotos y/o comentarios.
