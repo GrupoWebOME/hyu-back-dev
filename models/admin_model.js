@@ -2,34 +2,52 @@ const {Schema, model} = require('mongoose')
 const uniqueValidator = require('mongoose-unique-validator')
 
 const adminSchema = new Schema({
-  names: {type: String,
+  names: {
+    type: String,
     lowercase: true, 
-    required: true,
-    trim: true },
-  surnames: {type: String,
+    required: false,
+    trim: true,
+    select: false
+  },
+  surnames: {
+    type: String,
     lowercase: true, 
     trim: true,
-    required: true},
-  emailAddress: {type: String, 
-    unique: true,
+    required: false,
+    select: false
+  },
+  emailAddress: {
+    type: String, 
+    unique: false,
     lowercase: true, 
     trim: true,
-    required: true},
+    required: false,
+    select: false
+  },
   secondaryEmailAddress: {
     type: String, 
     lowercase: true, 
     trim: true,
-    required: false},
-  userName: {type: String, 
+    required: false,
+    select: false
+  },
+  userName: {
+    type: String, 
     lowercase: true, 
     unique: true,
     trim: true,
-    required: true},
-  password: {type: String, 
-    trim: true},
-  role: {type: String,
+    required: true
+  },
+  password: {
+    type: String, 
+    trim: true,
+    select: false
+  },
+  role: {
+    type: String,
     required: true,
-    trim: true},
+    trim: true
+  },
   audits: [
     {
       audit: {type: Schema.Types.ObjectId, ref: 'InstallationType', default: null},
