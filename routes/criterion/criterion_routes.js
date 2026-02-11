@@ -1,6 +1,7 @@
 const express = require('express')
 const api = express.Router()
 const Criterion = require('../../controllers/criterion/criterion_controller')
+const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
 
 /**
  * @swagger
@@ -152,13 +153,13 @@ const Criterion = require('../../controllers/criterion/criterion_controller')
   *   description: Rutas de Criterios
   */
 
-api.post('/all', Criterion.getAllCriterion)
+api.post('/all', authenticationAdminMain.validate, Criterion.getAllCriterion)
 
-api.post('/filter', Criterion.filtersCriterions)
+api.post('/filter', authenticationAdminMain.validate, Criterion.filtersCriterions)
 
-api.post('/calculates', Criterion.calculates)
+api.post('/calculates', authenticationAdminMain.validate, Criterion.calculates)
 
-api.post('/filterByAudit', Criterion.filtersAuditCriterions)
+api.post('/filterByAudit', authenticationAdminMain.validate, Criterion.filtersAuditCriterions)
 
 /**
  * @swagger
@@ -344,7 +345,7 @@ api.post('/filterByAudit', Criterion.filtersAuditCriterions)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', Criterion.createCriterion)
+api.post('/', authenticationAdminMain.validate, Criterion.createCriterion)
 
 /**
  * @swagger
@@ -514,7 +515,7 @@ api.post('/', Criterion.createCriterion)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', Criterion.getCriterion)
+api.get('/:id', authenticationAdminMain.validate, Criterion.getCriterion)
 
 /**
  * @swagger
@@ -599,7 +600,7 @@ api.get('/:id', Criterion.getCriterion)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', Criterion.updateCriterion)
+api.put('/:id', authenticationAdminMain.validate, Criterion.updateCriterion)
 
 /**
  * @swagger
@@ -766,7 +767,7 @@ api.put('/:id', Criterion.updateCriterion)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', Criterion.deleteCriterion)
+api.delete('/:id', authenticationAdminMain.validate, Criterion.deleteCriterion)
 
 /**
  * @swagger

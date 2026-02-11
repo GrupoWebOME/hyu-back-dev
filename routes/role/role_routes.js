@@ -1,6 +1,7 @@
 const express = require('express')
 const api = express.Router()
 const Role = require('../../controllers/role/role_controller')
+const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
 
 /**
  * @swagger
@@ -57,7 +58,7 @@ const Role = require('../../controllers/role/role_controller')
   *   description: Rutas de Roles
   */
 
-api.post('/all', Role.getAllRoles)
+api.post('/all', authenticationAdminMain.validate, Role.getAllRoles)
 
 /**
  * @swagger
@@ -164,7 +165,7 @@ api.post('/all', Role.getAllRoles)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', Role.createRole)
+api.post('/', authenticationAdminMain.validate, Role.createRole)
 
 /**
  * @swagger
@@ -273,7 +274,7 @@ api.post('/', Role.createRole)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', Role.updateRole)
+api.put('/:id', authenticationAdminMain.validate, Role.updateRole)
 
 /**
  * @swagger
@@ -383,7 +384,7 @@ api.put('/:id', Role.updateRole)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', Role.getRole)
+api.get('/:id', authenticationAdminMain.validate, Role.getRole)
 
 /**
  * @swagger
@@ -468,7 +469,7 @@ api.get('/:id', Role.getRole)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', Role.deleteRole)
+api.delete('/:id', authenticationAdminMain.validate, Role.deleteRole)
 
 /**
  * @swagger

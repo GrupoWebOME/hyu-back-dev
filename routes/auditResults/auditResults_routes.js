@@ -1,6 +1,7 @@
 const express = require('express')
 const api = express.Router()
 const AuditResults = require('../../controllers/auditResults/auditResults_controller')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -59,8 +60,8 @@ const AuditResults = require('../../controllers/auditResults/auditResults_contro
   *   description: Rutas de Resultados de Auditorias
   */
 
-api.post('/', AuditResults.createAuditResults)
-api.post('/createTest', AuditResults.createAuditResultsTest)
+api.post('/', authenticationAdmin.validate, AuditResults.createAuditResults)
+api.post('/createTest', authenticationAdmin.validate, AuditResults.createAuditResultsTest)
 
 /**
  * @swagger
@@ -175,7 +176,7 @@ api.post('/createTest', AuditResults.createAuditResultsTest)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', AuditResults.updateAuditResults)
+api.put('/:id', authenticationAdmin.validate, AuditResults.updateAuditResults)
 
 /**
  * @swagger
@@ -296,7 +297,7 @@ api.put('/:id', AuditResults.updateAuditResults)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', AuditResults.deleteAuditResults)
+api.delete('/:id', authenticationAdmin.validate, AuditResults.deleteAuditResults)
 
 /**
  * @swagger
@@ -381,21 +382,21 @@ api.delete('/:id', AuditResults.deleteAuditResults)
  *                                  example: something went wrong on the server
  */
 
-api.post('/tables', AuditResults.getDataForTables)
-api.post('/tables2', AuditResults.tablesTest)
+api.post('/tables', authenticationAdmin.validate, AuditResults.getDataForTables)
+api.post('/tables2', authenticationAdmin.validate, AuditResults.tablesTest)
 
-api.put('/updatetest/:id', AuditResults.updateTest)
+api.put('/updatetest/:id', authenticationAdmin.validate, AuditResults.updateTest)
 
-api.post('/tables/audit/:audit_id', AuditResults.getDataForAudit)
+api.post('/tables/audit/:audit_id', authenticationAdmin.validate, AuditResults.getDataForAudit)
 
-api.get('/tables/audit/:audit_id/details', AuditResults.getDataForFullAudit)
+api.get('/tables/audit/:audit_id/details', authenticationAdmin.validate, AuditResults.getDataForFullAudit)
 
-api.get('/tables/audit/:audit_id/details2', AuditResults.getDataForFullAuditTest)
+api.get('/tables/audit/:audit_id/details2', authenticationAdmin.validate, AuditResults.getDataForFullAuditTest)
 
-api.get('/tables/audit/:audit_id/inst_details', AuditResults.getDataInstForAudit)
+api.get('/tables/audit/:audit_id/inst_details', authenticationAdmin.validate, AuditResults.getDataInstForAudit)
 
-api.get('/audit/:auditid/installation/:installationid', AuditResults.getAuditResByAuditIDAndInstallationID)
+api.get('/audit/:auditid/installation/:installationid', authenticationAdmin.validate, AuditResults.getAuditResByAuditIDAndInstallationID)
 
-api.get('/audit/:auditid', AuditResults.getAuditResByAuditID)
+api.get('/audit/:auditid', authenticationAdmin.validate, AuditResults.getAuditResByAuditID)
 
 module.exports = api

@@ -1,6 +1,7 @@
 const express = require('express')
 const api = express.Router()
 const InstallationType = require('../../controllers/installationType/installationType_controller')
+const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
 
 /**
  * @swagger
@@ -57,7 +58,7 @@ const InstallationType = require('../../controllers/installationType/installatio
   *   description: Rutas de Tipos de tipos de instalación
   */
 
-api.post('/all', InstallationType.getAllInstallationType)
+api.post('/all', authenticationAdminMain.validate, InstallationType.getAllInstallationType)
 
 /**
  * @swagger
@@ -160,7 +161,7 @@ api.post('/all', InstallationType.getAllInstallationType)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', InstallationType.createInstallationType)
+api.post('/', authenticationAdminMain.validate, InstallationType.createInstallationType)
 
 /**
  * @swagger
@@ -256,7 +257,7 @@ api.post('/', InstallationType.createInstallationType)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', InstallationType.getInstallationType)
+api.get('/:id', authenticationAdminMain.validate, InstallationType.getInstallationType)
 
 /**
  * @swagger
@@ -341,7 +342,7 @@ api.get('/:id', InstallationType.getInstallationType)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', InstallationType.updateInstallationType)
+api.put('/:id', authenticationAdminMain.validate, InstallationType.updateInstallationType)
 
 /**
  * @swagger
@@ -445,7 +446,7 @@ api.put('/:id', InstallationType.updateInstallationType)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', InstallationType.deleteInstallationType)
+api.delete('/:id', authenticationAdminMain.validate, InstallationType.deleteInstallationType)
 
 /**
  * @swagger

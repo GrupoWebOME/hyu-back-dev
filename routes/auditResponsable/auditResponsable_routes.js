@@ -1,6 +1,7 @@
 const express = require('express')
 const api = express.Router()
 const AuditResponsable = require('../../controllers/auditResponsable/auditResponsable_controller')
+const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
 
 /**
  * @swagger
@@ -52,7 +53,7 @@ const AuditResponsable = require('../../controllers/auditResponsable/auditRespon
   *   description: Rutas de Responsables de audiciones
   */
 
-api.post('/all', AuditResponsable.getAllAuditResponsable)
+api.post('/all', authenticationAdminMain.validate, AuditResponsable.getAllAuditResponsable)
 
 /**
  * @swagger
@@ -155,7 +156,7 @@ api.post('/all', AuditResponsable.getAllAuditResponsable)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', AuditResponsable.createAuditResponsable)
+api.post('/', authenticationAdminMain.validate, AuditResponsable.createAuditResponsable)
 
 /**
  * @swagger
@@ -247,7 +248,7 @@ api.post('/', AuditResponsable.createAuditResponsable)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', AuditResponsable.getAuditResponsable)
+api.get('/:id', authenticationAdminMain.validate, AuditResponsable.getAuditResponsable)
 
 /**
  * @swagger
@@ -332,7 +333,7 @@ api.get('/:id', AuditResponsable.getAuditResponsable)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', AuditResponsable.updateAuditResponsable)
+api.put('/:id', authenticationAdminMain.validate, AuditResponsable.updateAuditResponsable)
 
 /**
  * @swagger
@@ -432,7 +433,7 @@ api.put('/:id', AuditResponsable.updateAuditResponsable)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', AuditResponsable.deleteAuditResponsable)
+api.delete('/:id', authenticationAdminMain.validate, AuditResponsable.deleteAuditResponsable)
 
 /**
  * @swagger

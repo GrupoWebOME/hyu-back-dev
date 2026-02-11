@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken')
 
 const getAllDealership= async(request, response) => {
   try{
+    const authHeader = request.headers['authorization']
+    console.log('authHeader: ', authHeader)
     const {name, address, province, pageReq} = request.body
     const page = !pageReq ? 0 : pageReq
     let skip = (page - 1) * 10

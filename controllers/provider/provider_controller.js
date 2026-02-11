@@ -1,5 +1,5 @@
 const Provider = require('../../models/provider_model')
-const { regExPatternEmailAddress } = require('../../utils/constants/regex')
+// const { regExPatternEmailAddress } = require('../../utils/constants/regex')
 const ObjectId = require('mongodb').ObjectId
 const Product = require('../../models/product_model')
 
@@ -8,6 +8,7 @@ const createProvider = async(request, response) => {
     const { name, description, nameP1, nameP2, emailP1, emailP2, phone, withNotifications } = request.body
     let errors = []
 
+    /*
     if(!emailP1 || !emailP1.match(regExPatternEmailAddress))
       errors.push({code: 400, 
         msg: 'invalid email',
@@ -19,7 +20,7 @@ const createProvider = async(request, response) => {
         msg: 'invalid email',
         detail: `${emailP2} is not valid email format. The email field can only contain a valid email P2`
       })
-
+      */
     if (!name) {
       errors.push({code: 400, 
         msg: 'invalid name',
@@ -34,14 +35,14 @@ const createProvider = async(request, response) => {
         })
       }
     }
-
+    /*
     if (!nameP1) {
       errors.push({code: 400, 
         msg: 'invalid nameP1',
         detail: 'nameP1 is a required field'
       })
     }
-
+    */
     if(errors.length > 0)
       return response.status(400).json({errors: errors})
 
@@ -87,7 +88,7 @@ const updateProvider = async(request, response) => {
           detail: `${name} is in use`
         })
     }
-
+    /*
     if(emailP1 && !emailP1.match(regExPatternEmailAddress))
       errors.push({code: 400, 
         msg: 'invalid email',
@@ -99,7 +100,7 @@ const updateProvider = async(request, response) => {
         msg: 'invalid email',
         detail: `${emailP2} is not valid email format. The email field can only contain a valid email`
       })
-        
+        */
     if(id && ObjectId.isValid(id)){
       const existId = await Provider.findById(id)
         .catch(error => {return response.status(400).json({code: 500, 

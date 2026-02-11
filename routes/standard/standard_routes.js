@@ -1,6 +1,7 @@
 const express = require('express')
 const api = express.Router()
 const Standard = require('../../controllers/standard/standard_controller')
+const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
 
 /**
  * @swagger
@@ -97,7 +98,7 @@ const Standard = require('../../controllers/standard/standard_controller')
   *   description: Rutas de Standard
   */
 
-api.post('/all', Standard.getAllStandard)
+api.post('/all', authenticationAdminMain.validate, Standard.getAllStandard)
 
 /**
  * @swagger
@@ -216,7 +217,7 @@ api.post('/all', Standard.getAllStandard)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', Standard.createStandard)
+api.post('/', authenticationAdminMain.validate, Standard.createStandard)
 
 /**
  * @swagger
@@ -335,7 +336,7 @@ api.post('/', Standard.createStandard)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', Standard.getStandard)
+api.get('/:id', authenticationAdminMain.validate, Standard.getStandard)
 
 /**
  * @swagger
@@ -420,7 +421,7 @@ api.get('/:id', Standard.getStandard)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', Standard.updateStandard)
+api.put('/:id', authenticationAdminMain.validate, Standard.updateStandard)
 
 /**
  * @swagger
@@ -543,7 +544,7 @@ api.put('/:id', Standard.updateStandard)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', Standard.deleteStandard)
+api.delete('/:id', authenticationAdminMain.validate, Standard.deleteStandard)
 
 /**
  * @swagger

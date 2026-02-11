@@ -13,25 +13,30 @@ const providerSchema = new Schema({
   },
   phone: {
     type: String,
-    default: null
+    default: null,
+    select: false
   },
   nameP1: {
     type: String, 
-    required: true
+    required: false,
+    select: false
   },
   emailP1: {
     type: String,
-    required: true,
-    lowercase: true    
+    required: false,
+    lowercase: true    ,
+    select: false
   },
   nameP2: {
     type: String, 
-    required: false
+    required: false,
+    select: false
   },
   emailP2: {
     type: String,
     required: false,
-    lowercase: true    
+    lowercase: true    ,
+    select: false
   },
   withNotifications: {
     type: Boolean,

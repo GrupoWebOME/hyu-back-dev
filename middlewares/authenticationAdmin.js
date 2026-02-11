@@ -1,39 +1,36 @@
 const jwt = require('jsonwebtoken')
 
-const validate = async(request, response, next) => {
-
-  const {authorization} = request.headers
-
-  if(!authorization)
-    return response.status(401).json({code: 401,
-      msg: 'invalid credentials',
-      detail: 'you do not have permissions'})
-
-  let decodedToken = null
-
-  let token = null
-  
-  if (authorization && authorization.toLowerCase().startsWith('bearer')) {
-    token = authorization.substring(7)
-  }
-
-  await jwt.verify(token, process.env.SECRET, function(err, decoded) {
-    if(err){
-      decodedToken = false
-    }
-    else{
-      decodedToken = decoded
-    }
+const unauthorized = (res) =>
+  res.status(401).json({
+    code: 401,
+    msg: 'invalid credentials',
+    detail: 'you do not have permissions',
   })
 
-  if(decodedToken === false)
-    return response.status(401).json({code: 401,
-      msg: 'invalid credentials',
-      detail: 'you do not have permissions'})
-    
-  request.jwt = decodedToken
-
-  next()
+const stripBearer = (value) => {
+  if (!value) return null
+  const s = String(value).trim()
+  return s.toLowerCase().startsWith('bearer ') ? s.slice(7).trim() : s
 }
 
-module.exports = {validate}
+const validate = (req, res, next) => {
+  try {
+    // 1) token por header
+    const headerToken = stripBearer(req.headers.authorization)
+
+    // 2) token por cookie (OJO: en tu caso viene con "Bearer ")
+    const cookieToken = stripBearer(req.cookies?.token)
+
+    const token = headerToken || cookieToken
+    if (!token) return unauthorized(res)
+
+    const decoded = jwt.verify(token, process.env.SECRET)
+
+    req.jwt = decoded
+    return next()
+  } catch (e) {
+    return unauthorized(res)
+  }
+}
+
+module.exports = { validate }

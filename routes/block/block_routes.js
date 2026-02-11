@@ -1,6 +1,7 @@
 const express = require('express')
 const api = express.Router()
 const Block = require('../../controllers/block/block_controller')
+const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
 
 /**
  * @swagger
@@ -68,7 +69,7 @@ const Block = require('../../controllers/block/block_controller')
   *   description: Rutas de Categorías
   */
 
-api.post('/all', Block.getAllBlock)
+api.post('/all', authenticationAdminMain.validate, Block.getAllBlock)
 
 /**
  * @swagger
@@ -175,7 +176,7 @@ api.post('/all', Block.getAllBlock)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', Block.createBlock)
+api.post('/', authenticationAdminMain.validate, Block.createBlock)
 
 /**
  * @swagger
@@ -280,7 +281,7 @@ api.post('/', Block.createBlock)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', Block.getBlock)
+api.get('/:id', authenticationAdminMain.validate, Block.getBlock)
 
 /**
  * @swagger
@@ -365,7 +366,7 @@ api.get('/:id', Block.getBlock)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', Block.updateBlock)
+api.put('/:id', authenticationAdminMain.validate, Block.updateBlock)
 
 /**
  * @swagger
@@ -465,7 +466,7 @@ api.put('/:id', Block.updateBlock)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', Block.deleteBlock)
+api.delete('/:id', authenticationAdminMain.validate, Block.deleteBlock)
 
 /**
  * @swagger
