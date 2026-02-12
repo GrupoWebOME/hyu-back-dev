@@ -128,21 +128,23 @@ const createDealership = async(request, response) => {
         msg: 'invalid postal_code',
         detail: 'postal_code is required'
       })
+      /*
     if(!phone || phone.length < 1)
       errors.push({code: 400, 
         msg: 'invalid phone',
         detail: 'phone is required'
-      })
+      })*/
     if(!email || email.length < 1)
       errors.push({code: 400, 
         msg: 'invalid email',
         detail: 'email is required'
       })
+      /*
     if(!name_surname_manager || name_surname_manager.length < 1)
       errors.push({code: 400, 
         msg: 'invalid name_surname_manager',
         detail: 'name_surname_manager is required'
-      })
+      })*/
     if(previous_year_sales && typeof previous_year_sales !== 'number')
       errors.push({code: 400, 
         msg: 'invalid previous_year_sales',
@@ -326,22 +328,24 @@ const updateDealership = async(request, response) => {
         msg: 'invalid postal_code',
         detail: 'postal_code is required'
       })
+      /*
     if(phone && phone.length < 1)
       errors.push({code: 400, 
         msg: 'invalid phone',
         detail: 'phone is required'
-      })
+      })*/
     if(email && email.length < 1)
       errors.push({code: 400, 
         msg: 'invalid email',
         detail: 'email is required'
       })
+      /*
     if(name_surname_manager && name_surname_manager.length < 1)
       errors.push({code: 400, 
         msg: 'invalid name_surname_manager',
         detail: 'name_surname_manager is required'
       })
-                        
+                        */
     if(previous_year_sales && typeof previous_year_sales !== 'number')
       errors.push({code: 400, 
         msg: 'invalid previous_year_sales',
