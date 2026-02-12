@@ -1,7 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const CriterionType = require('../../controllers/criterionType/criterionType_controller')
-const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -60,7 +61,7 @@ const authenticationAdminMain = require('../../middlewares/authenticationAdminMa
   *   description: Rutas de Tipos de criterios
   */
 
-api.post('/all', authenticationAdminMain.validate, CriterionType.getAllCriterionType)
+api.post('/all', authenticationAdmin.validate, CriterionType.getAllCriterionType)
 
 /**
  * @swagger
@@ -163,7 +164,7 @@ api.post('/all', authenticationAdminMain.validate, CriterionType.getAllCriterion
  *                                  example: something went wrong on the server
  */
 
-api.post('/', authenticationAdminMain.validate, CriterionType.createCriterionType)
+api.post('/', authenticationAdmin.validate, CriterionType.createCriterionType)
 
 /**
  * @swagger
@@ -255,7 +256,7 @@ api.post('/', authenticationAdminMain.validate, CriterionType.createCriterionTyp
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', authenticationAdminMain.validate, CriterionType.getCriterionType)
+api.get('/:id', authenticationAdmin.validate, CriterionType.getCriterionType)
 
 /**
  * @swagger
@@ -340,7 +341,7 @@ api.get('/:id', authenticationAdminMain.validate, CriterionType.getCriterionType
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', authenticationAdminMain.validate, CriterionType.updateCriterionType)
+api.put('/:id', authenticationAdmin.validate, CriterionType.updateCriterionType)
 
 /**
  * @swagger
@@ -440,7 +441,7 @@ api.put('/:id', authenticationAdminMain.validate, CriterionType.updateCriterionT
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', authenticationAdminMain.validate, CriterionType.deleteCriterionType)
+api.delete('/:id', authenticationAdmin.validate, CriterionType.deleteCriterionType)
 
 /**
  * @swagger

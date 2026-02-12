@@ -25,7 +25,7 @@ const validate = async(request, response, next) => {
     }
   })
 
-  if(decodedToken === false)
+  if(decodedToken === false || (decodedToken?.admin?.role !== 'main' && decodedToken?.admin?.role !== 'admin'))
     return response.status(401).json({code: 401,
       msg: 'invalid credentials',
       detail: 'you do not have permissions'})

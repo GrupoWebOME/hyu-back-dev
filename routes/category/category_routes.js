@@ -1,7 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const Category = require('../../controllers/category/category_controller')
-const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -63,7 +64,7 @@ const authenticationAdminMain = require('../../middlewares/authenticationAdminMa
   *   description: Rutas de Categorías
   */
 
-api.post('/all', authenticationAdminMain.validate, Category.getAllCategories)
+api.post('/all', authenticationAdmin.validate, Category.getAllCategories)
 
 /**
  * @swagger
@@ -187,7 +188,7 @@ api.post('/all', authenticationAdminMain.validate, Category.getAllCategories)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', authenticationAdminMain.validate, Category.createCategory)
+api.post('/', authenticationAdmin.validate, Category.createCategory)
 
 /**
  * @swagger
@@ -287,7 +288,7 @@ api.post('/', authenticationAdminMain.validate, Category.createCategory)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', authenticationAdminMain.validate, Category.getCategory)
+api.get('/:id', authenticationAdmin.validate, Category.getCategory)
 
 /**
  * @swagger
@@ -372,7 +373,7 @@ api.get('/:id', authenticationAdminMain.validate, Category.getCategory)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', authenticationAdminMain.validate, Category.updateCategory)
+api.put('/:id', authenticationAdmin.validate, Category.updateCategory)
 
 /**
  * @swagger
@@ -472,7 +473,7 @@ api.put('/:id', authenticationAdminMain.validate, Category.updateCategory)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', authenticationAdminMain.validate, Category.deleteCategory)
+api.delete('/:id', authenticationAdmin.validate, Category.deleteCategory)
 
 /**
  * @swagger

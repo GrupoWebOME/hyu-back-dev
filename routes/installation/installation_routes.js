@@ -1,7 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const Installation = require('../../controllers/installation/installation_controller')
-const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -131,7 +132,7 @@ const authenticationAdminMain = require('../../middlewares/authenticationAdminMa
   *   description: Rutas de Installation
   */
 
-api.post('/all', authenticationAdminMain.validate, authenticationAdminMain.validate, Installation.getAllInstallation)
+api.post('/all', authenticationAdmin.validate, Installation.getAllInstallation)
 
 /**
  * @swagger
@@ -258,7 +259,7 @@ api.post('/all', authenticationAdminMain.validate, authenticationAdminMain.valid
  *                                  example: something went wrong on the server
  */
 
-api.post('/', authenticationAdminMain.validate, Installation.createInstallation)
+api.post('/', authenticationAdmin.validate, Installation.createInstallation)
 
 /**
  * @swagger
@@ -415,7 +416,7 @@ api.post('/', authenticationAdminMain.validate, Installation.createInstallation)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', authenticationAdminMain.validate, Installation.getInstallation)
+api.get('/:id', authenticationAdmin.validate, Installation.getInstallation)
 
 /**
  * @swagger
@@ -500,7 +501,7 @@ api.get('/:id', authenticationAdminMain.validate, Installation.getInstallation)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', authenticationAdminMain.validate, Installation.updateInstallation)
+api.put('/:id', authenticationAdmin.validate, Installation.updateInstallation)
 
 /**
  * @swagger
@@ -665,7 +666,7 @@ api.put('/:id', authenticationAdminMain.validate, Installation.updateInstallatio
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', authenticationAdminMain.validate, Installation.deleteInstallation)
+api.delete('/:id', authenticationAdmin.validate, Installation.deleteInstallation)
 
 /**
  * @swagger

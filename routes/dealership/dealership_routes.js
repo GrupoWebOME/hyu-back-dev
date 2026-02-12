@@ -1,9 +1,10 @@
 const express = require('express')
 const api = express.Router()
 const Dealership = require('../../controllers/dealership/dealership_controller')
-const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
-api.get('/dealershipWithInstallations', authenticationAdminMain.validate, Dealership.geatAllDealershipWithInstallations)
+api.get('/dealershipWithInstallations', authenticationAdmin.validate, Dealership.geatAllDealershipWithInstallations)
 
 /**
  * @swagger
@@ -224,7 +225,7 @@ api.get('/:id', Dealership.getDealership)
  *                                  example: something went wrong on the server
  */
 
-api.post('/all', authenticationAdminMain.validate, Dealership.getAllDealership)
+api.post('/all', authenticationAdmin.validate, Dealership.getAllDealership)
 
 /**
  * @swagger
@@ -331,7 +332,7 @@ api.post('/all', authenticationAdminMain.validate, Dealership.getAllDealership)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', authenticationAdminMain.validate, Dealership.createDealership)
+api.post('/', authenticationAdmin.validate, Dealership.createDealership)
 
 /**
  * @swagger
@@ -498,7 +499,7 @@ api.post('/', authenticationAdminMain.validate, Dealership.createDealership)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', authenticationAdminMain.validate, Dealership.updateDealership)
+api.put('/:id', authenticationAdmin.validate, Dealership.updateDealership)
 
 /**
  * @swagger
@@ -654,7 +655,7 @@ api.put('/:id', authenticationAdminMain.validate, Dealership.updateDealership)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', authenticationAdminMain.validate, Dealership.deleteDealership)
+api.delete('/:id', authenticationAdmin.validate, Dealership.deleteDealership)
 
 /**
  * @swagger
@@ -739,6 +740,6 @@ api.delete('/:id', authenticationAdminMain.validate, Dealership.deleteDealership
  *                                  example: something went wrong on the server
  */
 
-api.get('/audit/:id', authenticationAdminMain.validate, Dealership.getAllDealershipByAuditID)
+api.get('/audit/:id', authenticationAdmin.validate, Dealership.getAllDealershipByAuditID)
 
 module.exports = api

@@ -1,7 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const InstallationType = require('../../controllers/installationType/installationType_controller')
-const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -58,7 +59,7 @@ const authenticationAdminMain = require('../../middlewares/authenticationAdminMa
   *   description: Rutas de Tipos de tipos de instalación
   */
 
-api.post('/all', authenticationAdminMain.validate, InstallationType.getAllInstallationType)
+api.post('/all', authenticationAdmin.validate, InstallationType.getAllInstallationType)
 
 /**
  * @swagger
@@ -161,7 +162,7 @@ api.post('/all', authenticationAdminMain.validate, InstallationType.getAllInstal
  *                                  example: something went wrong on the server
  */
 
-api.post('/', authenticationAdminMain.validate, InstallationType.createInstallationType)
+api.post('/', authenticationAdmin.validate, InstallationType.createInstallationType)
 
 /**
  * @swagger
@@ -257,7 +258,7 @@ api.post('/', authenticationAdminMain.validate, InstallationType.createInstallat
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', authenticationAdminMain.validate, InstallationType.getInstallationType)
+api.get('/:id', authenticationAdmin.validate, InstallationType.getInstallationType)
 
 /**
  * @swagger
@@ -342,7 +343,7 @@ api.get('/:id', authenticationAdminMain.validate, InstallationType.getInstallati
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', authenticationAdminMain.validate, InstallationType.updateInstallationType)
+api.put('/:id', authenticationAdmin.validate, InstallationType.updateInstallationType)
 
 /**
  * @swagger
@@ -446,7 +447,7 @@ api.put('/:id', authenticationAdminMain.validate, InstallationType.updateInstall
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', authenticationAdminMain.validate, InstallationType.deleteInstallationType)
+api.delete('/:id', authenticationAdmin.validate, InstallationType.deleteInstallationType)
 
 /**
  * @swagger

@@ -1,7 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const AuditResponsable = require('../../controllers/auditResponsable/auditResponsable_controller')
-const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -53,7 +54,7 @@ const authenticationAdminMain = require('../../middlewares/authenticationAdminMa
   *   description: Rutas de Responsables de audiciones
   */
 
-api.post('/all', authenticationAdminMain.validate, AuditResponsable.getAllAuditResponsable)
+api.post('/all', authenticationAdmin.validate, AuditResponsable.getAllAuditResponsable)
 
 /**
  * @swagger
@@ -156,7 +157,7 @@ api.post('/all', authenticationAdminMain.validate, AuditResponsable.getAllAuditR
  *                                  example: something went wrong on the server
  */
 
-api.post('/', authenticationAdminMain.validate, AuditResponsable.createAuditResponsable)
+api.post('/', authenticationAdmin.validate, AuditResponsable.createAuditResponsable)
 
 /**
  * @swagger
@@ -248,7 +249,7 @@ api.post('/', authenticationAdminMain.validate, AuditResponsable.createAuditResp
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', authenticationAdminMain.validate, AuditResponsable.getAuditResponsable)
+api.get('/:id', authenticationAdmin.validate, AuditResponsable.getAuditResponsable)
 
 /**
  * @swagger
@@ -333,7 +334,7 @@ api.get('/:id', authenticationAdminMain.validate, AuditResponsable.getAuditRespo
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', authenticationAdminMain.validate, AuditResponsable.updateAuditResponsable)
+api.put('/:id', authenticationAdmin.validate, AuditResponsable.updateAuditResponsable)
 
 /**
  * @swagger
@@ -433,7 +434,7 @@ api.put('/:id', authenticationAdminMain.validate, AuditResponsable.updateAuditRe
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', authenticationAdminMain.validate, AuditResponsable.deleteAuditResponsable)
+api.delete('/:id', authenticationAdmin.validate, AuditResponsable.deleteAuditResponsable)
 
 /**
  * @swagger

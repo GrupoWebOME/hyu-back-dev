@@ -1,7 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const Block = require('../../controllers/block/block_controller')
-const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -69,7 +70,7 @@ const authenticationAdminMain = require('../../middlewares/authenticationAdminMa
   *   description: Rutas de Categorías
   */
 
-api.post('/all', authenticationAdminMain.validate, Block.getAllBlock)
+api.post('/all', authenticationAdmin.validate, Block.getAllBlock)
 
 /**
  * @swagger
@@ -176,7 +177,7 @@ api.post('/all', authenticationAdminMain.validate, Block.getAllBlock)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', authenticationAdminMain.validate, Block.createBlock)
+api.post('/', authenticationAdmin.validate, Block.createBlock)
 
 /**
  * @swagger
@@ -281,7 +282,7 @@ api.post('/', authenticationAdminMain.validate, Block.createBlock)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', authenticationAdminMain.validate, Block.getBlock)
+api.get('/:id', authenticationAdmin.validate, Block.getBlock)
 
 /**
  * @swagger
@@ -366,7 +367,7 @@ api.get('/:id', authenticationAdminMain.validate, Block.getBlock)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', authenticationAdminMain.validate, Block.updateBlock)
+api.put('/:id', authenticationAdmin.validate, Block.updateBlock)
 
 /**
  * @swagger
@@ -466,7 +467,7 @@ api.put('/:id', authenticationAdminMain.validate, Block.updateBlock)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', authenticationAdminMain.validate, Block.deleteBlock)
+api.delete('/:id', authenticationAdmin.validate, Block.deleteBlock)
 
 /**
  * @swagger

@@ -1,7 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const Criterion = require('../../controllers/criterion/criterion_controller')
-const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -153,13 +154,13 @@ const authenticationAdminMain = require('../../middlewares/authenticationAdminMa
   *   description: Rutas de Criterios
   */
 
-api.post('/all', authenticationAdminMain.validate, Criterion.getAllCriterion)
+api.post('/all', authenticationAdmin.validate, Criterion.getAllCriterion)
 
-api.post('/filter', authenticationAdminMain.validate, Criterion.filtersCriterions)
+api.post('/filter', authenticationAdmin.validate, Criterion.filtersCriterions)
 
-api.post('/calculates', authenticationAdminMain.validate, Criterion.calculates)
+api.post('/calculates', authenticationAdmin.validate, Criterion.calculates)
 
-api.post('/filterByAudit', authenticationAdminMain.validate, Criterion.filtersAuditCriterions)
+api.post('/filterByAudit', authenticationAdmin.validate, Criterion.filtersAuditCriterions)
 
 /**
  * @swagger
@@ -345,7 +346,7 @@ api.post('/filterByAudit', authenticationAdminMain.validate, Criterion.filtersAu
  *                                  example: something went wrong on the server
  */
 
-api.post('/', authenticationAdminMain.validate, Criterion.createCriterion)
+api.post('/', authenticationAdmin.validate, Criterion.createCriterion)
 
 /**
  * @swagger
@@ -515,7 +516,7 @@ api.post('/', authenticationAdminMain.validate, Criterion.createCriterion)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', authenticationAdminMain.validate, Criterion.getCriterion)
+api.get('/:id', authenticationAdmin.validate, Criterion.getCriterion)
 
 /**
  * @swagger
@@ -600,7 +601,7 @@ api.get('/:id', authenticationAdminMain.validate, Criterion.getCriterion)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', authenticationAdminMain.validate, Criterion.updateCriterion)
+api.put('/:id', authenticationAdmin.validate, Criterion.updateCriterion)
 
 /**
  * @swagger
@@ -767,7 +768,7 @@ api.put('/:id', authenticationAdminMain.validate, Criterion.updateCriterion)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', authenticationAdminMain.validate, Criterion.deleteCriterion)
+api.delete('/:id', authenticationAdmin.validate, Criterion.deleteCriterion)
 
 /**
  * @swagger

@@ -1,7 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const Personal = require('../../controllers/personal/personal_controller')
-const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -78,7 +79,7 @@ const authenticationAdminMain = require('../../middlewares/authenticationAdminMa
   *   description: Rutas de Personal
   */
 
-api.post('/all', authenticationAdminMain.validate, Personal.getAllPersonal)
+api.post('/all', authenticationAdmin.validate, Personal.getAllPersonal)
 
 /**
  * @swagger
@@ -201,7 +202,7 @@ api.post('/all', authenticationAdminMain.validate, Personal.getAllPersonal)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', authenticationAdminMain.validate, Personal.createPersonal)
+api.post('/', authenticationAdmin.validate, Personal.createPersonal)
 
 /**
  * @swagger
@@ -319,7 +320,7 @@ api.post('/', authenticationAdminMain.validate, Personal.createPersonal)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', authenticationAdminMain.validate, Personal.getPersonal)
+api.get('/:id', authenticationAdmin.validate, Personal.getPersonal)
 
 /**
  * @swagger
@@ -404,7 +405,7 @@ api.get('/:id', authenticationAdminMain.validate, Personal.getPersonal)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', authenticationAdminMain.validate, Personal.updatePersonal)
+api.put('/:id', authenticationAdmin.validate, Personal.updatePersonal)
 
 /**
  * @swagger
@@ -537,7 +538,7 @@ api.put('/:id', authenticationAdminMain.validate, Personal.updatePersonal)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', authenticationAdminMain.validate, Personal.deletePersonal)
+api.delete('/:id', authenticationAdmin.validate, Personal.deletePersonal)
 
 /**
  * @swagger

@@ -1,7 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const Standard = require('../../controllers/standard/standard_controller')
-const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -98,7 +99,7 @@ const authenticationAdminMain = require('../../middlewares/authenticationAdminMa
   *   description: Rutas de Standard
   */
 
-api.post('/all', authenticationAdminMain.validate, Standard.getAllStandard)
+api.post('/all', authenticationAdmin.validate, Standard.getAllStandard)
 
 /**
  * @swagger
@@ -217,7 +218,7 @@ api.post('/all', authenticationAdminMain.validate, Standard.getAllStandard)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', authenticationAdminMain.validate, Standard.createStandard)
+api.post('/', authenticationAdmin.validate, Standard.createStandard)
 
 /**
  * @swagger
@@ -336,7 +337,7 @@ api.post('/', authenticationAdminMain.validate, Standard.createStandard)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', authenticationAdminMain.validate, Standard.getStandard)
+api.get('/:id', authenticationAdmin.validate, Standard.getStandard)
 
 /**
  * @swagger
@@ -421,7 +422,7 @@ api.get('/:id', authenticationAdminMain.validate, Standard.getStandard)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', authenticationAdminMain.validate, Standard.updateStandard)
+api.put('/:id', authenticationAdmin.validate, Standard.updateStandard)
 
 /**
  * @swagger
@@ -544,7 +545,7 @@ api.put('/:id', authenticationAdminMain.validate, Standard.updateStandard)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', authenticationAdminMain.validate, Standard.deleteStandard)
+api.delete('/:id', authenticationAdmin.validate, Standard.deleteStandard)
 
 /**
  * @swagger

@@ -1,7 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const Area = require('../../controllers/area/area_controller')
-const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -90,7 +91,7 @@ const authenticationAdminMain = require('../../middlewares/authenticationAdminMa
   *   description: Rutas de Areas
   */
 
-api.post('/all', authenticationAdminMain.validate, Area.getAllArea)
+api.post('/all', authenticationAdmin.validate, Area.getAllArea)
 
 /**
  * @swagger
@@ -205,7 +206,7 @@ api.post('/all', authenticationAdminMain.validate, Area.getAllArea)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', authenticationAdminMain.validate, Area.createArea)
+api.post('/', authenticationAdmin.validate, Area.createArea)
 
 /**
  * @swagger
@@ -320,7 +321,7 @@ api.post('/', authenticationAdminMain.validate, Area.createArea)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', authenticationAdminMain.validate, Area.getArea)
+api.get('/:id', authenticationAdmin.validate, Area.getArea)
 
 /**
  * @swagger
@@ -405,7 +406,7 @@ api.get('/:id', authenticationAdminMain.validate, Area.getArea)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', authenticationAdminMain.validate, Area.updateArea)
+api.put('/:id', authenticationAdmin.validate, Area.updateArea)
 
 /**
  * @swagger
@@ -510,7 +511,7 @@ api.put('/:id', authenticationAdminMain.validate, Area.updateArea)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', authenticationAdminMain.validate, Area.deleteArea)
+api.delete('/:id', authenticationAdmin.validate, Area.deleteArea)
 
 /**
  * @swagger
