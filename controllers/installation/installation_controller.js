@@ -3,9 +3,24 @@ const Personal = require('../../models/personal_model')
 const InstallationType = require('../../models/installationType_model')
 const Dealership = require('../../models/dealership_model')
 var ObjectId = require('mongodb').ObjectId
+const jwt = require('jsonwebtoken')
+const AuditInstallation = require('../../models/audit_installation_model')
+
+const stripBearer = (value) => {
+  if (!value) return null
+  const s = String(value).trim()
+  return s.toLowerCase().startsWith('bearer ') ? s.slice(7).trim() : s
+}
 
 const getAllInstallation = async(request, response) => {
   try{
+    const headerToken = stripBearer(request.headers.authorization)
+    const cookieToken = stripBearer(request.cookies?.token)
+    const token = headerToken || cookieToken
+    const decoded = jwt.verify(token, process.env.SECRET)
+    const idDecoded = decoded?.admin?._id
+    const roleDecoded = decoded?.admin?.role
+    
     const {name, code, hme_code, dealership, installation_type, phone, province, country, email, pageReq} = request.body
     const page = !pageReq ? 0 : pageReq
     let skip = (page - 1) * 10
@@ -28,6 +43,30 @@ const getAllInstallation = async(request, response) => {
       filter['installation_type'] = installation_type
     if(dealership)
       filter['dealership'] = dealership
+
+    let arrayInst = null
+
+    if (roleDecoded === 'auditor') {
+      const auditsIns = await AuditInstallation
+        .find({ auditor_id: idDecoded }) 
+        .lean()
+
+      if (auditsIns) {
+        arrayInst = [
+          ...new Set(
+            auditsIns
+              .map((el) => el.installation_id)
+              .filter(Boolean)
+              .map(String)
+          ),
+        ]
+      }
+    }
+    
+    if (arrayInst?.length > 0) {
+      filter['_id'] = { $in: arrayInst.map((id) => id) }
+    }
+
     if(page === 0){
       const installations = await Installation.find(filter).populate({path: 'dealership installation_type contacts'})
         .catch(error => {        
