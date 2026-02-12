@@ -17,7 +17,6 @@ app.use(cors({
       'https://13.39.151.221',
       'https://estandares.redhyundai.com',
     ]
-    // origin puede venir undefined en llamadas server-to-server o Postman
     if (!origin || allow.includes(origin)) return cb(null, true)
     return cb(new Error(`CORS blocked origin: ${origin}`))
   },

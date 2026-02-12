@@ -15,10 +15,7 @@ const stripBearer = (value) => {
 
 const validate = (req, res, next) => {
   try {
-    // 1) token por header
     const headerToken = stripBearer(req.headers.authorization)
-
-    // 2) token por cookie (OJO: en tu caso viene con "Bearer ")
     const cookieToken = stripBearer(req.cookies?.token)
 
     const token = headerToken || cookieToken

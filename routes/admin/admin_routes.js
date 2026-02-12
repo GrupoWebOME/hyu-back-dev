@@ -59,6 +59,17 @@ const authenticationAdminMain = require('../../middlewares/authenticationAdminMa
  *              updatedAt: 2021-10-20
  */
 
+apiAdmin.get('/validate-token', authenticationAdminMain.validate, (req, res) => {
+  return res.status(200).json({
+    code: 200,
+    msg: 'valid token',
+    data: {
+      valid: true,
+      admin: req.jwt?.admin ?? null,
+    },
+  })
+})
+
 /**
   * @swagger
   * tags:
