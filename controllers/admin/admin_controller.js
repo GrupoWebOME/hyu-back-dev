@@ -187,7 +187,13 @@ const loginAdmin = async(request, response) => {
       }
     )
 
-    response.cookie('token', token, {httpOnly: true, maxAge: 24 * 60 * 60 * 1000})
+    response.cookie('token', token, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: 'none',
+      secure: true,
+      path: '/',
+    })
 
     const adminSafe = admin.toObject()
     delete adminSafe.password
