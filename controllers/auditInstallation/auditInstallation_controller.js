@@ -3,6 +3,13 @@ const Dealership = require('../../models/dealership_model')
 var ObjectId = require('mongodb').ObjectId
 const nodemailer = require('nodemailer')
 const Audit = require('../../models/audit_model')
+const jwt = require('jsonwebtoken')
+
+const stripBearer = (value) => {
+  if (!value) return null
+  const s = String(value).trim()
+  return s.toLowerCase().startsWith('bearer ') ? s.slice(7).trim() : s
+}
 
 const plannedMailContent = (installation, audit) => { return `
     <p>
@@ -240,6 +247,13 @@ const updateAuditInstallation = async(request, response) => {
 
 const getAllAuditInstallation = async(request, response) => {
   try{
+    const headerToken = stripBearer(request.headers.authorization)
+    const cookieToken = stripBearer(request.cookies?.token)
+    const token = headerToken || cookieToken
+    const decoded = jwt.verify(token, process.env.SECRET)
+    const idDecoded = decoded?.admin?._id
+    const roleDecoded = decoded?.admin?.role
+    
     const {installation_id, dealership_id, audit_id, pageReq} = request.body
 
     const page = !pageReq ? 0 : pageReq
@@ -256,7 +270,22 @@ const getAllAuditInstallation = async(request, response) => {
 
     if(audit_id)
       filter['audit_id'] = audit_id
-        
+
+    let arrayAuditInstId = null
+
+    if (roleDecoded === 'auditor') {
+      const auditsIns = await AuditInstallation
+        .find({ auditor_id: idDecoded })
+        .select('_id')
+        .lean()
+    
+      arrayAuditInstId = auditsIns.map((el) => String(el._id))
+    }
+
+    if (arrayAuditInstId?.length > 0) {
+      filter['_id'] = { $in: arrayAuditInstId.map((id) => id) }
+    }
+
     if(page === 0){
       let auditInstallations = await AuditInstallation.find(filter).populate('installation_id auditor_id dealership_id')
       const audtiInstTransform = auditInstallations?.map((auditIns) => {

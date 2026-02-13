@@ -1,6 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const Personal = require('../../controllers/personal/personal_controller')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -77,7 +79,7 @@ const Personal = require('../../controllers/personal/personal_controller')
   *   description: Rutas de Personal
   */
 
-api.post('/all', Personal.getAllPersonal)
+api.post('/all', authenticationAdmin.validate, Personal.getAllPersonal)
 
 /**
  * @swagger
@@ -200,7 +202,7 @@ api.post('/all', Personal.getAllPersonal)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', Personal.createPersonal)
+api.post('/', authenticationAdmin.validate, Personal.createPersonal)
 
 /**
  * @swagger
@@ -318,7 +320,7 @@ api.post('/', Personal.createPersonal)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', Personal.getPersonal)
+api.get('/:id', authenticationAdmin.validate, Personal.getPersonal)
 
 /**
  * @swagger
@@ -403,7 +405,7 @@ api.get('/:id', Personal.getPersonal)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', Personal.updatePersonal)
+api.put('/:id', authenticationAdmin.validate, Personal.updatePersonal)
 
 /**
  * @swagger
@@ -536,7 +538,7 @@ api.put('/:id', Personal.updatePersonal)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', Personal.deletePersonal)
+api.delete('/:id', authenticationAdmin.validate, Personal.deletePersonal)
 
 /**
  * @swagger

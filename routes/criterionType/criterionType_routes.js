@@ -1,6 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const CriterionType = require('../../controllers/criterionType/criterionType_controller')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -59,7 +61,7 @@ const CriterionType = require('../../controllers/criterionType/criterionType_con
   *   description: Rutas de Tipos de criterios
   */
 
-api.post('/all', CriterionType.getAllCriterionType)
+api.post('/all', authenticationAdmin.validate, CriterionType.getAllCriterionType)
 
 /**
  * @swagger
@@ -162,7 +164,7 @@ api.post('/all', CriterionType.getAllCriterionType)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', CriterionType.createCriterionType)
+api.post('/', authenticationAdmin.validate, CriterionType.createCriterionType)
 
 /**
  * @swagger
@@ -254,7 +256,7 @@ api.post('/', CriterionType.createCriterionType)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', CriterionType.getCriterionType)
+api.get('/:id', authenticationAdmin.validate, CriterionType.getCriterionType)
 
 /**
  * @swagger
@@ -339,7 +341,7 @@ api.get('/:id', CriterionType.getCriterionType)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', CriterionType.updateCriterionType)
+api.put('/:id', authenticationAdmin.validate, CriterionType.updateCriterionType)
 
 /**
  * @swagger
@@ -439,7 +441,7 @@ api.put('/:id', CriterionType.updateCriterionType)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', CriterionType.deleteCriterionType)
+api.delete('/:id', authenticationAdmin.validate, CriterionType.deleteCriterionType)
 
 /**
  * @swagger

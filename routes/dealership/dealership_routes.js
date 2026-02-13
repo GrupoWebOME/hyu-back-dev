@@ -1,8 +1,10 @@
 const express = require('express')
 const api = express.Router()
 const Dealership = require('../../controllers/dealership/dealership_controller')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
-api.get('/dealershipWithInstallations', Dealership.geatAllDealershipWithInstallations)
+api.get('/dealershipWithInstallations', authenticationAdmin.validate, Dealership.geatAllDealershipWithInstallations)
 
 /**
  * @swagger
@@ -223,7 +225,7 @@ api.get('/:id', Dealership.getDealership)
  *                                  example: something went wrong on the server
  */
 
-api.post('/all', Dealership.getAllDealership)
+api.post('/all', authenticationAdmin.validate, Dealership.getAllDealership)
 
 /**
  * @swagger
@@ -330,7 +332,7 @@ api.post('/all', Dealership.getAllDealership)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', Dealership.createDealership)
+api.post('/', authenticationAdmin.validate, Dealership.createDealership)
 
 /**
  * @swagger
@@ -497,7 +499,7 @@ api.post('/', Dealership.createDealership)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', Dealership.updateDealership)
+api.put('/:id', authenticationAdmin.validate, Dealership.updateDealership)
 
 /**
  * @swagger
@@ -653,7 +655,7 @@ api.put('/:id', Dealership.updateDealership)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', Dealership.deleteDealership)
+api.delete('/:id', authenticationAdmin.validate, Dealership.deleteDealership)
 
 /**
  * @swagger
@@ -738,6 +740,6 @@ api.delete('/:id', Dealership.deleteDealership)
  *                                  example: something went wrong on the server
  */
 
-api.get('/audit/:id', Dealership.getAllDealershipByAuditID)
+api.get('/audit/:id', authenticationAdmin.validate, Dealership.getAllDealershipByAuditID)
 
 module.exports = api

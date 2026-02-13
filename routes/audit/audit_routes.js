@@ -194,7 +194,7 @@ api.post('/all', authenticationAdmin.validate, Audit.getAllAudit)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', Audit.createAudit)
+api.post('/', authenticationAdmin.validate, Audit.createAudit)
 
 /**
  * @swagger
@@ -322,7 +322,7 @@ api.post('/', Audit.createAudit)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', Audit.getAudit)
+api.get('/:id', authenticationAdmin.validate, Audit.getAudit)
 
 /**
  * @swagger
@@ -537,7 +537,7 @@ api.put('/:id', Audit.updateAudit)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', Audit.deleteAudit)
+api.delete('/:id', authenticationAdmin.validate, Audit.deleteAudit)
 
 /**
  * @swagger
@@ -622,7 +622,7 @@ api.delete('/:id', Audit.deleteAudit)
  *                                  example: something went wrong on the server
  */
 
-api.get('/byupdate/:totalResults', Audit.getAllUpdateAudit)
+api.get('/byupdate/:totalResults', authenticationAdmin.validate, Audit.getAllUpdateAudit)
 
 /**
   * @swagger

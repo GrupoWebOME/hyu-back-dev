@@ -5,6 +5,6 @@ const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 apiAuditInstallation.post('/', authenticationAdmin.validate, AuditInstallation.getAllAuditInstallation)
 
-apiAuditInstallation.put('/:id', AuditInstallation.updateAuditInstallation)
+apiAuditInstallation.put('/:id', authenticationAdmin.validate, AuditInstallation.updateAuditInstallation)
 
 module.exports = apiAuditInstallation

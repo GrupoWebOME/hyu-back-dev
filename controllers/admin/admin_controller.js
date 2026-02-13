@@ -50,18 +50,20 @@ const createAdmin = async(request, response) => {
       })
     }
 
-    if(!names)
+    const isAuditor = role.toLowerCase() === 'auditor'
+    if(isAuditor && !names)
       errors.push({code: 400, 
         msg: 'invalid names',
         detail: `${names} is not valid names format. The names field is required`
       })
     
-    if(!surnames)
+    if(isAuditor && !surnames)
       errors.push({code: 400, 
         msg: 'invalid surnames',
         detail: `${surnames} is not valid surnames format. The surnames field is required`
       })
-    
+
+    /*
     if(!emailAddress || !emailAddress.match(regExPatternEmailAddress))
       errors.push({code: 400, 
         msg: 'invalid emailAddress',
@@ -75,7 +77,7 @@ const createAdmin = async(request, response) => {
           detail: `${emailAddress} is in use`
         })
     }
-    
+    */
     if(!userName)
       errors.push({code: 400, 
         msg: 'invalid userName',
@@ -126,10 +128,16 @@ const createAdmin = async(request, response) => {
     */
     
     await admin.save()
-    console.log('llega')
+
+    const safe = admin.toObject()
+    delete safe.password
+    delete safe.names
+    delete safe.surnames
+    delete safe.secondaryEmailAddress
+
     response.status(201).json({code: 201,
       msg: 'the administrator has been created successfully',
-      data: admin })
+      data: safe })
   }
   catch(error){
     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
@@ -143,7 +151,7 @@ const loginAdmin = async(request, response) => {
       return response.status(401).json({errors: [{code: 401, msg: 'unauthorized access', detail: 'invalid credentials'}]})
     }
 
-    const admin = await Admin.findOne({$or: [{userName: user},{emailAddress: user}]})
+    const admin = await Admin.findOne({$or: [{userName: user},{emailAddress: user}]}).select('+password')
 
     const popup = await PopUpMessage.findOne({ name: admin.role })
 
@@ -162,9 +170,9 @@ const loginAdmin = async(request, response) => {
 
     let adminAux = {
       _id: admin._id,
-      names: admin.names,
-      surnames: admin.surnames,
-      emailAddress: admin.emailAddress,
+      // names: admin.names,
+      // surnames: admin.surnames,
+      // emailAddress: admin.emailAddress,
       userName: admin.userName,
       role: admin.role,
       dealership: admin.dealership,
@@ -181,103 +189,96 @@ const loginAdmin = async(request, response) => {
 
     response.cookie('token', token, {httpOnly: true, maxAge: 24 * 60 * 60 * 1000})
 
-    response.status(200).json({code: 200, msg: 'login success', data: {admin: admin, message: popup?.active? popup?.message : null, token: token}})
+    const adminSafe = admin.toObject()
+    delete adminSafe.password
+
+    response.status(200).json({code: 200, msg: 'login success', data: {admin: adminSafe, message: popup?.active? popup?.message : null, token: token}})
   }
   catch(error){
     return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
   }     
 }
 
-const updateAdmin = async(request, response) => {
-  try{
-    const {id} = request.params
-    const {names, surnames, emailAddress, userName, password, role, dealership, audits, secondaryEmailAddress} = request.body
+const updateAdmin = async (request, response) => {
+  try {
+    const { id } = request.params
+    const { names, surnames, emailAddress, userName, password, role, dealership, audits, secondaryEmailAddress } = request.body
     const { adminRole, _id } = request.jwt.admin
-    let errors = []
-    
-    const regExPatternEmailAddress= /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
-    
-    if(!id)
-      return response.status(400).json({code: 400,
-        msg: 'invalid id',
-        detail: 'id is a obligatory field'})
+    const errors = []
 
-    if(id && !ObjectId.isValid(id))
-      return response.status(400).json({code: 400,
-        msg: 'invalid id',
-        detail: 'id should be an objectId'})
+    const isAuditor = role?.toLowerCase() === 'auditor'
 
-    let admin = null
-        
-    if(id){
-      admin = await Admin.findById(id)
-      if(admin && (admin.role === 'admin' || admin.role === 'main') && adminRole !== 'main' && admin.id.toString() !== _id.toString()){
-        return response.status(401).json({code: 401,
-          msg: 'invalid credentials',
-          detail: 'you do not have permissions to update this admin'})
-      }
-      if (!admin)
-        return response.status(404).json({code: 404,
-          msg: 'invalid id',
-          detail: 'id not found'})
+    if (!id) {
+      return response.status(400).json({ code: 400, msg: 'invalid id', detail: 'id is a obligatory field' })
     }
 
-    if(role !== undefined && role !== null && role.toLowerCase() !== 'admin' && role.toLowerCase() !== 'dealership' && role.toLowerCase() !== 'auditor' && role.toLowerCase() !== 'processmanager')
-      errors.push({code: 400, 
-        msg: 'invalid role',
-        detail: 'role should be "admin", "dealership", "processmanager" or "auditor"'
+    if (!ObjectId.isValid(id)) {
+      return response.status(400).json({ code: 400, msg: 'invalid id', detail: 'id should be an objectId' })
+    }
+
+    // 1) Buscar admin a editar
+    const admin = await Admin.findById(id)
+    if (!admin) {
+      return response.status(404).json({ code: 404, msg: 'invalid id', detail: 'id not found' })
+    }
+
+    // 2) Permisos (tal cual lo tenías)
+    if (
+      (admin.role === 'admin' || admin.role === 'main') &&
+      adminRole !== 'main' &&
+      admin._id.toString() !== _id.toString()
+    ) {
+      return response.status(401).json({
+        code: 401,
+        msg: 'invalid credentials',
+        detail: 'you do not have permissions to update this admin',
       })
-        
-    if(role !== undefined && role !== null && role.toLowerCase() === 'dealership'){
-      if(dealership === null || dealership === undefined || !ObjectId.isValid(dealership)){
-        errors.push({code: 400, 
-          msg: 'invalid dealership',
-          detail: 'dealership should be an objectID format'
-        })
-      }
-      else{
+    }
+
+    // 3) Validaciones
+    if (
+      role !== undefined &&
+      role !== null &&
+      !['admin', 'dealership', 'auditor', 'processmanager'].includes(role.toLowerCase())
+    ) {
+      errors.push({
+        code: 400,
+        msg: 'invalid role',
+        detail: 'role should be "admin", "dealership", "processmanager" or "auditor"',
+      })
+    }
+
+    if (role?.toLowerCase() === 'dealership') {
+      if (!dealership || !ObjectId.isValid(dealership)) {
+        errors.push({ code: 400, msg: 'invalid dealership', detail: 'dealership should be an objectID format' })
+      } else {
         const existDealership = await Dealership.findById(dealership)
-        if(existDealership === null || existDealership === undefined){
-          errors.push({code: 400, 
-            msg: 'invalid dealership',
-            detail: 'dealership not found'
-          })
+        if (!existDealership) {
+          errors.push({ code: 400, msg: 'invalid dealership', detail: 'dealership not found' })
         }
       }
     }
 
-    if(audits){
-      if(!Array.isArray(audits) || audits.length < 1){
-        errors.push({code: 400, 
-          msg: 'invalid audits',
-          detail: 'audits should be an array type'
-        })
-      } else{
+    if (isAuditor && !names) errors.push({ code: 400, msg: 'invalid names', detail: 'The names field is required' })
+    if (isAuditor && !surnames) errors.push({ code: 400, msg: 'invalid surnames', detail: 'The surnames field is required' })
+
+    if (audits) {
+      if (!Array.isArray(audits) || audits.length < 1) {
+        errors.push({ code: 400, msg: 'invalid audits', detail: 'audits should be an array type' })
+      } else {
         audits.forEach((element) => {
-          if(!element.hasOwnProperty('audit') || !ObjectId.isValid(element.audit)){
-            errors.push({code: 400, 
-              msg: 'invalid audit field',
-              detail: 'invalid audit field in audits object && audit should be an objectID type'
-            })
+          if (!ObjectId.isValid(element?.audit)) {
+            errors.push({ code: 400, msg: 'invalid audit field', detail: 'audit should be an objectID type' })
           }
-          if(!element.hasOwnProperty('dealerships') || !Array.isArray(element.dealerships) || element.dealerships.length < 1){
-            errors.push({code: 400, 
-              msg: 'invalid dealerships field',
-              detail: 'invalid dealerships field in audits object && dealerships should be an array type'
-            })
-          } else{
-            element.dealerships.forEach((dealership) => {
-              if(!dealership.hasOwnProperty('dealership_id') || !ObjectId.isValid(dealership.dealership_id)){
-                errors.push({code: 400, 
-                  msg: 'invalid dealership_id field',
-                  detail: 'invalid dealership_id field in audits object && dealership_id should be an ObjectID type'
-                })
+          if (!Array.isArray(element?.dealerships) || element.dealerships.length < 1) {
+            errors.push({ code: 400, msg: 'invalid dealerships field', detail: 'dealerships should be an array type' })
+          } else {
+            element.dealerships.forEach((d) => {
+              if (!ObjectId.isValid(d?.dealership_id)) {
+                errors.push({ code: 400, msg: 'invalid dealership_id field', detail: 'dealership_id should be an ObjectID type' })
               }
-              if(!dealership.hasOwnProperty('installations') || !Array.isArray(dealership.installations)){
-                errors.push({code: 400, 
-                  msg: 'invalid installations field',
-                  detail: 'invalid installations field in audits object && installations should be an array type'
-                })
+              if (!Array.isArray(d?.installations)) {
+                errors.push({ code: 400, msg: 'invalid installations field', detail: 'installations should be an array type' })
               }
             })
           }
@@ -285,107 +286,73 @@ const updateAdmin = async(request, response) => {
       }
     }
 
-    if(secondaryEmailAddress && !secondaryEmailAddress.match(regExPatternEmailAddress))
-      errors.push({code: 400, 
-        msg: 'invalid secondaryEmailAddress',
-        detail: `${secondaryEmailAddress} is not valid emailAddress format. The emailAddress field can only contain a valid email`
-      })
-    
-    if(emailAddress && !emailAddress.match(regExPatternEmailAddress))
-      errors.push({code: 400, 
-        msg: 'invalid emailAddress',
-        detail: `${emailAddress} is not valid emailAddress format. The emailAddress field can only contain a valid email`
-      })
-    else if(emailAddress){
-      const adminExist = await Admin.findOne({emailAddress: emailAddress.toLowerCase()})
-      if(adminExist && adminExist._id.toString() !== id)
-        errors.push({code: 400, 
-          msg: 'invalid emailAddress',
-          detail: `${emailAddress} is in use`
-        })
+    if (isAuditor && userName && userName.length < 1) {
+      errors.push({ code: 400, msg: 'invalid userName', detail: 'userName is not valid' })
+    } else if (isAuditor && userName) {
+      const adminExist = await Admin.findOne({ userName: userName.toLowerCase() })
+      if (adminExist && adminExist._id.toString() !== id) {
+        errors.push({ code: 400, msg: 'invalid userName', detail: `${userName} is in use` })
+      }
     }
-    
-    if(userName && userName.length < 1)
-      errors.push({code: 400, 
-        msg: 'invalid userName',
-        detail: `${userName} is not valid userName format. The userName field can only contain a valid email`
-      })
-    else if(userName){
-      const adminExist = await Admin.findOne({userName: userName.toLowerCase()})
-      if(adminExist && adminExist._id.toString() !== id)
-        errors.push({code: 400, 
-          msg: 'invalid userName',
-          detail: `${userName} is in use`
-        })
-    }
-    
-    if(password && password.length < 6)
-      errors.push({code: 400, 
-        msg: 'invalid password',
-        detail: `${userName} is not valid password format. The password field can only contain a valid email`
-      })
 
-    if(errors.length > 0)
-      return response.status(400).json({errors: errors})
-    
+    if (password && password.length < 6) {
+      errors.push({ code: 400, msg: 'invalid password', detail: 'password must be at least 6 characters' })
+    }
+
+    if (errors.length > 0) {
+      return response.status(400).json({ errors })
+    }
+
+    // 4) Hash seguro (sin .catch que responde)
     let passwordHash = null
-
-    if(password){
-      passwordHash = await bcrypt.hash(password, 10)
-        .catch(error => {
-          return response.status(500).json({errors: [{code: 500, msg: 'hash fail', detail: error.message}]})
-        })
-    }
-    
-    const editAdmin = {}
-
-    if(names)
-      editAdmin['names'] = names
-
-    if(surnames)
-      editAdmin['surnames'] = surnames
-
-    if(emailAddress)
-      editAdmin['emailAddress'] = emailAddress
-
-    if(secondaryEmailAddress)
-      editAdmin['secondaryEmailAddress'] = secondaryEmailAddress
-
-    if(userName)
-      editAdmin['userName'] = userName
-            
-    if(password)
-      editAdmin['password'] = passwordHash
-
-    if(role)
-      editAdmin['role'] = role.toLowerCase()
-
-    if(dealership)
-      editAdmin['dealership'] = dealership
-
-    if(audits)
-      editAdmin['audits'] = audits
-
-    editAdmin['updatedAt'] = Date.now()
-
-    const newAdmin = await Admin.findByIdAndUpdate(id, editAdmin, {new: true})
-      .catch( error => {return response.status(500).json({code: 500, msg: 'created error', detail: error.message})})
-
-    const token = jwt.sign(
-      {newAdmin},
-      process.env.SECRET,
-      {
-        expiresIn: 60 * 60 * 24
+    if (password) {
+      try {
+        passwordHash = await bcrypt.hash(password, 10)
+      } catch (error) {
+        return response.status(500).json({ errors: [{ code: 500, msg: 'hash fail', detail: error.message }] })
       }
+    }
+
+    // 5) Construir update
+    const editAdmin = {}
+    if (names) editAdmin.names = names
+    if (surnames) editAdmin.surnames = surnames
+    if (emailAddress) editAdmin.emailAddress = emailAddress
+    if (secondaryEmailAddress) editAdmin.secondaryEmailAddress = secondaryEmailAddress
+    if (userName) editAdmin.userName = userName
+    if (password) editAdmin.password = passwordHash
+    if (role) editAdmin.role = role.toLowerCase()
+    if (dealership) editAdmin.dealership = dealership
+    if (audits) editAdmin.audits = audits
+    editAdmin.updatedAt = Date.now()
+
+    // 6) Update seguro (sin .catch que responde)
+    let newAdmin
+    try {
+      newAdmin = await Admin.findByIdAndUpdate(id, editAdmin, { new: true })
+    } catch (error) {
+      return response.status(500).json({ code: 500, msg: 'update error', detail: error.message })
+    }
+
+    // ✅ (recomendado) no meter el documento entero en el JWT
+    const token = jwt.sign(
+      { admin: { _id: newAdmin._id, role: newAdmin.role, userName: newAdmin.userName } },
+      process.env.SECRET,
+      { expiresIn: 60 * 60 * 24 }
     )
-        
-    response.status(200).json({code: 200,
+
+    // ✅ no devolver password
+    const safe = newAdmin.toObject()
+    delete safe.password
+
+    return response.status(200).json({
+      code: 200,
       msg: 'the administrator has been updated successfully',
-      data: {admin: newAdmin, token: token} })
+      data: { admin: safe, token },
+    })
+  } catch (error) {
+    return response.status(500).json({ errors: [{ code: 500, msg: 'unhanddle error', detail: error.message }] })
   }
-  catch(error){
-    return response.status(500).json({errors: [{code: 500, msg: 'unhanddle error', detail: error.message}]})
-  }          
 }
 
 const deleteAdmin = async(request, response) => {
@@ -464,9 +431,15 @@ const getAllAdmins = async(request, response) => {
       filter['dealership'] = new RegExp((dealership).toLowerCase())
 
     if(page === 0){
-      const admins = await Admin.find(filter).populate('dealership')
-            
-      const data = {admins: admins, 
+      const admins = await Admin.find(filter).populate('dealership').select('+names +surnames').lean()
+      const adminsSafe = admins?.map((adm) => {
+        if (adm?.role?.toLocaleLowerCase() !== 'auditor') {
+          return {...adm, names: undefined, surnames: undefined}
+        } else {
+          return {...adm}
+        }
+      }) 
+      const data = {admins: adminsSafe, 
         totalPages: 1}
 
       return response.status(200).json({code: 200,
@@ -483,9 +456,15 @@ const getAllAdmins = async(request, response) => {
         msg: 'invalid page', 
         detail: `totalPages: ${countPage}`})
 
-    const admins = await Admin.find(filter).populate('dealership').skip(skip).limit(10)
-        
-    const data = {admins: admins, 
+    const admins = await Admin.find(filter).populate('dealership').select('+names +surnames').skip(skip).limit(10).lean()
+    const adminsSafe = admins?.map((adm) => {
+      if (adm?.role?.toLocaleLowerCase() !== 'auditor') {
+        return {...adm, names: undefined, surnames: undefined}
+      } else {
+        return {...adm}
+      }
+    })  
+    const data = {admins: adminsSafe, 
       totalPages: countPage}
 
     response.status(200).json({code: 200,

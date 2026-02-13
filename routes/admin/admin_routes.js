@@ -2,6 +2,7 @@ const express = require('express')
 const apiAdmin = express.Router()
 const Admin = require('../../controllers/admin/admin_controller')
 const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -58,6 +59,17 @@ const authenticationAdminMain = require('../../middlewares/authenticationAdminMa
  *              createdAt: 2021-10-20
  *              updatedAt: 2021-10-20
  */
+
+apiAdmin.get('/validate-token', authenticationAdmin.validate, (req, res) => {
+  return res.status(200).json({
+    code: 200,
+    msg: 'valid token',
+    data: {
+      valid: true,
+      admin: req.jwt?.admin ?? null,
+    },
+  })
+})
 
 /**
   * @swagger

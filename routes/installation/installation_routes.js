@@ -1,6 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const Installation = require('../../controllers/installation/installation_controller')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -130,7 +132,7 @@ const Installation = require('../../controllers/installation/installation_contro
   *   description: Rutas de Installation
   */
 
-api.post('/all', Installation.getAllInstallation)
+api.post('/all', authenticationAdmin.validate, Installation.getAllInstallation)
 
 /**
  * @swagger
@@ -257,7 +259,7 @@ api.post('/all', Installation.getAllInstallation)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', Installation.createInstallation)
+api.post('/', authenticationAdmin.validate, Installation.createInstallation)
 
 /**
  * @swagger
@@ -414,7 +416,7 @@ api.post('/', Installation.createInstallation)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', Installation.getInstallation)
+api.get('/:id', authenticationAdmin.validate, Installation.getInstallation)
 
 /**
  * @swagger
@@ -499,7 +501,7 @@ api.get('/:id', Installation.getInstallation)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', Installation.updateInstallation)
+api.put('/:id', authenticationAdmin.validate, Installation.updateInstallation)
 
 /**
  * @swagger
@@ -664,7 +666,7 @@ api.put('/:id', Installation.updateInstallation)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', Installation.deleteInstallation)
+api.delete('/:id', authenticationAdmin.validate, Installation.deleteInstallation)
 
 /**
  * @swagger

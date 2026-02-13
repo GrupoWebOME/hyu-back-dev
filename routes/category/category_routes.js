@@ -1,6 +1,8 @@
 const express = require('express')
 const api = express.Router()
 const Category = require('../../controllers/category/category_controller')
+// const authenticationAdminMain = require('../../middlewares/authenticationAdminMain')
+const authenticationAdmin = require('../../middlewares/authenticationAdmin')
 
 /**
  * @swagger
@@ -62,7 +64,7 @@ const Category = require('../../controllers/category/category_controller')
   *   description: Rutas de Categorías
   */
 
-api.post('/all', Category.getAllCategories)
+api.post('/all', authenticationAdmin.validate, Category.getAllCategories)
 
 /**
  * @swagger
@@ -186,7 +188,7 @@ api.post('/all', Category.getAllCategories)
  *                                  example: something went wrong on the server
  */
 
-api.post('/', Category.createCategory)
+api.post('/', authenticationAdmin.validate, Category.createCategory)
 
 /**
  * @swagger
@@ -286,7 +288,7 @@ api.post('/', Category.createCategory)
  *                                  example: something went wrong on the server
  */
 
-api.get('/:id', Category.getCategory)
+api.get('/:id', authenticationAdmin.validate, Category.getCategory)
 
 /**
  * @swagger
@@ -371,7 +373,7 @@ api.get('/:id', Category.getCategory)
  *                                  example: something went wrong on the server
  */
 
-api.put('/:id', Category.updateCategory)
+api.put('/:id', authenticationAdmin.validate, Category.updateCategory)
 
 /**
  * @swagger
@@ -471,7 +473,7 @@ api.put('/:id', Category.updateCategory)
  *                                  example: something went wrong on the server
  */
 
-api.delete('/:id', Category.deleteCategory)
+api.delete('/:id', authenticationAdmin.validate, Category.deleteCategory)
 
 /**
  * @swagger
