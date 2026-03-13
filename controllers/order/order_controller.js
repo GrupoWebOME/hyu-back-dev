@@ -160,9 +160,13 @@ const sendMail = async(subject, content, recipients) => {
           
     transporter.sendMail(mailOptions, function(error, info){
       if (error) {
+        console.log('Fecha y hora: ', new Date().toLocaleString())
         console.log('error: ', error)
+        console.log('mailOptions: ', mailOptions)
       } else {
+        console.log('Fecha y hora: ', new Date().toLocaleString())
         console.log('Email sent: ' + info.response)
+        console.log('mailOptions: ', mailOptions)
       }
     })
 
