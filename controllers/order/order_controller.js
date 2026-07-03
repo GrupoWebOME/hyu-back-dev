@@ -584,7 +584,6 @@ const getOrder = async(request, response) => {
 const getAllOrders = async(request, response) => {
   try{
     const { dealership, installation, state, pageReq } = request.body
-    const authHeader = request.headers['authorization']
 
     const page = !pageReq ? 0 : pageReq
 
@@ -592,31 +591,26 @@ const getAllOrders = async(request, response) => {
 
     const filter = {}
 
-    if(dealership)
-      filter['dealership'] = dealership
-
     if(installation)
       filter['installation'] = installation
 
     if(state)
       filter['state'] = state
 
-    if (authHeader) {
-      const token = authHeader.split(' ')[1]
-      let decodedToken = null
-      await jwt.verify(token, process.env.SECRET, function(err, decoded) {
-        if(err){
-          decodedToken = false
-          return response.status(401).json({error: 'Unauthorized'})
-        }
-        else{
-          decodedToken = decoded
-        }
-      })
+    const loggedAdmin = request.jwt?.admin
 
-      if(decodedToken?.admin?.dealership) {
-        filter['dealership'] = decodedToken?.admin?.dealership
+    if (loggedAdmin?.role === 'dealership') {
+      if (!loggedAdmin?.dealership) {
+        return response.status(401).json({
+          code: 401,
+          msg: 'invalid credentials',
+          detail: 'dealership user without dealership',
+        })
       }
+
+      filter['dealership'] = loggedAdmin.dealership
+    } else if (dealership) {
+      filter['dealership'] = dealership
     }
 
     if(page === 0){
